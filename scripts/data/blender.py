@@ -1,4 +1,4 @@
-import bpy, random, math, addon_utils, shutil
+import bpy, random, math, addon_utils, os
 import multiprocessing as mp
 from glob import glob
 from collections import namedtuple
@@ -267,11 +267,11 @@ def sample_environment(job, texture_path_floor, texture_path_wall, texture_path_
 
 
 if __name__ == '__main__':
-	blf = '../../resources/blender/env_proto.blend'
-	tpf = '../../resources/textures/floor/train'
-	tpw = '../../resources/textures/wall/train'
-	tpb = '../../resources/textures/blind/train'
-	exp = '.'
+	blf = os.path.abspath('../../resources/blender/env_proto.blend')
+	tpf = os.path.abspath('../../resources/textures/floor/train')
+	tpw = os.path.abspath('../../resources/textures/wall/train')
+	tpb = os.path.abspath('../../resources/textures/blind/train')
+	exp = os.path.abspath('.')
 
 	addon_utils.enable('io_scene_egg')
 	bpy.ops.wm.open_mainfile(filepath=blf)
