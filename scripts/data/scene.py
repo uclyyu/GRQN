@@ -1,19 +1,19 @@
+import math, random, numpy, sys
 from direct.actor.Actor import Actor 
 from direct.showbase.ShowBase import ShowBase, WindowProperties
 from direct.gui.OnscreenText import OnscreenText
 from panda3d.core import NodePath, PerspectiveLens, AmbientLight, Spotlight, VBase4, ClockObject
-import math, random, numpy, sys
+from collections import namedtuple
 
 
-class ActorSpec(object):
-	def __init__(self, egg_actor, egg_animation, animation_name):
-		self.egg_actor = egg_actor
-		self.
+POVState = namedtuple('POVState', ['radius', 'elevation', 'phase', 'yaw'])
+POVReading = namedtuple('POVReading', [])
+
 
 class SceneManager(ShowBase):
 	"""The SceneManager will import two models: one for the static 
 	environment layout, the other for an animated human animation. """
-	def __init__(self, scene, actor, obstacles, mode, size=(768, 768), zNear=0.1, zFar=1000.0, fov=70.0, showPosition=False):
+	def __init__(self, scene, actor, animation, mode, size=(768, 768), zNear=0.1, zFar=1000.0, fov=70.0, showPosition=False):
 		super(SceneManager, self).__init__()
 
 		self.__dict__.update(size=size, zNear=zNear, zFar=zFar, fov=fov, showPosition=showPosition)
@@ -22,7 +22,7 @@ class SceneManager(ShowBase):
 		self.globalClock = ClockObject.getGlobalClock()
 
 		self.disableMouse()
-		self.setBackgroundColor(.5294, .8078, .9804)
+		# self.setBackgroundColor(.5294, .8078, .9804)
 
 		lens = self.cam.node().getLens()
 		lens.setFov(self.fov)
@@ -43,23 +43,21 @@ class SceneManager(ShowBase):
 		self.win.movePointer(0, int(self.centX), int(self.centY))
 
 		# essential node paths
-		self.scene = self.loader.loadModel(model)
-		self.actorList = [Actor(aa[0], aa[1]) for aa in actors]
-		self.obstacleList = [self.loader.loadModel(obs) for obs in obstacles]
+		self.scene = self.loader.loadModel(scene)
+		self.actor = Actor(actor, {'act': animation})
 		self.dummy = NodePath('dummy')
 
-		self.cameraState = {'x': 0, 'y': None, 'z': 1.3, 'radius': 2, 'phase': None, 
-						    'hdeg': None, 'pdeg': None, 'hrad': None, 'prad': None}
-		self.obstacleState = {'id': 0, 'x': None, 'y': None, 'z': 0, 'radius': 1, 'phase': None, 'hdeg': None, 'hrad': None}
-		self.actorState = {'id': 0, 'x': 0, 'y': 0, 'z': 0, 'hdeg': None, 'hrad': None}
+		self.scene.reparentTo(self.render)
+		self.actor.reparentTo(self.render)
+		self.dummy.reparentTo(self.render)
 
-		self.cam.setP(self.cam, 0)
-		self.cam.setR(0)
-		self._setupDefaultScene()
+		self.pov_state = POVState(None, None, None, None)
 
-		if mode == 'data':
-			pass
-		elif mode == 'view':
+		self._initialiseScene()
+
+		if mode == 'collect':
+			self.taskMgr.add(self.updateCollectTask, 'update-collect')
+		elif mode == 'navigate':
 			# sensitivity settings
 			self.movSens = 2
 			self.movSensFast = self.movSens * 5
@@ -78,7 +76,7 @@ class SceneManager(ShowBase):
 			self.stop = False
 
 			self._setupViewEvent()
-			self.taskMgr.add(self.updateViewTask, 'update-view')
+			self.taskMgr.add(self.updateViewTask, 'update-navigate')
 			
 		elif mode == 'demo':
 			self._setupDemoEvents()
@@ -91,10 +89,17 @@ class SceneManager(ShowBase):
 			ShowBase.destroy(self)
 			raise ValueError()
 
-	def _setupDataEvents(self):
+	def _initialiseScene(self):
+		self.scene.reparentTo(self.render)
+		self.actor.reparentTo(self.render)
+		self.dummy.reparentTo(self.render)
+
+		self.actor.setScale(0.085, 0.085, 0.085)
+
+	def _setupCollecEvents(self):
 		pass
 
-	def _setupViewEvents(self):
+	def _setupNavigateEvents(self):
 
 		self.escapeEventText = OnscreenText(text="ESC: Quit",
 											style=1, fg=(1, 1, 1, 1), pos=(-1.3, 0.95),
@@ -196,63 +201,36 @@ class SceneManager(ShowBase):
 		self.actorList[j].loop('act')
 		self.actorState.update({'id': j})
 
-	def _randomiseActorOrientation(self):
+	def _actorSetYaw(self, rad):
+		deg = math.degrees(rad)
+		self.actor.setH(deg)
+
+	def _actorRandomiseYaw(self):
+		rad = random.uniform(low=-math.pi, high=math.pi)
+		self._actorSetYaw(rad)
+
+	def _povSetState(self, radius=None, phase=None, yaw=None, elevation=None):
+
+		pass
+
+	def _povRandomiseState(self):
+		radius = random.uniform(2.3, 3.5)
+		phase = random.uniform(-math.pi, math.pi)
+		yaw = random.uniform(-math.pi, math.pi)
+		elevation = random.uniform(1.3, 1.5)
+
+		self._povSetState(radius, phase, yaw, elevation)
+
+	def _povLookAtActor(self):
 		i = self.actorState['id']
-		hdeg = numpy.random.uniform(low=0, high=360)
+		self.camera.lookAt(self.actorList[i])
+		pdeg = self.cameraState['pdeg']
+		hdeg = self.camera.getH()
 		hrad = math.radians(hdeg)
-		self.actorList[i].setH(hdeg)
-		self.actorState.update({'hdeg': hdeg, 'hrad': hrad})
+		self.camera.setP(pdeg)
 
-	def _setObstacle(self, i, phase, hdeg, radius=1):
-		j = self.obstacleState['id']
-		self.obstacleList[j].detachNode()
+		self.cameraState.update({'hdeg': hdeg, 'hrad': hrad})
 
-		self.obstacleList[i].reparentTo(self.render)
-		x, y = radius * numpy.cos(phase), radius * numpy.sin(phase)
-		self.obstacleList[i].setX(x)
-		self.obstacleList[i].setY(y)
-		self.obstacleList[i].setH(hdeg)
-
-		self.obstacleState.update({'id': i, 'phase': phase, 'radius': radius, 'x': x, 'y': y, 'hdeg': hdeg, 'hrad': math.radians(hdeg)})
-
-	def _resampleObstacle(self):
-		# detach current obstacle from scene graph and 
-		# sample one obstacle and place it under the scene graph
-		N = len(self.obstacleList)
-		
-		i = self.obstacleState['id']
-		self.obstacleList[i].detachNode()
-
-		j = random.randint(0, N - 1)
-		self.obstacleList[j].reparentTo(self.render)
-		self.obstacleState.update({'id': j})
-
-	def _randomiseObstaclePosition(self):
-		i = self.obstacleState['id']
-		u = self.obstacleState['radius']
-		v = numpy.random.uniform(low=-numpy.pi, high=numpy.pi)
-		x, y = u * numpy.cos(v), u * numpy.sin(v)
-		hrad = 0.5 * numpy.pi + v
-		hdeg = math.degrees(hrad)
-
-		self.obstacleList[i].setPos(x, y, 0.)
-		self.obstacleList[i].setH(hdeg)
-
-		self.obstacleState.update({'x': x, 'y': y, 'z': 0., 'phase': v, 'hrad': hrad, 'hdeg': hdeg})
-
-	def _moveObstacleByDegree(self, deg):
-		i = self.obstacleState['id']
-		vdeg = (math.degrees(self.obstacleState['phase']) + deg) % 360
-		vrad = math.radians(vdeg)
-		x, y = numpy.cos(vrad), numpy.sin(vrad)
-
-		hrad = 0.5 * numpy.pi + vrad
-		hdeg = math.degrees(hrad)
-
-		self.obstacleList[i].setPos(x, y, 0.)
-		self.obstacleList[i].setH(hdeg)
-
-		self.obstacleState.update({'x': x, 'y': y, 'phase': vrad, 'hrad': hrad, 'hdeg': hdeg})
 
 	def _setCamera(self, phase, hdeg, pdeg, z=1.3, radius=2):
 		x, y = radius * numpy.cos(phase), radius * numpy.sin(phase)
@@ -292,15 +270,7 @@ class SceneManager(ShowBase):
 		self.cameraState.update({'x': x, 'y': y, 'phase': vrad})
 		self._pointCameraAtActor()
 
-	def _pointCameraAtActor(self):
-		i = self.actorState['id']
-		self.camera.lookAt(self.actorList[i])
-		pdeg = self.cameraState['pdeg']
-		hdeg = self.camera.getH()
-		hrad = math.radians(hdeg)
-		self.camera.setP(pdeg)
-
-		self.cameraState.update({'hdeg': hdeg, 'hrad': hrad})
+	
 
 	def updateViewTask(self, task):
 
