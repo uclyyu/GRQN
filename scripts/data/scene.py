@@ -412,3 +412,4 @@ if __name__ == '__main__':
 
 	mgr = SceneManager(scene, actor, animation, 'view')
 	mgr.run()
+	

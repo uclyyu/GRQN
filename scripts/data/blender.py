@@ -35,7 +35,10 @@ def _duplicate_object(name_proto):
 	bpy.data.objects[name_proto].select = True
 	bpy.ops.object.duplicate(linked=False)
 	dup = bpy.context.selected_objects[0]
-	dup.name = name_proto.replace('.proto', '.dup')
+	dup.name = (name_proto
+				.replace('.proto', '.dup')
+				.replace('.A', '')
+				.replace('.B', ''))
 	dup.data.name = dup.name.replace('obj.', 'dat.')
 	dup.hide = False
 	bpy.context.scene.objects.active = dup
@@ -128,7 +131,7 @@ def _texture_object(obj, image_group, repeat):
 	# Make sure texure exists
 	ttag = obj.name.replace('obj', 'tex')
 	if bpy.data.textures.find(ttag) < 0:
-		tex = bpy.data.textures.new(tex, type='IMAGE')
+		tex = bpy.data.textures.new(ttag, type='IMAGE')
 	else:
 		tex = bpy.data.textures[ttag]
 		tex.user_clear()
@@ -213,7 +216,7 @@ def sample_blind (texture_path, sample_mode='train'):
 	_apply_solidify_modifier(dup, random.uniform(0.01, 0.08))
 
 	# Finally, deal with textures
-	_texture_object(dup, imag_group)
+	_texture_object(dup, imag_group, 3)
 
 
 def sample_wall(texture_path, sample_mode='train'):
@@ -246,7 +249,7 @@ def sample_wall(texture_path, sample_mode='train'):
 		_nudge_random_faces(dup, percent=random.uniform(3, 4), seed=random.randint(*seed_range), N=10)
 
 		# Deal with textures
-		_texture_object(dup, imag_group)
+		_texture_object(dup, imag_group, 3)
 
 		# Object specific adjustments
 		if wall == 'N':
@@ -285,7 +288,7 @@ def sample_environment(job, texture_path_floor, texture_path_wall, texture_path_
 
 	_deselect_all()
 
-	bpy.data.objects['obj.floor'].select = True
+	bpy.data.objects['obj.floor.dup'].select = True
 	bpy.data.objects['obj.blind.dup'].select = True
 	bpy.data.objects['obj.wall.dup.N'].select = True
 	bpy.data.objects['obj.wall.dup.W'].select = True
@@ -298,15 +301,13 @@ def sample_environment(job, texture_path_floor, texture_path_wall, texture_path_
 
 
 if __name__ == '__main__':
-	# blf = os.path.abspath('../../resources/blender/env_proto.blend')
-	# tpf = os.path.abspath('../../resources/textures/floor/train')
-	# tpw = os.path.abspath('../../resources/textures/wall/train')
-	# tpb = os.path.abspath('../../resources/textures/blind/train')
-	# exp = os.path.abspath('.')
+	blf = os.path.abspath('../../resources/blender/env_proto.blend')
+	tpf = os.path.abspath('../../resources/textures/floor/train')
+	tpw = os.path.abspath('../../resources/textures/wall/train')
+	tpb = os.path.abspath('../../resources/textures/blind/train')
+	exp = os.path.abspath('../../../../data/gern/egg_scene')
 
-	# addon_utils.enable('io_scene_egg')
-	# bpy.ops.wm.open_mainfile(filepath=blf)
+	addon_utils.enable('io_scene_egg')
+	bpy.ops.wm.open_mainfile(filepath=blf)
 
-	# sample_environment(1, tpf, tpw, tpb, exp)
-	tpf = os.path.abspath('/Users/hikoyu/Downloads/imagination_based_rl/GeRN/resources/textures/floor/train')
-	sample_floor(tpf)
+	sample_environment(1, tpf, tpw, tpb, exp)
