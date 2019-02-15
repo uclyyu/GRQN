@@ -271,7 +271,7 @@ if __name__ == '__main__':
 	tpf = os.path.abspath('../../resources/textures/floor/train')
 	tpw = os.path.abspath('../../resources/textures/wall/train')
 	tpb = os.path.abspath('../../resources/textures/blind/train')
-	exp = os.path.abspath('.')
+	exp = os.path.abspath('../../../../data/gern/egg_scene')
 
 	addon_utils.enable('io_scene_egg')
 	bpy.ops.wm.open_mainfile(filepath=blf)
