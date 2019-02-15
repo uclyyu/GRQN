@@ -223,10 +223,6 @@ class SceneManager(ShowBase):
 		phase = phase + by_rad
 		phase = (phase + math.pi) % (2 * math.pi)
 		phase = phase - math.pi
-		# if phase < math.pi:
-		# 	phase = phase % math.pi
-		# elif phase > math.pi:
-		# 	phase = (phase % math.pi) - math.pi
 		self._povSetState(phase=phase)
 
 	def _povAdvanceRadius(self, by):
@@ -238,10 +234,8 @@ class SceneManager(ShowBase):
 	def _povAdvanceYaw(self, by_rad):
 		yaw = self.pov_state['yaw']
 		yaw = yaw + by_rad
-		if yaw < math.pi:
-			yaw = yaw % math.pi
-		elif yaw > math.pi:
-			yaw = (yaw % math.pi) - math.pi
+		yaw = (yaw + math.pi) % (2 * math.pi)
+		yaw = yaw - math.pi
 		self._povSetState(phase=phase)
 
 	def _povAdvancePitch(self, by):
@@ -412,4 +406,3 @@ if __name__ == '__main__':
 
 	mgr = SceneManager(scene, actor, animation, 'view')
 	mgr.run()
-	
