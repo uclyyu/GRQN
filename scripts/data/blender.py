@@ -31,12 +31,12 @@ def _remove_object_by_name(name):
 		bpy.data.objects.remove(obj)
 
 
-def _duplicate_object(name_proto, tag):
+def _duplicate_object(name_proto):
 	bpy.data.objects[name_proto].select = True
 	bpy.ops.object.duplicate(linked=False)
 	dup = bpy.context.selected_objects[0]
-	dup.name = '.'.join(['obj', tag, 'dup'])
-	dup.data.name = '.'.join(['dat', tag, 'dup'])
+	dup.name = name_proto.replace('.proto', '.dup')
+	dup.data.name = dup.name.replace('obj.', 'dat.')
 	dup.hide = False
 	bpy.context.scene.objects.active = dup
 
@@ -103,11 +103,22 @@ def _nudge_random_faces(obj, percent, seed, N=100):
 	bpy.ops.object.mode_set(mode='OBJECT')
 
 
-def _texture_object(obj, tag, image_group):
-	## Randomly sample a texture image and apply to object 'obj'.
+def _texture_object(obj, image_group, repeat):
+	# Set object to active
+	bpy.context.scene.objects.active = obj
 
+	# UV-unwrap object
+	bpy.ops.object.mode_set(mode='EDIT')
+	bpy.ops.mesh.select_mode(type='FACE', action='ENABLE')
+	bpy.ops.mesh.select_all(action='SELECT')
+	bpy.ops.uv.unwrap()
+	bpy.ops.object.mode_set(mode='OBJECT')
+	name_uv = obj.name.replace('obj', 'uv')
+	obj.data.uv_textures.active.name = name_uv
+
+	# Randomly sample a texture image and apply to uv_face.
 	# Make sure material exists
-	mtag = '.'.join(['mat', tag, 'dup'])
+	mtag = obj.name.replace('obj', 'mat')
 	if bpy.data.materials.find(mtag) < 0:
 		mat = bpy.data.materials.new(mtag)
 	else:
@@ -115,19 +126,23 @@ def _texture_object(obj, tag, image_group):
 		mat.user_clear()
 
 	# Make sure texure exists
-	ttag = '.'.join(['tex', tag, 'dup'])
+	ttag = obj.name.replace('obj', 'tex')
 	if bpy.data.textures.find(ttag) < 0:
 		tex = bpy.data.textures.new(tex, type='IMAGE')
 	else:
 		tex = bpy.data.textures[ttag]
 		tex.user_clear()
+	tex.repeat_x = repeat
+	tex.repeat_y = repeat
 
 	# Assign texture to material
 	if mat.texture_slots[0] is None:
 		tex_slot = mat.texture_slots.add()
-		tex_slot.texture = tex
 	else:
-		mat.texture_slots[0].texture = tex
+		tex_slot = mat.texture_slots[0]
+	tex_slot.texture = tex
+	tex_slot.texture_coords = 'UV'
+	tex_slot.uv_layer = name_uv
 		
 	# Assign material to object
 	obj.data.materials.append(mat)
@@ -136,9 +151,23 @@ def _texture_object(obj, tag, image_group):
 	imag_path, = random.sample(image_group, 1)
 	imag_name = imag_path.split('/')[-1]
 	if bpy.data.images.find(imag_name) < 0:
-		tex.image = bpy.data.images.load(imag_path)
+		image = bpy.data.images.load(imag_path)
 	else:
-		tex.image = bpy.data.images[imag_name]
+		 image = bpy.data.images[imag_name]
+	tex.image = image
+
+	for uv_face in obj.data.uv_textures.active.data:
+		uv_face.image = image
+
+	# Set active for rendering
+	obj.data.uv_textures.active.active_render = True
+
+
+def _check_texture_images(imag_group):
+	if len(imag_group) == 0:
+		raise BadSampleException
+
+	return imag_group
 
 
 def sample_blind (texture_path, sample_mode='train'):
@@ -156,7 +185,7 @@ def sample_blind (texture_path, sample_mode='train'):
 	_deselect_all()
 	
 	# Create and ready object:	
-	dup = _duplicate_object(name_proto, tag)	
+	dup = _duplicate_object(name_proto)	
 
 	# Apply random ARRAY modifier
 	_apply_array_modifier(dup, 'z', array_count.z)
@@ -184,14 +213,14 @@ def sample_blind (texture_path, sample_mode='train'):
 	_apply_solidify_modifier(dup, random.uniform(0.01, 0.08))
 
 	# Finally, deal with textures
-	_texture_object(dup, tag, imag_group)
+	_texture_object(dup, imag_group)
 
 
 def sample_wall(texture_path, sample_mode='train'):
 	tag = 'wall'
 	name_proto, = random.sample(['.'.join(['obj', tag, 'proto', X]) for X in ['A']], 1) 
 	name_dup_ = '.'.join(['obj', tag, 'dup', '_'])
-	imag_group = glob('/'.join([texture_path, 'img.*']))
+	imag_group = _check_texture_images(glob('/'.join([texture_path, 'img.*'])))
 	array_count = Vec3(x=random.randint(40, 50), y=None, z=random.randint(10, 12))
 	seed_range = _get_seeds(sample_mode)
 
@@ -205,7 +234,7 @@ def sample_wall(texture_path, sample_mode='train'):
 		_deselect_all()
 			
 		# Create and ready object:
-		dup = _duplicate_object(name_proto, tag)
+		dup = _duplicate_object(name_proto)
 		dup.name = name_dup
 		dup.data.name = name_dup.replace('obj', 'dat')
 
@@ -217,7 +246,7 @@ def sample_wall(texture_path, sample_mode='train'):
 		_nudge_random_faces(dup, percent=random.uniform(3, 4), seed=random.randint(*seed_range), N=10)
 
 		# Deal with textures
-		_texture_object(dup, tag, imag_group)
+		_texture_object(dup, imag_group)
 
 		# Object specific adjustments
 		if wall == 'N':
@@ -237,14 +266,16 @@ def sample_wall(texture_path, sample_mode='train'):
 			dup.rotation_euler[2] = math.radians(-90)
 
 
-
 def sample_floor(texture_path):
 	tag = 'floor'
-	name_proto = '.'.join(['obj', tag])
-	imag_group = glob('/'.join([texture_path, 'img.*']))
+	name_proto = '.'.join(['obj', tag, 'proto'])
+	name_dup = name_proto.replace('proto', 'dup')
+	imag_group = _check_texture_images(glob('/'.join([texture_path, 'img.*'])))
 
-	obj = bpy.data.objects[name_proto]
-	_texture_object(obj, tag, imag_group)
+	_remove_object_by_name(name_dup)
+	dup = _duplicate_object(name_proto)
+
+	_texture_object(dup, imag_group, 3)
 
 
 def sample_environment(job, texture_path_floor, texture_path_wall, texture_path_blind, export_path):
@@ -267,13 +298,15 @@ def sample_environment(job, texture_path_floor, texture_path_wall, texture_path_
 
 
 if __name__ == '__main__':
-	blf = os.path.abspath('../../resources/blender/env_proto.blend')
-	tpf = os.path.abspath('../../resources/textures/floor/train')
-	tpw = os.path.abspath('../../resources/textures/wall/train')
-	tpb = os.path.abspath('../../resources/textures/blind/train')
-	exp = os.path.abspath('.')
+	# blf = os.path.abspath('../../resources/blender/env_proto.blend')
+	# tpf = os.path.abspath('../../resources/textures/floor/train')
+	# tpw = os.path.abspath('../../resources/textures/wall/train')
+	# tpb = os.path.abspath('../../resources/textures/blind/train')
+	# exp = os.path.abspath('.')
 
-	addon_utils.enable('io_scene_egg')
-	bpy.ops.wm.open_mainfile(filepath=blf)
+	# addon_utils.enable('io_scene_egg')
+	# bpy.ops.wm.open_mainfile(filepath=blf)
 
-	sample_environment(1, tpf, tpw, tpb, exp)
+	# sample_environment(1, tpf, tpw, tpb, exp)
+	tpf = os.path.abspath('/Users/hikoyu/Downloads/imagination_based_rl/GeRN/resources/textures/floor/train')
+	sample_floor(tpf)
