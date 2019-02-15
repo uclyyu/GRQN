@@ -9,7 +9,7 @@ from collections import OrderedDict
 class SceneManager(ShowBase):
 	"""The SceneManager will import two models: one for the static 
 	environment layout, the other for an animated human animation. """
-	def __init__(self, scene, actor, animation, mode, size=(768, 768), zNear=0.1, zFar=1000.0, fov=70.0, showPosition=False, extremal=None):
+	def __init__(self, scene, actor, animation, mode, anim_step_size=4, size=(768, 768), zNear=0.1, zFar=1000.0, fov=70.0, showPosition=False, extremal=None):
 		super(SceneManager, self).__init__()
 
 		self.__dict__.update(size=size, zNear=zNear, zFar=zFar, fov=fov, showPosition=showPosition)
@@ -27,8 +27,9 @@ class SceneManager(ShowBase):
 
 		# essential node paths
 		self.scene = self.loader.loadModel(scene)
-		self.actor = Actor(actor, {'act': animation})
 		self.dummy = NodePath('dummy')
+		self.actor_step_size = anim_step_size
+		self.swapActor(actor, animation)
 
 		# containers
 		self.pov_state = OrderedDict([
@@ -158,6 +159,7 @@ class SceneManager(ShowBase):
 
 	def _setupViewEvents(self):
 		self.accept('escape', sys.exit)
+		self._resampleSpotlight()
 		self.actor.loop('act')
 
 	def _addDefaultLighting(self):
@@ -285,8 +287,12 @@ class SceneManager(ShowBase):
 		rad = math.radians(deg)
 		self._povSetState(yaw=rad)
 
-	def povRandomiseState(self, phase_quardrant='all', to_actor=False):
-		self._povRandomisePhase(phase_quardrant)
+	def _povCopyReadings(self, vector):
+		reading = list(self.pov_reading.items())
+		vector.append(reading)
+
+	def povRandomiseState(self, phase_quadrant='all', to_actor=False):
+		self._povRandomisePhase(phase_quadrant)
 		self._povRandomiseRadius()
 		self._povRandomiseYaw()
 		self._povRandomisePitch()
@@ -305,16 +311,27 @@ class SceneManager(ShowBase):
 		self.camera.setP(p)
 
 	def swapActor(self, actor, animation):
-		self.actor.detachNode()
-		self.actor.destroy()
+		if hasattr(self, 'actor'):
+			self.actor.detachNode()
+			self.actor.destroy()
 		self.actor = Actor(actor, {'act': animation})
-		self.actor.reparentTo(self.actor)
+		self.actor.reparentTo(self.render)
+
+		total_frames = self.actor.getNumFrames('act')
+		self.actor_frames = np.arange(0, total_frames, self.actor_step_size)
 
 	def swapScene(self, scene):
 		self.scene.detachNode()
 		self.scene.destroy()
 		self.scene = self.loader.loadMode(scene)
 		self.scene.reparentTo(self.render)
+
+	def _sliceFrames(self, start, length):
+		return self.actor_frames[slice(start, start + length)]
+
+	def _sampleFrameSlice(self, length):
+		start = random.sample(0, len(self.actor_frames) - length - 1)
+		return self._sliceFrames(start, length)
 
 	def _updateNavigateTask(self, task):
 		pass
@@ -390,9 +407,29 @@ class SceneManager(ShowBase):
 		return task.cont
 
 	def _updateCollectTask(self, task):
-		phase = -0.5 * numpy.pi
-		self._setCamera(phase=phase, hdeg=0., pdeg=0., z=1.1)
-		self._setObstacle(0, phase=phase, hdeg=180)
+		tape = []  # keeping pov readings
+		frames = self._sampleFrameSlice(16)
+		fi = 0
+
+		# --- Allow two samples per quadrant
+		# The first centers on the actor
+		for q in range(4):
+			self.actor.pose('act', frames[fi])
+			self.povRandomiseState(phase_quadrant=q, to_actor=True)
+			self.cameraCopyPOV()
+			self._povCopyReadings(tape)
+			fi = fi + 1
+
+		# The second has a randomised view
+		for q in range(4):
+			self.actor.pose('act', frames[fi])
+			self.povRandomiseState(phase_quadrant=q, to_actor=False)
+			self.cameraCopyPOV()
+			self._povCopyReadings(tape)
+			fi = fi + 1
+
+		# --- Temporal samples
+
 		return task.cont
 
 	def step(self):
@@ -405,4 +442,6 @@ if __name__ == '__main__':
 	animation = os.path.abspath('../../../../data/gern/egg_human/models/man0/man0pm2-pm21.egg')
 
 	mgr = SceneManager(scene, actor, animation, 'view')
+	import pdb
+	pdb.set_trace()
 	mgr.run()
