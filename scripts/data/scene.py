@@ -281,9 +281,9 @@ class SceneManager(ShowBase):
 		ele = random.uniform(*self.pov_state_extremal['elevation'])
 		self._povSetState(elevation=ele)
 
-	def _povTurnToActor(self):
+	def _povTurnToActor(self, jitter=0):
 		self.camera.lookAt(self.actor)
-		deg = self.camera.getH()
+		deg = self.camera.getH() + random.uniform(-jitter, jitter)
 		rad = math.radians(deg)
 		self._povSetState(yaw=rad)
 
@@ -408,27 +408,27 @@ class SceneManager(ShowBase):
 
 	def _updateCollectTask(self, task):
 		tape = []  # keeping pov readings
-		frames = self._sampleFrameSlice(16)
-		fi = 0
+		slice_length = random.randint(16, 32)
+		frames = self._sampleFrameSlice(slice_length + 4)
 
 		# --- Allow two samples per quadrant
 		# The first centers on the actor
 		for q in range(4):
-			self.actor.pose('act', frames[fi])
+			self.actor.pose('act', frames[q])
 			self.povRandomiseState(phase_quadrant=q, to_actor=True)
 			self.cameraCopyPOV()
 			self._povCopyReadings(tape)
-			fi = fi + 1
 
 		# The second has a randomised view
-		for q in range(4):
-			self.actor.pose('act', frames[fi])
-			self.povRandomiseState(phase_quadrant=q, to_actor=False)
-			self.cameraCopyPOV()
-			self._povCopyReadings(tape)
-			fi = fi + 1
+		# for q in range(4):
+		# 	self.actor.pose('act', frames[fi])
+		# 	self.povRandomiseState(phase_quadrant=q, to_actor=False)
+		# 	self.cameraCopyPOV()
+		# 	self._povCopyReadings(tape)
 
 		# --- Temporal samples
+		# Starting from a random position
+		self.povRandomiseState(quadrant='all', to_actor=True)
 
 		return task.cont
 
