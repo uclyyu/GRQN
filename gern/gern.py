@@ -67,99 +67,85 @@ class GroupNorm(nn.Module):
 		return x * self.gamma + self.beta
 
 
-class Representation(nn.Module):
+class RepresentationEncoderPrimitive(nn.Module):
 	def __init__(self):
-		super(Representation, self).__init__()
+		super(RepresentationEncoderPrimitive, self).__init__()
 
-		self.vgg19_f26 = visionmodels.vgg19_bn(pretrained=True).eval().features[:27]
 		self.features = self.features = nn.ModuleList([
 			# 0 ---
 			nn.Sequential(
-				nn.Conv2d(77, 32, (3, 3), (1, 1), padding=1), 
-				nn.BatchNorm2d(32), 
+				nn.Conv2d(4, 32, (3, 3), (2, 2), padding=1), 
+				GroupNorm(32, 8), 
 				nn.ReLU(True),
 				SkipConnect(
 					nn.Conv2d(32, 32, (3, 3), (1, 1), padding=1)), 
-				nn.BatchNorm2d(32), 
+				GroupNorm(32, 8), 
 				nn.ReLU(True),
 				nn.MaxPool2d((2, 2), stride=(2, 2)),
 				nn.Conv2d(32, 64, (3, 3), (1, 1), padding=1), 
-				nn.BatchNorm2d(64), 
+				GroupNorm(64, 8), 
 				nn.ReLU(True),
 				SkipConnect(
 					nn.Conv2d(64, 64, (3, 3), (1, 1), padding=1)), 
-				nn.BatchNorm2d(64), 
+				GroupNorm(64, 8), 
 				nn.ReLU(True),
 				nn.MaxPool2d((2, 2), stride=(2, 2)),
 				nn.Conv2d( 64, 128, (3, 3), (1, 1), padding=1), 
-				nn.BatchNorm2d(128), 
+				GroupNorm(128, 8), 
 				nn.ReLU(True),
 				SkipConnect(
 					nn.Sequential(
 						nn.Conv2d(128, 128, (3, 3), (1, 1), padding=1), 
-						nn.BatchNorm2d(128), 
+						GroupNorm(128, 8), 
 						nn.ReLU(True),
 						nn.Conv2d(128, 128, (3, 3), (1, 1), padding=1), 
-						nn.BatchNorm2d(128), 
-						nn.ReLU(True),
-						nn.Conv2d(128, 128, (3, 3), (1, 1), padding=1))), 
-				nn.BatchNorm2d(128), 
+						)), 
+				GroupNorm(128, 8), 
 				nn.ReLU(True),
 				nn.MaxPool2d((2, 2), stride=(2, 2))
 			),
 			# 1 ---
 			nn.Sequential(
-				nn.Conv2d(391, 512, (3, 3), (2, 2), padding=1), 
-				nn.BatchNorm2d(512),
+				nn.Conv2d(135, 128, (3, 3), (1, 1), padding=1), 
+				GroupNorm(128, 8),
+				nn.ReLU(True),
+				nn.MaxPool2d((2, 2), stride=(2, 2)),
+				nn.Conv2d(128, 256, (3, 3), (1, 1), padding=1), 
+				GroupNorm(256, 8),
 				nn.ReLU(True),
 				SkipConnect(
-					nn.Conv2d(512, 512, (1, 1), (1, 1), bias=False),
+					nn.Conv2d(256, 256, (1, 1), (1, 1), bias=False),
 					nn.Sequential(
-						nn.Conv2d(512, 512, (3, 3), (1, 1), padding=1),
-						nn.BatchNorm2d(512),
+						nn.Conv2d(256, 256, (3, 3), (1, 1), padding=1),
+						GroupNorm(256, 8),
 						nn.ReLU(True),
-						nn.Conv2d(512, 512, (3, 3), (1, 1), padding=1),
-						nn.BatchNorm2d(512),
-						nn.ReLU(True),
-						nn.Conv2d(512, 512, (3, 3), (1, 1), padding=1))
+						nn.Conv2d(256, 256, (3, 3), (1, 1), padding=1))
 					), 
-				nn.BatchNorm2d(512),
+				GroupNorm(256, 8),
 				nn.ReLU(True),
-				nn.Conv2d(512, 512, (3, 3), (2, 2), padding=1),
-				nn.BatchNorm2d(512),
-				nn.ReLU(True),
-				nn.Conv2d(512, 512, (3, 3), (2, 2))
+				nn.MaxPool2d((2, 2), stride=(2, 2)),
+				nn.Conv2d(256, 256, (3, 3), (2, 2), padding=1)
 			)
 		])
 
 
 	def forward(self, x, m, q):
-		# x: RGB input (-1xNx3x128x128) [-1, 1]
-		# m: OpenPose heatmaps (-1xNx77x128x128) [-1, 1]
-		# q: Query vector (-1xNx7x16x16) [-1, 1]
-		# r: Latent representation (256x1x1; default: zeros) 
-		# h: LSTM hidden state (512x1x1; default: zeros)
-		# c: LSTM cell state (512x1x1; default: zeros)
+		# x: RGB input (-1x3x128x128) [-1, 1]
+		# m: OpenPose heatmaps (-1x1x128x128) [-1, 1]
+		# q: Query vector (-1x7x1x1) [-1, 1]
 		batch_size = x.size(0)
 		num_steps = x.size(1)
 		dev = x.device
 		
-		# collapse time axis
-		x = x.view(-1,  3, 128, 128)
-		m = m.view(-1, 77, 128, 128)
-		q = q.view(-1,  7,  16,  16)
+		inp = torch.cat([x, m], dim=1)
+		inp = self.features[0](inp)
+		inp = torch.cat([inp, q.expand(-1, -1, 8, 8)], dim=1)
+		out = self.features[1](inp)
 
-		# encode rgb images
-		enc_x = self.vgg19_f26(x)
-		# encode heatmaps
-		enc_m = self.features[0](m)
-
-		enc_z = self.features[1](torch.cat([enc_x, enc_m, q], dim=1))
-
-		return enc_z.view(batch_size, num_steps, 512, 1, 1)
+		return out
 
 
-class RecurrentRepresentationAggregator(nn.Module):
+class RepresentationEncoderState(nn.Module):
 	def __init__(self, input_channels=512, hidden_channels=512, output_channels=256):
 		super(RecurrentRepresentationAggregator, self).__init__()
 
@@ -203,6 +189,14 @@ class RecurrentRepresentationAggregator(nn.Module):
 			r_next = r_next + self.feature(h_next)
 		
 		return r_next, (h_next, c_next)
+
+
+class RepresentationEncoder(nn.Module):
+	pass
+
+
+class RepresentationAggregator(nn.Module):
+	pass
 
 
 class Decoder(nn.Module):
@@ -413,6 +407,7 @@ class PerceptualLoss(nn.Module):
 
 		return loss / len(self.vgg_layers)
 
+
 class GeRN(nn.Module):
 	def __init__(self):
 		super(GeRN, self).__init__()
@@ -597,3 +592,11 @@ class GeRN(nn.Module):
 			'generator_hidden': (gen_h, gen_c),
 			'decoder_hidden': (dec_h, dec_c)
 			})
+
+
+if __name__ == '__main__':
+	x = torch.randn(1, 3, 128, 128)
+	m = torch.randn(1, 1, 128, 128)
+	q = torch.randn(1, 7,   1,   1)
+	net = RepresentationEncoderPrimitive()
+	print(net(x, m, q).size())
