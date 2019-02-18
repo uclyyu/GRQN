@@ -1,11 +1,12 @@
-import math, random, sys, os, json
+import math, random, sys, os, json, numpy
 from direct.actor.Actor import Actor 
 from direct.showbase.ShowBase import ShowBase, WindowProperties
 from direct.gui.OnscreenText import TextNode, OnscreenText
 from panda3d.core import NodePath, PerspectiveLens, AmbientLight, Spotlight, VBase4, ClockObject
 from collections import OrderedDict
 try:
-	import openpose, cv2
+	import cv2
+	from openpose import openpose
 	_PY_OPENPOSE_AVAIL_ = True
 except ImportError:
 	_PY_OPENPOSE_AVAIL_ = False
@@ -14,7 +15,7 @@ except ImportError:
 class SceneManager(ShowBase):
 	"""The SceneManager will import two models: one for the static 
 	environment layout, the other for an animated human animation. """
-	def __init__(self, scene, actor, animation, mode, op_config, anim_step_size=4, size=(768, 768), zNear=0.1, zFar=1000.0, fov=70.0, showPosition=False, extremal=None):
+	def __init__(self, scene, actor, animation, mode, op_config, pose_gap=4, size=(768, 768), zNear=0.1, zFar=1000.0, fov=70.0, showPosition=False, extremal=None):
 		super(SceneManager, self).__init__()
 
 		self.__dict__.update(size=size, zNear=zNear, zFar=zFar, fov=fov, showPosition=showPosition)
@@ -23,34 +24,28 @@ class SceneManager(ShowBase):
 		self.global_clock = ClockObject.getGlobalClock()
 		self.disableMouse()
 	
-		# Change window size
+		# --- Change window size
 		wp = WindowProperties()
 		wp.setSize(size[0], size[1])
 		wp.setTitle("Viewer")
 		wp.setCursorHidden(True)
 		self.win.requestProperties(wp)
 
-		# essential node paths
-		self.scene = self.loader.loadModel(scene)
-		self.dummy = NodePath('dummy')
-		self.actor_pose_gap = anim_step_size
-		self.swapActor(actor, animation)
-
-		# containers
+		# --- Containers
 		self.loader_manifest = OrderedDict([
-			('serial', 0)
+			('serial', 0),
 			('actor', ''),
 			('animation', ''),
 			('poses.pre', None),
 			('poses.post', None),
-			('poses.rewind', None)
+			('poses.rewind', None),
 			('visuals.rewind', []),
 			('visuals.condition', []),
 			('heatmaps.rewind', []),
 			('heatmaps.condition', []),
 			('skeletons.rewind', []),
-			('skeletons.condition', [])
-			('animation.step.size', self.actor_pose_gap),
+			('skeletons.condition', []),
+			('pose.gap.size', pose_gap),
 			('pov.readings.rewind', []),
 			('pov.readings.condition', [])])
 		self.pov_state = OrderedDict([
@@ -76,9 +71,16 @@ class SceneManager(ShowBase):
 		if type(extremal) is dict:
 			self.pov_state_extremal.update(extremal)
 
+		# --- Essential node paths
+		self.scene = self.loader.loadModel(scene)
+		self.dummy = NodePath('dummy')
+		self.swapActor(actor, animation)
+
+		# --- Initialise
 		self._initialiseScene()
 		self._initialiseOpenpose(op_config)
 
+		# --- Entering resepctive modes
 		if mode == 'collect':
 			# --- Mode for data collection
 			self.taskMgr.add(self._modeCollectPending, 'mode-collect-pending')
@@ -352,7 +354,8 @@ class SceneManager(ShowBase):
 		self.actor.reparentTo(self.render)
 
 		total_frames = self.actor.getNumFrames('act')
-		self.actor_valid_poses = np.arange(0, total_frames, self.actor_pose_gap)
+		gap = self.loader_manifest['pose.gap.size']
+		self.actor_valid_poses = numpy.arange(0, total_frames, gap)
 
 		self.loader_manifest.update(
 			{'actor': actor, 
@@ -382,7 +385,7 @@ class SceneManager(ShowBase):
 		return self.actor_valid_poses[slice(start, start + length)]
 
 	def _samplePoseSlice(self, length):
-		start = random.sample(0, len(self.actor_valid_poses) - length - 1)
+		start = random.randint(0, len(self.actor_valid_poses) - length - 1)
 		return self._slicePoses(start, length)
 
 	def _taskInvokeOpenPose(self, name_visual):
@@ -514,11 +517,11 @@ class SceneManager(ShowBase):
 			self._taskWriteVisual(name_visual, self.loader_manifest['visuals.condition'])
 			if _PY_OPENPOSE_AVAIL_:
 				self._taskInvokeOpenPose(name_visual)
-				self._taskWriteHeatmap(name_visual, name_heatmap, self.loader_manifest['heatmaps.condition'])
+				self._taskWriteHeatmap(name_heatmap, self.loader_manifest['heatmaps.condition'])
 				self._taskWriteSkeleton(name_skeleton, self.loader_manifest['skeletons.condition'])
 
 		# Next, sample temporal data from a random position
-		self.povRandomiseState(quadrant='all', to_actor=True)
+		self.povRandomiseState(phase_quadrant='all', to_actor=True)
 		step = math.copysign(math.radians(1), random.uniform(-1, 1))
 		for i, q in enumerate(pose_slice_post):
 			k = i + num_pose_pre
@@ -538,11 +541,11 @@ class SceneManager(ShowBase):
 			self._taskWriteVisual(name_visual, self.loader_manifest['visuals.condition'])
 			if _PY_OPENPOSE_AVAIL_:
 				self._taskInvokeOpenPose(name_visual)
-				self._taskWriteHeatmap(name_visual, name_heatmap, self.loader_manifest['heatmaps.condition'])
+				self._taskWriteHeatmap(name_heatmap, self.loader_manifest['heatmaps.condition'])
 				self._taskWriteSkeleton(name_skeleton, self.loader_manifest['skeletons.condition'])
 
 		# --- Prepare query outputs
-		self.povRandomiseState(quadrant='all', to_actor=True)
+		self.povRandomiseState(phase_quadrant='all', to_actor=True)
 		if random.uniform(-1, 1) < 0:
 			# Random sample
 			for i, q in enumerate(pose_slice_rewind):
@@ -558,9 +561,9 @@ class SceneManager(ShowBase):
 				self._taskWriteVisual(name_visual, self.loader_manifest['visuals.rewind'])
 				if _PY_OPENPOSE_AVAIL_:
 					self._taskInvokeOpenPose(name_visual)
-					self._taskWriteHeatmap(name_visual, name_heatmap, self.loader_manifest['heatmaps.rewind'])
+					self._taskWriteHeatmap(name_heatmap, self.loader_manifest['heatmaps.rewind'])
 					self._taskWriteSkeleton(name_skeleton, self.loader_manifest['skeletons.rewind'])
-				self.povRandomiseState(quadrant='all', to_actor=True)
+				self.povRandomiseState(phase_quadrant='all', to_actor=True)
 
 		else:
 			# Circular sample
@@ -579,7 +582,7 @@ class SceneManager(ShowBase):
 				self._taskWriteVisual(name_visual, self.loader_manifest['visuals.rewind'])
 				if _PY_OPENPOSE_AVAIL_:
 					self._taskInvokeOpenPose(name_visual)
-					self._taskWriteHeatmap(name_visual, name_heatmap, self.loader_manifest['heatmaps.rewind'])
+					self._taskWriteHeatmap(name_heatmap, self.loader_manifest['heatmaps.rewind'])
 					self._taskWriteSkeleton(name_skeleton, self.loader_manifest['skeletons.rewind'])
 
 		# --- Finally, output manifest
@@ -600,7 +603,8 @@ class SceneManager(ShowBase):
 		# --- Swap actor
 
 		# 
-		self.taskMgr.add(self._modeCollect, 'mode-collect')		
+		self.taskMgr.add(self._modeCollect, 'mode-collect')	
+		print('Added collect task.')	
 		return task.done
 
 	def step(self):
@@ -611,6 +615,8 @@ if __name__ == '__main__':
 	scene = os.path.abspath('../../resources/examples/scenes/scene_00000001.egg')
 	actor = os.path.abspath('../../resources/examples/models/modl_001.egg')
 	animation = os.path.abspath('../../resources/examples/models/anim_001.egg')
+	config = os.path.abspath('../../resources/openpose/default_config.json')
+	mode = 'collect'
 
-	mgr = SceneManager(scene, actor, animation, 'collect')
+	mgr = SceneManager(scene, actor, animation, mode, config)
 	mgr.run()
