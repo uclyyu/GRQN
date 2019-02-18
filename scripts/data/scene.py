@@ -1,8 +1,11 @@
 import math, random, sys, os, json, numpy
+from panda3d.core import NodePath, PerspectiveLens, AmbientLight, Spotlight, VBase4, ClockObject, loadPrcFileData
+loadPrcFileData('', 'window-type offscreen')   # Spawn an offscreen buffer
+loadPrcFileData('', 'audio-library-name null') # Avoid ALSA errors https://discourse.panda3d.org/t/solved-render-only-one-frame-and-other-questions/12899/5
 from direct.actor.Actor import Actor 
 from direct.showbase.ShowBase import ShowBase, WindowProperties
 from direct.gui.OnscreenText import TextNode, OnscreenText
-from panda3d.core import NodePath, PerspectiveLens, AmbientLight, Spotlight, VBase4, ClockObject
+
 from collections import OrderedDict
 try:
 	import cv2
@@ -24,18 +27,25 @@ class SceneManager(ShowBase):
 		self.global_clock = ClockObject.getGlobalClock()
 		self.disableMouse()
 	
-		# --- Change window size
-		wp = WindowProperties()
-		wp.setSize(size[0], size[1])
-		wp.setTitle("Viewer")
-		wp.setCursorHidden(True)
-		self.win.requestProperties(wp)
+		# --- Change window size (on-screen)
+		# wp = WindowProperties()
+		# wp.setSize(size[0], size[1])
+		# wp.setTitle("Viewer")
+		# wp.setCursorHidden(True)
+		# self.win.requestProperties(wp)
+
+		# --- Change window size (off-screen)
+		self.win.setSize(size[0], size[1])
 
 		# --- Containers
 		self.loader_manifest = OrderedDict([
+			('root', '.')
 			('serial', 0),
 			('actor', ''),
 			('animation', ''),
+			('num.pre', None),
+			('num.pose', None),
+			('num.rewind', None),
 			('poses.pre', None),
 			('poses.post', None),
 			('poses.rewind', None),
@@ -49,7 +59,7 @@ class SceneManager(ShowBase):
 			('pov.readings.rewind', []),
 			('pov.readings.condition', [])])
 		self.pov_state = OrderedDict([
-			('radius',    0), 
+			('radius',    2.5), 
 			('phase',     0), 
 			('yaw',       0), 
 			('pitch',     0), 
@@ -83,7 +93,7 @@ class SceneManager(ShowBase):
 		# --- Entering resepctive modes
 		if mode == 'collect':
 			# --- Mode for data collection
-			self.taskMgr.add(self._modeCollectPending, 'mode-collect-pending')
+			self.taskMgr.add(self._modeCollect, 'mode-collect')
 
 		elif mode == 'navigate':
 			# --- Mode for manual scene navigation
@@ -116,6 +126,42 @@ class SceneManager(ShowBase):
 			ShowBase.destroy(self)
 			raise ValueError('Unknow mode: {}'.format(mode))
 
+	def _addDefaultLighting(self):
+		self._lightnp_ambient = self.render.attachNewNode(AmbientLight('lightAmbient'))
+		self._lightnp_ambient.node().setColor(VBase4(.4, .4, .4, 1.))
+		self._lightnp_ambient.setPos(0, 0, 0)
+		self.render.setLight(self._lightnp_ambient)
+
+		self._lightnp_spot = self.render.attachNewNode(Spotlight('lightSpot'))
+		self._lightnp_spot.node().setColor(VBase4(.7, .7, .7, 1.))
+		self._lightnp_spot.node().setLens(PerspectiveLens())
+		self._lightnp_spot.node().setShadowCaster(True, 2048, 2048)
+		self._lightnp_spot.node().getLens().setFov(90)
+		self._lightnp_spot.node().getLens().setNearFar(.1, 40)
+		self._lightnp_spot.node().getLens().setFilmSize(2048, 2048)
+		self._lightnp_spot.setPos(0, 0, 5)
+		self._lightnp_spot.lookAt(self.dummy)
+		self.render.setLight(self._lightnp_spot)
+		self.render.setShaderAuto()
+
+	def _actorSetYaw(self, rad):
+		deg = math.degrees(rad)
+		self.actor.setH(deg)
+
+	def _actorRandomiseYaw(self):
+		rad = random.uniform(-math.pi, math.pi)
+		self._actorSetYaw(rad)
+
+	def cameraCopyPOV(self):
+		x = self.pov_reading['x']
+		y = self.pov_reading['y']
+		z = self.pov_reading['z']
+		h = math.degrees(self.pov_state['yaw'])
+		p = math.degrees(self.pov_state['pitch'])
+		self.camera.setPos(x, y, z)
+		self.camera.setH(h)
+		self.camera.setP(p)
+
 	def _initialiseScene(self):
 		# self.setBackgroundColor(.5294, .8078, .9804)
 		lens = self.cam.node().getLens()
@@ -146,90 +192,217 @@ class SceneManager(ShowBase):
 
 			self.op_wrapper.start()
 
-	def _setupCollecMode(self):
+	def _modeNavigate(self, task):
 		pass
+		# dt = self.globalClock.getDt()
+		# dt = task.time - self.time
 
-	def _setupNavigateMode(self):
-		self.centX = self.win.getProperties().getXSize() / 2
-		self.centY = self.win.getProperties().getYSize() / 2
+		# if self.interactive:
 
-		# reset mouse to start position:
-		self.win.movePointer(0, int(self.centX), int(self.centY))
+		# 	# handle mouse look
+		# 	md = self.win.getPointer(0)
+		# 	x = md.getX()
+		# 	y = md.getY()
 
-		self.escapeEventText = OnscreenText(text="ESC: Quit",
-											style=1, fg=(1, 1, 1, 1), pos=(-1.3, 0.95),
-											align=TextNode.ALeft, scale=.05)
+		# 	if self.win.movePointer(0, int(self.centX), int(self.centY)):
+		# 		self.cam.setH(self.cam, self.cam.getH(
+		# 			self.cam) - (x - self.centX) * self.sensX)
+		# 		self.cam.setP(self.cam, self.cam.getP(
+		# 			self.cam) - (y - self.centY) * self.sensY)
+		# 		self.cam.setR(0)
 
-		if self.showPosition:
-			self.positionText = OnscreenText(text="Position: ",
-											 style=1, fg=(1, 1, 1, 1), pos=(-1.3, 0.85),
-											 align=TextNode.ALeft, scale=.05)
+		# 	# handle keys:
+		# 	if self.forward:
+		# 		self.cam.setY(self.cam, self.cam.getY(
+		# 			self.cam) + self.movSens * self.fast * dt)
+		# 	if self.backward:
+		# 		self.cam.setY(self.cam, self.cam.getY(
+		# 			self.cam) - self.movSens * self.fast * dt)
+		# 	if self.left:
+		# 		self.cam.setX(self.cam, self.cam.getX(
+		# 			self.cam) - self.movSens * self.fast * dt)
+		# 	if self.right:
+		# 		self.cam.setX(self.cam, self.cam.getX(
+		# 			self.cam) + self.movSens * self.fast * dt)
+		# 	if self.up:
+		# 		self.cam.setZ(self.cam, self.cam.getZ(
+		# 			self.cam) + self.movSens * self.fast * dt)
+		# 	if self.down:
+		# 		self.cam.setZ(self.cam, self.cam.getZ(
+		# 			self.cam) - self.movSens * self.fast * dt)
 
-			self.orientationText = OnscreenText(text="Orientation: ",
-												style=1, fg=(1, 1, 1, 1), pos=(-1.3, 0.80),
-												align=TextNode.ALeft, scale=.05)
+		# if self.showPosition:
+		# 	position = self.cam.getNetTransform().getPos()
+		# 	hpr = self.cam.getNetTransform().getHpr()
+		# 	self.positionText.setText(
+		# 		'Position: (x = %4.2f, y = %4.2f, z = %4.2f)' % (position.x, position.y, position.z))
+		# 	self.orientationText.setText(
+		# 		'Orientation: (h = %4.2f, p = %4.2f, r = %4.2f)' % (hpr.x, hpr.y, hpr.z))
 
-		# Set up the key input
-		self.accept('escape', sys.exit)
-		self.accept('0', setattr, [self, "stop", True])
-		self.accept("w", setattr, [self, "forward", True])
-		self.accept("shift-w", setattr, [self, "forward", True])
-		self.accept("w-up", setattr, [self, "forward", False])
-		self.accept("s", setattr, [self, "backward", True])
-		self.accept("shift-s", setattr, [self, "backward", True])
-		self.accept("s-up", setattr, [self, "backward", False])
-		self.accept("a", setattr, [self, "left", True])
-		self.accept("shift-a", setattr, [self, "left", True])
-		self.accept("a-up", setattr, [self, "left", False])
-		self.accept("d", setattr, [self, "right", True])
-		self.accept("shift-d", setattr, [self, "right", True])
-		self.accept("d-up", setattr, [self, "right", False])
-		self.accept("r", setattr, [self, "up", True])
-		self.accept("shift-r", setattr, [self, "up", True])
-		self.accept("r-up", setattr, [self, "up", False])
-		self.accept("f", setattr, [self, "down", True])
-		self.accept("shift-f", setattr, [self, "down", True])
-		self.accept("f-up", setattr, [self, "down", False])
-		self.accept("shift", setattr, [self, "fast", 10.0])
-		self.accept("shift-up", setattr, [self, "fast", 1.0])
+		# self.time = task.time
 
-	def _setupViewMode(self):
-		self.accept('escape', sys.exit)
-		self._resampleSpotlight()
-		self.actor.loop('act')
+		# # Simulate physics
+		# if 'physics' in self.scene.worlds:
+		# 	self.scene.worlds['physics'].step(dt)
 
-	def _addDefaultLighting(self):
-		self._lightnp_ambient = self.render.attachNewNode(AmbientLight('lightAmbient'))
-		self._lightnp_ambient.node().setColor(VBase4(.4, .4, .4, 1.))
-		self._lightnp_ambient.setPos(0, 0, 0)
-		self.render.setLight(self._lightnp_ambient)
+		# # Rendering
+		# if 'render' in self.scene.worlds:
+		# 	self.scene.worlds['render'].step(dt)
 
-		self._lightnp_spot = self.render.attachNewNode(Spotlight('lightSpot'))
-		self._lightnp_spot.node().setColor(VBase4(.7, .7, .7, 1.))
-		self._lightnp_spot.node().setLens(PerspectiveLens())
-		self._lightnp_spot.node().setShadowCaster(True, 2048, 2048)
-		self._lightnp_spot.node().getLens().setFov(90)
-		self._lightnp_spot.node().getLens().setNearFar(.1, 40)
-		self._lightnp_spot.node().getLens().setFilmSize(2048, 2048)
-		self._lightnp_spot.setPos(0, 0, 5)
-		self._lightnp_spot.lookAt(self.dummy)
-		self.render.setLight(self._lightnp_spot)
-		self.render.setShaderAuto()
+		# # Simulate acoustics
+		# if 'acoustics' in self.scene.worlds:
+		# 	self.scene.worlds['acoustics'].step(dt)
 
-	def _resampleSpotlight(self):
-		z = self._lightnp_spot.getZ()
-		x = random.uniform(-5, 5)
-		y = random.uniform(-5, 5)
-		self._lightnp_spot.setPos(x, y, z)
-		self._lightnp_spot.lookAt(self.dummy)
+		# # Simulate semantics
+		# # if 'render-semantics' in self.scene.worlds:
+		# #     self.scene.worlds['render-semantics'].step(dt)
 
-	def _actorSetYaw(self, rad):
-		deg = math.degrees(rad)
-		self.actor.setH(deg)
+		# return task.cont
 
-	def _actorRandomiseYaw(self):
-		rad = random.uniform(low=-math.pi, high=math.pi)
-		self._actorSetYaw(rad)
+	def _modeView(self, task):
+		self._povAdvancePhase(math.radians(1.))
+		self._povTurnToActor()
+		self.cameraCopyPOV()
+		return task.cont
+
+	def _modeCollect(self, task):
+		num_pose_pre = random.randint(1, 8)
+		num_pose_post = random.randint(16, 32)
+		num_pose_rewind = random.randint(1, int(num_pose_post / 2))
+		pose_slice = self._samplePoseSlice(num_pose_pre + num_pose_post)
+		pose_slice_pre = pose_slice[:num_pose_pre]
+		pose_slice_post = pose_slice[num_pose_pre:]
+		pose_slice_rewind = list(reversed(pose_slice_post[-num_pose_rewind:]))
+
+		self.loader_manifest.update({
+			'num.pre': num_pose_pre,
+			'num.post': num_pose_post,
+			'num.rewind': num_pose_rewind,
+			'poses.pre': pose_slice_pre,
+			'poses.post': pose_slice_post,
+			'poses.rewind': pose_slice_rewind
+			})
+
+		# --- Prepare conditional inputs
+		# Allow up to two samples per quadrant
+		for i, q in enumerate(pose_slice_pre):
+			self.actor.pose('act', q)
+			if i < 4:
+				# The first centers on the actor		
+				self.povRandomiseState(phase_quadrant='all', to_actor=True)
+			else:
+				# The second has a randomised view
+				self.povRandomiseState(phase_quadrant='all', to_actor=False)
+
+			# Record camera states
+			self.cameraCopyPOV()
+			self._povCopyReadings(self.loader_manifest['pov.readings.condition'])
+
+			# Screenshots, heatmaps, and skeletons
+			name_visual = 'visual-cond-{:03d}.jpg'.format(i)
+			name_heatmap = 'heatmap-cond-{:03d}.jpg'.format(i)
+			name_skeleton = 'skeleton-cond-{:03d}.jpg'.format(i)
+			self._renderFrame()
+			self._taskWriteVisual(name_visual, self.loader_manifest['visuals.condition'])
+			if _PY_OPENPOSE_AVAIL_:
+				self._taskInvokeOpenPose(name_visual)
+				self._taskWriteHeatmap(name_heatmap, self.loader_manifest['heatmaps.condition'])
+				self._taskWriteSkeleton(name_skeleton, self.loader_manifest['skeletons.condition'])
+
+		# Next, sample temporal data from a random position
+		self.povRandomiseState(phase_quadrant='all', to_actor=True)
+		step = math.copysign(math.radians(1), random.uniform(-1, 1))
+		for i, q in enumerate(pose_slice_post):
+			k = i + num_pose_pre
+			self.actor.pose('act', q)
+			# Move POV
+			self._povAdvancePhase(step)
+			self._povTurnToActor()
+			# Record camera states
+			self.cameraCopyPOV()
+			self._povCopyReadings(self.loader_manifest['pov.readings.condition'])
+
+			# Screenshots, heatmaps, and skeletons
+			name_visual = 'visual-cond-{:03d}.jpg'.format(k)
+			name_heatmap = 'heatmap-cond-{:03d}.jpg'.format(k)
+			name_skeleton = 'skeleton-cond-{:03d}.jpg'.format(k)
+			self._renderFrame()
+			self._taskWriteVisual(name_visual, self.loader_manifest['visuals.condition'])
+			if _PY_OPENPOSE_AVAIL_:
+				self._taskInvokeOpenPose(name_visual)
+				self._taskWriteHeatmap(name_heatmap, self.loader_manifest['heatmaps.condition'])
+				self._taskWriteSkeleton(name_skeleton, self.loader_manifest['skeletons.condition'])
+
+		# --- Prepare query outputs
+		self.povRandomiseState(phase_quadrant='all', to_actor=True)
+		if random.uniform(-1, 1) < 0:
+			# Random sample
+			for i, q in enumerate(pose_slice_rewind):
+				self.actor.pose('act', q)
+				self._povTurnToActor(jitter=math.radians(random.uniform(-3, 3)))
+				self.cameraCopyPOV()
+				self._povCopyReadings(self.loader_manifest['pov.readings.rewind'])
+
+				name_visual = 'visual-rewd-{:03d}.jpg'.format(i)
+				name_heatmap = 'heatmap-rewd-{:03d}.jpg'.format(i)
+				name_skeleton = 'skeleton-rewd-{:03d}.jpg'.format(i)
+				self._renderFrame()
+				self._taskWriteVisual(name_visual, self.loader_manifest['visuals.rewind'])
+				if _PY_OPENPOSE_AVAIL_:
+					self._taskInvokeOpenPose(name_visual)
+					self._taskWriteHeatmap(name_heatmap, self.loader_manifest['heatmaps.rewind'])
+					self._taskWriteSkeleton(name_skeleton, self.loader_manifest['skeletons.rewind'])
+				self.povRandomiseState(phase_quadrant='all', to_actor=True)
+
+		else:
+			# Circular sample
+			step = math.copysign(math.radians(1), random.uniform(-1, 1))
+			for i, q in enumerate(pose_slice_rewind):
+				print('r: ', i)
+				self.actor.pose('act', q)
+				self._povAdvancePhase(step)
+				self._povTurnToActor()
+				self.cameraCopyPOV()
+				self._povCopyReadings(self.loader_manifest['pov.readings.rewind'])
+
+				name_visual = 'visual-rewd-{:03d}.jpg'.format(i)
+				name_heatmap = 'heatmap-rewd-{:03d}.jpg'.format(i)
+				name_skeleton = 'skeleton-rewd-{:03d}.jpg'.format(i)
+				self._renderFrame()
+				self._taskWriteVisual(name_visual, self.loader_manifest['visuals.rewind'])
+				if _PY_OPENPOSE_AVAIL_:
+					self._taskInvokeOpenPose(name_visual)
+					self._taskWriteHeatmap(name_heatmap, self.loader_manifest['heatmaps.rewind'])
+					self._taskWriteSkeleton(name_skeleton, self.loader_manifest['skeletons.rewind'])
+
+		# --- Finally, output manifest
+		with open('manifest.json', 'w') as jf:
+			json.dump(self.loader_manifest, jf)
+
+
+		# --- Revert back to pending state
+		# self.taskMgr.add(self._modeCollectPending, 'mode-collect-pending')
+		print('Done!')
+		return task.done
+
+	def _modeCollectPending(self, task):
+		if self.global_clock.getFrameTime() < 5:
+			self._povAdvancePhase(math.radians(1.))
+			self._povTurnToActor()
+			self.cameraCopyPOV()
+			return task.cont
+		else:
+			self.taskMgr.add(self._modeCollect, 'mode-collect')	
+			return task.done
+
+	def povRandomiseState(self, phase_quadrant='all', to_actor=False):
+		self._povRandomisePhase(phase_quadrant)
+		self._povRandomiseRadius()
+		self._povRandomiseYaw()
+		self._povRandomisePitch()
+		self._povRandomiseElevation()
+		if to_actor:
+			self._povTurnToActor(jitter=math.radians(random.uniform(0, 1)))
 
 	def _povSetState(self, radius=None, phase=None, yaw=None, pitch=None, elevation=None):
 		if radius:
@@ -318,33 +491,39 @@ class SceneManager(ShowBase):
 		self._povSetState(elevation=ele)
 
 	def _povTurnToActor(self, jitter=0):
+		x = self.pov_reading['x']
+		y = self.pov_reading['y']
+		z = self.pov_reading['z']
+		self.camera.setPos(x, y, z)
 		self.camera.lookAt(self.actor)
 		deg = self.camera.getH() + random.uniform(-jitter, jitter)
 		rad = math.radians(deg)
 		self._povSetState(yaw=rad)
 
-	def _povCopyReadings(self, vector):
-		reading = list(self.pov_reading.items())
-		vector.append(reading)
+	def _povCopyReadings(self, container):
+		reading = list(self.pov_reading.values())
+		container.append(reading)
 
-	def povRandomiseState(self, phase_quadrant='all', to_actor=False):
-		self._povRandomisePhase(phase_quadrant)
-		self._povRandomiseRadius()
-		self._povRandomiseYaw()
-		self._povRandomisePitch()
-		self._povRandomiseElevation()
-		if to_actor:
-			self._povTurnToActor()
+	def rebase(self, path, mkdir=True):
+		apath = os.path.abspath(path)
+		if mkdir:
+			os.mkdir(apath)
+		self.loader_manifest.update('root': path)
 
-	def cameraCopyPOV(self):
-		x = self.pov_reading['x']
-		y = self.pov_reading['y']
-		z = self.pov_reading['z']
-		h = math.degrees(self.pov_state['yaw'])
-		p = math.degrees(self.pov_state['pitch'])
-		self.camera.setPos(x, y, z)
-		self.camera.setH(h)
-		self.camera.setP(p)
+	def _renderFrame(self):
+		# render twice because of double buffering?
+		# self.graphicsEngine.render_frame()
+		self.graphicsEngine.render_frame()
+
+	def _resampleSpotlight(self):
+		z = self._lightnp_spot.getZ()
+		x = random.uniform(-5, 5)
+		y = random.uniform(-5, 5)
+		self._lightnp_spot.setPos(x, y, z)
+		self._lightnp_spot.lookAt(self.dummy)
+
+	def step(self):
+		self.taskMgr.step()
 
 	def swapActor(self, actor, animation):
 		if hasattr(self, 'actor'):
@@ -355,7 +534,7 @@ class SceneManager(ShowBase):
 
 		total_frames = self.actor.getNumFrames('act')
 		gap = self.loader_manifest['pose.gap.size']
-		self.actor_valid_poses = numpy.arange(0, total_frames, gap)
+		self.actor_valid_poses = numpy.arange(0, total_frames, gap).tolist()
 
 		self.loader_manifest.update(
 			{'actor': actor, 
@@ -372,6 +551,8 @@ class SceneManager(ShowBase):
 		self.loader_manifest['pov.readings.rewind'].clear()
 		self.loader_manifest['pov.readings.condition'].clear()
 
+		self._actorRandomiseYaw()
+
 	def swapScene(self, scene, resample_light=True):
 		self.scene.detachNode()
 		self.scene.destroy()
@@ -380,6 +561,58 @@ class SceneManager(ShowBase):
 
 		if resample_light:
 			self._resampleSpotlight()
+
+	def _setupCollecMode(self):
+		pass
+
+	def _setupNavigateMode(self):
+		self.centX = self.win.getProperties().getXSize() / 2
+		self.centY = self.win.getProperties().getYSize() / 2
+
+		# reset mouse to start position:
+		self.win.movePointer(0, int(self.centX), int(self.centY))
+
+		self.escapeEventText = OnscreenText(text="ESC: Quit",
+											style=1, fg=(1, 1, 1, 1), pos=(-1.3, 0.95),
+											align=TextNode.ALeft, scale=.05)
+
+		if self.showPosition:
+			self.positionText = OnscreenText(text="Position: ",
+											 style=1, fg=(1, 1, 1, 1), pos=(-1.3, 0.85),
+											 align=TextNode.ALeft, scale=.05)
+
+			self.orientationText = OnscreenText(text="Orientation: ",
+												style=1, fg=(1, 1, 1, 1), pos=(-1.3, 0.80),
+												align=TextNode.ALeft, scale=.05)
+
+		# Set up the key input
+		self.accept('escape', sys.exit)
+		self.accept('0', setattr, [self, "stop", True])
+		self.accept("w", setattr, [self, "forward", True])
+		self.accept("shift-w", setattr, [self, "forward", True])
+		self.accept("w-up", setattr, [self, "forward", False])
+		self.accept("s", setattr, [self, "backward", True])
+		self.accept("shift-s", setattr, [self, "backward", True])
+		self.accept("s-up", setattr, [self, "backward", False])
+		self.accept("a", setattr, [self, "left", True])
+		self.accept("shift-a", setattr, [self, "left", True])
+		self.accept("a-up", setattr, [self, "left", False])
+		self.accept("d", setattr, [self, "right", True])
+		self.accept("shift-d", setattr, [self, "right", True])
+		self.accept("d-up", setattr, [self, "right", False])
+		self.accept("r", setattr, [self, "up", True])
+		self.accept("shift-r", setattr, [self, "up", True])
+		self.accept("r-up", setattr, [self, "up", False])
+		self.accept("f", setattr, [self, "down", True])
+		self.accept("shift-f", setattr, [self, "down", True])
+		self.accept("f-up", setattr, [self, "down", False])
+		self.accept("shift", setattr, [self, "fast", 10.0])
+		self.accept("shift-up", setattr, [self, "fast", 1.0])
+
+	def _setupViewMode(self):
+		self.accept('escape', sys.exit)
+		self._resampleSpotlight()
+		self.actor.loop('act')
 
 	def _slicePoses(self, start, length):
 		return self.actor_valid_poses[slice(start, start + length)]
@@ -393,11 +626,13 @@ class SceneManager(ShowBase):
 		self.op_wrapper.emplaceAndPop([self.op_datum])
 
 	def _taskWriteVisual(self, name_visual, container):
+		self.graphicsEngine.renderFrame()
 		self.screenshot(name_visual, defaultFilename=False, source=self.win)
 		container.append(name_visual)
 
 	def _taskWriteHeatmap(self, name_heatmap, container):
 		hm = self.op_datum.poseHeatMaps.copy()[0]
+		hm = (hm * 255).astype('uint8')
 		cv2.imwrite(name_heatmap, hm)
 		container.append(name_heatmap)
 
@@ -405,210 +640,6 @@ class SceneManager(ShowBase):
 		sk = self.op_datum.cvOutputData.copy()
 		cv2.imwrite(name_skeleton, sk)
 		container.append(name_skeleton)
-
-	def _modeNavigate(self, task):
-		pass
-		# dt = self.globalClock.getDt()
-		# dt = task.time - self.time
-
-		# if self.interactive:
-
-		# 	# handle mouse look
-		# 	md = self.win.getPointer(0)
-		# 	x = md.getX()
-		# 	y = md.getY()
-
-		# 	if self.win.movePointer(0, int(self.centX), int(self.centY)):
-		# 		self.cam.setH(self.cam, self.cam.getH(
-		# 			self.cam) - (x - self.centX) * self.sensX)
-		# 		self.cam.setP(self.cam, self.cam.getP(
-		# 			self.cam) - (y - self.centY) * self.sensY)
-		# 		self.cam.setR(0)
-
-		# 	# handle keys:
-		# 	if self.forward:
-		# 		self.cam.setY(self.cam, self.cam.getY(
-		# 			self.cam) + self.movSens * self.fast * dt)
-		# 	if self.backward:
-		# 		self.cam.setY(self.cam, self.cam.getY(
-		# 			self.cam) - self.movSens * self.fast * dt)
-		# 	if self.left:
-		# 		self.cam.setX(self.cam, self.cam.getX(
-		# 			self.cam) - self.movSens * self.fast * dt)
-		# 	if self.right:
-		# 		self.cam.setX(self.cam, self.cam.getX(
-		# 			self.cam) + self.movSens * self.fast * dt)
-		# 	if self.up:
-		# 		self.cam.setZ(self.cam, self.cam.getZ(
-		# 			self.cam) + self.movSens * self.fast * dt)
-		# 	if self.down:
-		# 		self.cam.setZ(self.cam, self.cam.getZ(
-		# 			self.cam) - self.movSens * self.fast * dt)
-
-		# if self.showPosition:
-		# 	position = self.cam.getNetTransform().getPos()
-		# 	hpr = self.cam.getNetTransform().getHpr()
-		# 	self.positionText.setText(
-		# 		'Position: (x = %4.2f, y = %4.2f, z = %4.2f)' % (position.x, position.y, position.z))
-		# 	self.orientationText.setText(
-		# 		'Orientation: (h = %4.2f, p = %4.2f, r = %4.2f)' % (hpr.x, hpr.y, hpr.z))
-
-		# self.time = task.time
-
-		# # Simulate physics
-		# if 'physics' in self.scene.worlds:
-		# 	self.scene.worlds['physics'].step(dt)
-
-		# # Rendering
-		# if 'render' in self.scene.worlds:
-		# 	self.scene.worlds['render'].step(dt)
-
-		# # Simulate acoustics
-		# if 'acoustics' in self.scene.worlds:
-		# 	self.scene.worlds['acoustics'].step(dt)
-
-		# # Simulate semantics
-		# # if 'render-semantics' in self.scene.worlds:
-		# #     self.scene.worlds['render-semantics'].step(dt)
-
-		# return task.cont
-
-	def _modeView(self, task):
-		self._povAdvancePhase(math.radians(1.))
-		self._povTurnToActor()
-		self.cameraCopyPOV()
-		return task.cont
-
-	def _modeCollect(self, task):
-		num_pose_pre = random.randint(1, 8)
-		num_pose_post = random.randint(16, 32)
-		num_pose_rewind = random.randint(1, int(num_pose_post / 2))
-		pose_slice = self._samplePoseSlice(num_pose_pre + num_pose_post)
-		pose_slice_pre = pose_slice[:num_pose_pre]
-		pose_slice_post = pose_slice[num_pose_pre:]
-		pose_slice_rewind = list(reversed(pose_slice_post[-num_pose_rewind:]))
-
-		self.loader_manifest.update({
-			'poses.pre': pose_slice_pre,
-			'poses.post': pose_slice_post,
-			'poses.rewind': pose_slice_rewind
-			})
-
-		# --- Prepare conditional inputs
-		# Allow up to two samples per quadrant
-		for i, q in enumerate(pose_slice_pre):
-			self.actor.pose('act', q)
-			if i < 4:
-				# The first centers on the actor		
-				self.povRandomiseState(phase_quadrant=i, to_actor=True)
-			else:
-				# The second has a randomised view
-				self.povRandomiseState(phase_quadrant='all', to_actor=False)
-
-			# Record camera states
-			self.cameraCopyPOV()
-			self._povCopyReadings(self.loader_manifest['pov.readings.condition'])
-
-			# Screenshots, heatmaps, and skeletons
-			name_visual = 'visual-cond-{:03d}.jpg'.format(i)
-			name_heatmap = 'heatmap-cond-{:03d}.jpg'.format(i)
-			name_skeleton = 'skeleton-cond-{:03d}.jpg'.format(i)
-			self.graphicsEngine.renderFrame()
-			self._taskWriteVisual(name_visual, self.loader_manifest['visuals.condition'])
-			if _PY_OPENPOSE_AVAIL_:
-				self._taskInvokeOpenPose(name_visual)
-				self._taskWriteHeatmap(name_heatmap, self.loader_manifest['heatmaps.condition'])
-				self._taskWriteSkeleton(name_skeleton, self.loader_manifest['skeletons.condition'])
-
-		# Next, sample temporal data from a random position
-		self.povRandomiseState(phase_quadrant='all', to_actor=True)
-		step = math.copysign(math.radians(1), random.uniform(-1, 1))
-		for i, q in enumerate(pose_slice_post):
-			k = i + num_pose_pre
-			self.actor.pose('act', q)
-			# Move POV
-			self._povAdvancePhase(step)
-			self._povTurnToActor()
-			# Record camera states
-			self.cameraCopyPOV()
-			self._povCopyReadings(self.loader_manifest['pov.readings.condition'])
-
-			# Screenshots, heatmaps, and skeletons
-			name_visual = 'visual-cond-{:03d}.jpg'.format(k)
-			name_heatmap = 'heatmap-cond-{:03d}.jpg'.format(k)
-			name_skeleton = 'skeleton-cond-{:03d}.jpg'.format(k)
-			self.graphicsEngine.renderFrame()
-			self._taskWriteVisual(name_visual, self.loader_manifest['visuals.condition'])
-			if _PY_OPENPOSE_AVAIL_:
-				self._taskInvokeOpenPose(name_visual)
-				self._taskWriteHeatmap(name_heatmap, self.loader_manifest['heatmaps.condition'])
-				self._taskWriteSkeleton(name_skeleton, self.loader_manifest['skeletons.condition'])
-
-		# --- Prepare query outputs
-		self.povRandomiseState(phase_quadrant='all', to_actor=True)
-		if random.uniform(-1, 1) < 0:
-			# Random sample
-			for i, q in enumerate(pose_slice_rewind):
-				self.actor.pose('act', q)
-				self._povTurnToActor(jitter=math.radians(random.uniforms(-3, 3)))
-				self.cameraCopyPOV()
-				self._povCopyReadings(self.loader_manifest['pov.readings.rewind'])
-
-				name_visual = 'visual-rewd-{:03d}.jpg'.format(i)
-				name_heatmap = 'heatmap-rewd-{:03d}.jpg'.format(i)
-				name_skeleton = 'skeleton-rewd-{:03d}.jpg'.format(i)
-				self.graphicsEngine.renderFrame()
-				self._taskWriteVisual(name_visual, self.loader_manifest['visuals.rewind'])
-				if _PY_OPENPOSE_AVAIL_:
-					self._taskInvokeOpenPose(name_visual)
-					self._taskWriteHeatmap(name_heatmap, self.loader_manifest['heatmaps.rewind'])
-					self._taskWriteSkeleton(name_skeleton, self.loader_manifest['skeletons.rewind'])
-				self.povRandomiseState(phase_quadrant='all', to_actor=True)
-
-		else:
-			# Circular sample
-			step = math.copysign(math.radians(1), random.uniform(-1, 1))
-			for i, q in enumerate(pose_slice_rewind):
-				self.actor.pose('act', q)
-				self._povAdvancePhase(step)
-				self._povTurnToActor()
-				self.cameraCopyPOV()
-				self._povCopyReadings(self.loader_manifest['pov.readings.rewind'])
-
-				name_visual = 'visual-rewd-{:03d}.jpg'.format(i)
-				name_heatmap = 'heatmap-rewd-{:03d}.jpg'.format(i)
-				name_skeleton = 'skeleton-rewd-{:03d}.jpg'.format(i)
-				self.graphicsEngine.renderFrame()
-				self._taskWriteVisual(name_visual, self.loader_manifest['visuals.rewind'])
-				if _PY_OPENPOSE_AVAIL_:
-					self._taskInvokeOpenPose(name_visual)
-					self._taskWriteHeatmap(name_heatmap, self.loader_manifest['heatmaps.rewind'])
-					self._taskWriteSkeleton(name_skeleton, self.loader_manifest['skeletons.rewind'])
-
-		# --- Finally, output manifest
-		with open('manifest.json', 'w') as jf:
-			json.dump(self.loader_manifest, jf)
-
-
-		# --- Revert back to pending state
-		# self.taskMgr.add(self._modeCollectPending, 'mode-collect-pending')
-
-		return task.done
-
-	def _modeCollectPending(self, task):
-		# --- Obtain serial number
-
-		# --- Swap scene
-
-		# --- Swap actor
-
-		# 
-		self.taskMgr.add(self._modeCollect, 'mode-collect')	
-		print('Added collect task.')	
-		return task.done
-
-	def step(self):
-		self.taskMgr.step()
 
 
 if __name__ == '__main__':
@@ -619,4 +650,4 @@ if __name__ == '__main__':
 	mode = 'collect'
 
 	mgr = SceneManager(scene, actor, animation, mode, config)
-	mgr.run()
+	mgr.step()
