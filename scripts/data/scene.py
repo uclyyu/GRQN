@@ -266,6 +266,7 @@ class SceneManager(ShowBase):
 		return task.cont
 
 	def _modeCollect(self, task):
+		# --- Determine sample size
 		num_pose_pre = random.randint(1, 8)
 		num_pose_post = random.randint(16, 32)
 		num_pose_rewind = random.randint(1, int(num_pose_post / 2))
@@ -284,6 +285,11 @@ class SceneManager(ShowBase):
 			})
 
 		# --- Prepare conditional inputs
+		# Output strings
+		_name_visual = os.path.sep.join([self.loader_manifest['root'], 'visual-cond-{:03d}.jpg'])
+		_name_heatmap = os.path.sep.join([self.loader_manifest['root'], 'heatmap-cond-{:03d}.jpg'])
+		_name_skeleton = os.path.sep.join([self.loader_manifest['root'], 'skeleton-cond-{:03d}.jpg'])
+
 		# Allow up to two samples per quadrant
 		for i, q in enumerate(pose_slice_pre):
 			self.actor.pose('act', q)
@@ -299,9 +305,9 @@ class SceneManager(ShowBase):
 			self._povCopyReadings(self.loader_manifest['pov.readings.condition'])
 
 			# Screenshots, heatmaps, and skeletons
-			name_visual = 'visual-cond-{:03d}.jpg'.format(i)
-			name_heatmap = 'heatmap-cond-{:03d}.jpg'.format(i)
-			name_skeleton = 'skeleton-cond-{:03d}.jpg'.format(i)
+			name_visual = _name_visual.format(i)
+			name_heatmap = _name_heatmap.format(i)
+			name_skeleton = _name_skeleton.format(i)
 			self._renderFrame()
 			self._taskWriteVisual(name_visual, self.loader_manifest['visuals.condition'])
 			if _PY_OPENPOSE_AVAIL_:
@@ -323,9 +329,9 @@ class SceneManager(ShowBase):
 			self._povCopyReadings(self.loader_manifest['pov.readings.condition'])
 
 			# Screenshots, heatmaps, and skeletons
-			name_visual = 'visual-cond-{:03d}.jpg'.format(k)
-			name_heatmap = 'heatmap-cond-{:03d}.jpg'.format(k)
-			name_skeleton = 'skeleton-cond-{:03d}.jpg'.format(k)
+			name_visual = _name_visual.format(k)
+			name_heatmap = _name_heatmap.format(k)
+			name_skeleton = _name_skeleton.format(k)
 			self._renderFrame()
 			self._taskWriteVisual(name_visual, self.loader_manifest['visuals.condition'])
 			if _PY_OPENPOSE_AVAIL_:
@@ -334,6 +340,11 @@ class SceneManager(ShowBase):
 				self._taskWriteSkeleton(name_skeleton, self.loader_manifest['skeletons.condition'])
 
 		# --- Prepare query outputs
+		# Output strings
+		_name_visual = os.path.sep.join([self.loader_manifest['root'], 'visual-rewn-{:03d}.jpg'])
+		_name_heatmap = os.path.sep.join([self.loader_manifest['root'], 'heatmap-rewn-{:03d}.jpg'])
+		_name_skeleton = os.path.sep.join([self.loader_manifest['root'], 'skeleton-rewn-{:03d}.jpg'])
+
 		self.povRandomiseState(phase_quadrant='all', to_actor=True)
 		if random.uniform(-1, 1) < 0:
 			# Random sample
@@ -343,9 +354,9 @@ class SceneManager(ShowBase):
 				self.cameraCopyPOV()
 				self._povCopyReadings(self.loader_manifest['pov.readings.rewind'])
 
-				name_visual = 'visual-rewd-{:03d}.jpg'.format(i)
-				name_heatmap = 'heatmap-rewd-{:03d}.jpg'.format(i)
-				name_skeleton = 'skeleton-rewd-{:03d}.jpg'.format(i)
+				name_visual = _name_visual.format(i)
+				name_heatmap = _name_heatmap.format(i)
+				name_skeleton = _name_skeleton.format(i)
 				self._renderFrame()
 				self._taskWriteVisual(name_visual, self.loader_manifest['visuals.rewind'])
 				if _PY_OPENPOSE_AVAIL_:
@@ -365,9 +376,9 @@ class SceneManager(ShowBase):
 				self.cameraCopyPOV()
 				self._povCopyReadings(self.loader_manifest['pov.readings.rewind'])
 
-				name_visual = 'visual-rewd-{:03d}.jpg'.format(i)
-				name_heatmap = 'heatmap-rewd-{:03d}.jpg'.format(i)
-				name_skeleton = 'skeleton-rewd-{:03d}.jpg'.format(i)
+				name_visual = _name_visual.format(i)
+				name_heatmap = _name_heatmap.format(i)
+				name_skeleton = _name_skeleton.format(i)
 				self._renderFrame()
 				self._taskWriteVisual(name_visual, self.loader_manifest['visuals.rewind'])
 				if _PY_OPENPOSE_AVAIL_:
