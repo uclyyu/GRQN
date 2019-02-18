@@ -1,0 +1,9 @@
+{
+	"model_folder": "/home/yen/models/openpose",
+	"num_gpu": 1,
+	"num_gpu_start": 0,
+	"net_resolution": "128x128",
+	"heatmaps_add_bkg": "true",
+	"heatmaps_scale": 1,
+	"disable_blending": "true"
+}
