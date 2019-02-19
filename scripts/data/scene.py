@@ -1,9 +1,9 @@
-import math, random, sys, os, json, numpy
+import math, random, sys, os, json, numpy, shutil
 from panda3d.core import NodePath, PerspectiveLens, AmbientLight, Spotlight, VBase4, ClockObject, loadPrcFileData
-loadPrcFileData('', 'window-type offscreen')   # Spawn an offscreen buffer
-loadPrcFileData('', 'audio-library-name null') # Avoid ALSA errors https://discourse.panda3d.org/t/solved-render-only-one-frame-and-other-questions/12899/5
+# loadPrcFileData('', 'window-type offscreen')   # Spawn an offscreen buffer
+# loadPrcFileData('', 'audio-library-name null') # Avoid ALSA errors https://discourse.panda3d.org/t/solved-render-only-one-frame-and-other-questions/12899/5
 from direct.actor.Actor import Actor 
-from direct.showbase.ShowBase import ShowBase, WindowProperties
+from direct.showbase.ShowBase import ShowBase, WindowProperties, FrameBufferProperties, GraphicsPipe
 from direct.gui.OnscreenText import TextNode, OnscreenText
 
 from collections import OrderedDict
@@ -15,13 +15,17 @@ except ImportError:
 	_PY_OPENPOSE_AVAIL_ = False
 
 
+class SceneOpError(Exception):
+	pass
+
+
 class SceneManager(ShowBase):
 	"""The SceneManager will import two models: one for the static 
 	environment layout, the other for an animated human animation. """
 	def __init__(self, mode, op_config, 
 				 scene=None, actor=None, animation=None,
 				 pose_gap=4, step_size_deg=3, extremal=None,
-				 size=(768, 768), zNear=0.1, zFar=1000.0, fov=70.0, showPosition=False):
+				 size=(128, 128), zNear=0.1, zFar=1000.0, fov=70.0, showPosition=False):
 		super(SceneManager, self).__init__()
 
 		self.__dict__.update(size=size, zNear=zNear, zFar=zFar, fov=fov, showPosition=showPosition)
@@ -29,20 +33,31 @@ class SceneManager(ShowBase):
 		self.time = 0
 		self.global_clock = ClockObject.getGlobalClock()
 		self.disableMouse()
+
+		# flags = GraphicsPipe.BFFbPropsOptional | GraphicsPipe.BFRefuseWindow
+		# wprop = WindowProperties.getDefault()
+		# wprop.size(size[0], size[1])
+		# fprop = FrameBufferProperties.getDefault()
+		# buff = self.graphicsEngine.makeOutput(
+		# 	pipe=self.pipe, name='rendering buffer', sort=0, 
+		# 	fb_prop=fprop, win_prop=wprop, flags=flags,
+		# 	gsg=self.win.getGsg(), host=self.win)
+		# import pdb
+		# pdb.set_trace()
 	
 		# --- Change window size (on-screen)
-		# wp = WindowProperties()
-		# wp.setSize(size[0], size[1])
-		# wp.setTitle("Viewer")
-		# wp.setCursorHidden(True)
-		# self.win.requestProperties(wp)
+		wp = WindowProperties()
+		wp.setSize(size[0], size[1])
+		wp.setTitle("Viewer")
+		wp.setCursorHidden(True)
+		self.win.requestProperties(wp)
 
 		# --- Change window size (off-screen)
-		self.win.setSize(size[0], size[1])
+		# self.win.setSize(size[0], size[1])
 
 		# --- Containers
 		self.loader_manifest = OrderedDict([
-			('root', '.')
+			('root', '.'),
 			('serial', 0),
 			('actor', ''),
 			('animation', ''),
@@ -373,7 +388,6 @@ class SceneManager(ShowBase):
 			# Circular sample
 			step = math.copysign(self.loader_manifest['actor.step.size.rad'], random.uniform(-1, 1))
 			for i, q in enumerate(pose_slice_rewind):
-				print('r: ', i)
 				self.actor.pose('act', q)
 				self._povAdvancePhase(step)
 				self._povTurnToActor()
@@ -391,8 +405,9 @@ class SceneManager(ShowBase):
 					self._taskWriteSkeleton(name_skeleton, self.loader_manifest['skeletons.rewind'])
 
 		# --- Finally, output manifest
-		with open('manifest.json', 'w') as jf:
-			json.dump(self.loader_manifest, jf)
+		manifest_output = os.path.sep.join([self.loader_manifest['root'], 'manifest.json'])
+		with open(manifest_output, 'w') as jw:
+			json.dump(self.loader_manifest, jw)
 
 		# --- Revert back to pending state
 		# self.taskMgr.add(self._modeCollectPending, 'mode-collect-pending')
@@ -517,11 +532,23 @@ class SceneManager(ShowBase):
 		reading = list(self.pov_reading.values())
 		container.append(reading)
 
-	def rebase(self, path, mkdir=True):
+	def rebase(self, path, mkdir=True, clean=False):
 		apath = os.path.abspath(path)
 		if mkdir:
-			os.mkdir(apath)
-		self.loader_manifest.update('root': path)
+			try:
+				os.mkdir(apath)
+			except PermissionError:
+				print('Cannot make new directory!')
+				raise SceneOpError
+			except FileExistsError:
+				if clean:
+					print('Removing old directory! ', apath)
+					shutil.rmtree(apath)
+					os.mkdir(apath)
+				else:
+					print('Directory alreay exists!')
+					raise SceneOpError
+		self.loader_manifest.update({'root': path})
 
 	def _renderFrame(self):
 		# render twice because of double buffering?
@@ -572,7 +599,7 @@ class SceneManager(ShowBase):
 		if isinstance(self.scene, NodePath):
 			self.scene.detachNode()
 			self.scene.destroy()
-		self.scene = self.loader.loadMode(scene)
+		self.scene = self.loader.loadModel(scene)
 		self.scene.reparentTo(self.render)
 
 		if resample_light:
@@ -668,5 +695,5 @@ if __name__ == '__main__':
 	mgr = SceneManager(mode, config)
 	mgr.swapScene(scene)
 	mgr.swapActor(actor, animation)
-	mgr.rebase('/tmp/tmp-scene')
+	mgr.rebase('/tmp/tmp-scene', clean=True)
 	mgr.step()
