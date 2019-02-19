@@ -17,7 +17,7 @@ def mp_collect(worker, serial, bjson, sjson, wsize, output_base):
 	sp_pose = os.path.abspath(sjson['openpose_config'])
 
 	# --- List of actors and animations
-	actors = glob.glob(os.path.sep.join([sp_actr, 'modl_*.egg']))
+	actors = glob.glob(os.path.sep.join([sp_actr, 'rigg_*.egg']))
 	animations = glob.glob(os.path.sep.join([sp_anim, 'anim_*.egg']))
 
 	# --- blender: load export utility
