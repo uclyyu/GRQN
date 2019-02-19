@@ -1,0 +1,5 @@
+{
+	"actor_search_path": "../../resources/examples/models/",
+	"animation_search_path": "../../resources/examples/models",
+	"openpose_config": "../../resources/openpose/default_config.json"
+}
