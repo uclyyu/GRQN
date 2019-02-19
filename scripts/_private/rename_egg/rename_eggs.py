@@ -37,9 +37,10 @@ if __name__ == '__main__':
 						shutil.copy(file, os.path.sep.join(['../test', new_rname]))
 
 					anim_files = glob(file.split('.egg')[-2] + '-*.egg')
+					anim_j = 0
 					for afile in anim_files:
 						aname = afile.split(os.path.sep)[-1]
-						new_aname = 'anim_{:04d}_{:04d}.egg'.format(rigg_i, anim_i)
+						new_aname = 'anim_{:04d}_{:04d}.egg'.format(rigg_i, anim_j)
 						record.update({'source': aname, 'dest': new_aname})
 						writer.writerow(record)
 						
@@ -49,6 +50,7 @@ if __name__ == '__main__':
 						else:
 							shutil.copy(afile, os.path.sep.join(['../test', new_aname]))
 						anim_i += 1
+						anim_j += 1
 
 					rigg_i += 1
 
