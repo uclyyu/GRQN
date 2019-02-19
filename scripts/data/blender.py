@@ -1,4 +1,4 @@
-import bpy, random, math, addon_utils, os
+import bpy, random, math, addon_utils, os, subprocess
 import multiprocessing as mp
 from glob import glob
 from collections import namedtuple
