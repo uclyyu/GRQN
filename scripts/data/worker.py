@@ -2,7 +2,7 @@ import multiprocessing as mp
 import queue, sys, argparse, json, scene, os, random
 
 
-def mp_collect(worker, serial, bjson, sjson, wsize, output_base):
+def mp_collect(worker, serial, bjson, sjson, wsize, extension, output_base):
 	import blender
 	# --- blender: json information 
 	bp_main = os.path.abspath(bjson['blender_main_file'])
@@ -17,8 +17,8 @@ def mp_collect(worker, serial, bjson, sjson, wsize, output_base):
 	sp_pose = os.path.abspath(sjson['openpose_config'])
 
 	# --- List of actors and animations
-	actors = glob.glob(os.path.sep.join([sp_actr, 'rigg_*.egg']))
-	animations = glob.glob(os.path.sep.join([sp_anim, 'anim_*.egg']))
+	actors = glob.glob(os.path.sep.join([sp_actr, 'rigg_*{}'.format(extension)]))
+	animations = glob.glob(os.path.sep.join([sp_anim, 'anim_*{}'.format(extension)]))
 
 	# --- blender: load export utility
 	blender.addon_utils.enable('io_scene_egg')
@@ -76,6 +76,7 @@ if __name__ == '__main__':
 	parser = argparse.ArgumentParser(description='Multi-worker data generator.')
 	parser.add_argument('--num-worker', type=int, dest='nworker', metavar='N', required=True, help='(integer) Number of multiprocessing workers.')
 	parser.add_argument('--num-sample', type=int, dest='nsample', metavar='M', required=True, help='(integer) Number of samples to draw.')
+	parser.add_argument('--file-extension', type=str, dest='extension', metavar='.EXT', required=True, default='.bam', help='')
 	parser.add_argument('--win-size', type=str, dest='wsize', metavar='WxH', required=True, default='128x128')
 	parser.add_argument('--out-base', type=str, dest='outpath', metavar='PATH', required=True, help='Root path for generated samples.')
 	parser.add_argument('--blender-json', type=str, dest='bjson', metavar='B', required=True, help='')
@@ -99,7 +100,8 @@ if __name__ == '__main__':
 		# Spawn workers
 		workers = []
 		for j in range(nworker):
-			p = mp.Process(target=mp_collect, args=(worker, serial, bjson, sjons, wsize, outpath))
+			args = (worker, serial, bjson, sjons, wsize, extension, outpath)
+			p = mp.Process(target=mp_collect, args=args)
 			workers.append(p)
 
 		# Start workers
