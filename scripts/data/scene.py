@@ -62,7 +62,7 @@ class SceneManager(ShowBase):
 			('actor', ''),
 			('animation', ''),
 			('num.pre', None),
-			('num.pose', None),
+			('num.post', None),
 			('num.rewind', None),
 			('poses.pre', None),
 			('poses.post', None),
@@ -199,6 +199,7 @@ class SceneManager(ShowBase):
 		self.dummy.setPos(0, 0, 0)
 
 		self._addDefaultLighting()
+		self._renderFrame()
 
 	def _initialiseOpenpose(self, config):
 		self.op_datum = None
@@ -288,6 +289,7 @@ class SceneManager(ShowBase):
 		return task.cont
 
 	def _modeCollect(self, task):
+		self._renderFrame()
 		# --- Determine sample size
 		num_pose_pre = random.randint(1, 8)
 		num_pose_post = random.randint(16, 32)
@@ -610,7 +612,7 @@ class SceneManager(ShowBase):
 	def swapScene(self, scene, resample_light=True):
 		if isinstance(self.scene, NodePath):
 			self.scene.detachNode()
-			self.scene.cleanup()
+			# self.scene.clean_up()
 			self.scene.removeNode()
 		self.scene = self.loader.loadModel(scene)
 		self.scene.reparentTo(self.render)
