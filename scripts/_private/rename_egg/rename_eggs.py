@@ -6,11 +6,11 @@ from datetime import datetime
 if __name__ == '__main__':
 	rigg_i = 0
 	anim_i = 0
-	n_train_rigg = 105
-	n_train_anim = 570
+	n_train_rigg = 100
+	n_train_anim = 0
 	files = glob('./**/*.egg')
 	texs = glob('./**/tex')
-	pattern = '(?P<rigg>(wo)?m(a|e)n\d{1,2}\w{0,3}\d?\.egg)|(?P<anim>.*-.*egg)'
+	pattern = '(?P<rigg>(wo)?m(a|e)n\d{1,2}[a-z]{1,3}\d?\.egg)|(?P<anim>.*-.*egg)'
 	record = {'source': None, 'dest': None}
 	report = {'num_rigg': 0, 'num_anim': 0, 'timestamp': None,
 			  'num_rigg_train': n_train_rigg, 'num_rigg_test': 0, 
@@ -25,38 +25,42 @@ if __name__ == '__main__':
 			name = file.split(os.path.sep)[-1]
 			m = re.match(pattern, name)
 			if m:
-				if m.group('rigg'):
-					new_name = 'rigg_{:04d}.egg'.format(rigg_i)
-					record.update({'source': name, 'dest': new_name})
+				if m.group('rigg') is not None:
+					rname = name
+					new_rname = 'rigg_{:04d}.egg'.format(rigg_i)
+					record.update({'source': name, 'dest': new_rname})
 					writer.writerow(record)
-					
+
 					if rigg_i < n_train_rigg:
-						shutil.copy(file, os.path.sep.join(['../train', new_name]))
+						shutil.copy(file, os.path.sep.join(['../train', new_rname]))
 					else:
-						shutil.copy(file, os.path.sep.join(['../test', new_name]))
+						shutil.copy(file, os.path.sep.join(['../test', new_rname]))
+
+					anim_files = glob(file.split('.egg')[-2] + '-*.egg')
+					for afile in anim_files:
+						aname = afile.split(os.path.sep)[-1]
+						new_aname = 'anim_{:04d}_{:04d}.egg'.format(rigg_i, anim_i)
+						record.update({'source': aname, 'dest': new_aname})
+						writer.writerow(record)
+						
+						if rigg_i < n_train_rigg:
+							shutil.copy(afile, os.path.sep.join(['../train', new_aname]))
+							n_train_anim += 1
+						else:
+							shutil.copy(afile, os.path.sep.join(['../test', new_aname]))
+						anim_i += 1
 
 					rigg_i += 1
 
-				elif m.group('anim'):
-					new_name = 'anim_{:04d}.egg'.format(anim_i)
-					record.update({'source': name, 'dest': new_name})
-					writer.writerow(record)
-
-					if anim_i < n_train_anim:
-						shutil.copy(file, os.path.sep.join(['../train', new_name]))
-					else:
-						shutil.copy(file, os.path.sep.join(['../test', new_name]))
-					
-					anim_i += 1
 			else:
-				print('Cannot match: ', name)
-				raise ValueError
+				print('Cannot match: {}...skipping'.format(name))
 
 	# --- Report numbers
 	with open('egg_report.json', 'w') as jw:
-		report.update({'num_rigg': rigg_i + 1, 'num_anim': anim_i + 1})
-		report.update({'num_rigg_test': rigg_i + 1 - n_train_rigg, 
-					   'num_anim_test': anim_i + 1 - n_train_anim})
+		report.update({'num_rigg': rigg_i, 'num_anim': anim_i})
+		report.update({'num_rigg_test': rigg_i - n_train_rigg, 
+					   'num_anim_train': n_train_anim,
+					   'num_anim_test': anim_i - n_train_anim})
 		report.update({'timestamp': str(datetime.now())})
 		json.dump(report, jw)
 
