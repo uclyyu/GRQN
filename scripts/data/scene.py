@@ -25,7 +25,7 @@ class SceneManager(ShowBase):
 	def __init__(self, mode, op_config=None, 
 				 scene=None, actor=None, animation=None,
 				 pose_gap=4, step_size_deg=3, extremal=None,
-				 size=(128, 128), zNear=0.1, zFar=1000.0, fov=70.0, showPosition=False):
+				 size=(768, 768), zNear=0.1, zFar=1000.0, fov=70.0, showPosition=False):
 		super(SceneManager, self).__init__()
 
 		self.__dict__.update(size=size, zNear=zNear, zFar=zFar, fov=fov, showPosition=showPosition)
@@ -568,10 +568,11 @@ class SceneManager(ShowBase):
 	def step(self):
 		self.taskMgr.step()
 
-	def swapActor(self, actor, animation):
+	def swapActor(self, actor, animation, loop=False):
 		if isinstance(self.actor, NodePath):
 			self.actor.detachNode()
-			self.actor.destroy()
+			self.actor.cleanup()
+			self.actor.removeNode()
 		self.actor = Actor(actor, {'act': animation})
 		self.actor.reparentTo(self.render)
 		self.actor.setScale(0.085, 0.085, 0.085)
@@ -597,6 +598,14 @@ class SceneManager(ShowBase):
 
 		self._actorRandomiseYaw()
 		self.povRandomiseState(to_actor=True)
+
+		if loop:
+			self.actor.loop('act')
+
+		if hasattr(self, 'textRiggedModel'):
+			self.textRiggedModel.setText(actor.split(os.path.sep)[-1])
+		if hasattr(self, 'textAnimatedModel'):
+			self.textAnimatedModel.setText(animation.split(os.path.sep)[-1])
 
 	def swapScene(self, scene, resample_light=True):
 		if isinstance(self.scene, NodePath):
@@ -658,7 +667,12 @@ class SceneManager(ShowBase):
 	def _setupViewMode(self):
 		self.accept('escape', sys.exit)
 		self._resampleSpotlight()
-		self.actor.loop('act')
+		self.textRiggedModel = OnscreenText(text="",
+											style=1, fg=(1, 1, 1, 1), pos=(0, 0.85),
+											align=TextNode.ARight, scale=.05, mayChange=True)
+		self.textAnimatedModel = OnscreenText(text="",
+										  	  style=1, fg=(1, 1, 1, 1), pos=(0, 0.80),
+											  align=TextNode.ARight, scale=.05, mayChange=True)
 
 	def _slicePoses(self, start, length):
 		return self.actor_valid_poses[slice(start, start + length)]
