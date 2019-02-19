@@ -18,7 +18,10 @@ except ImportError:
 class SceneManager(ShowBase):
 	"""The SceneManager will import two models: one for the static 
 	environment layout, the other for an animated human animation. """
-	def __init__(self, scene, actor, animation, mode, op_config, pose_gap=4, size=(768, 768), zNear=0.1, zFar=1000.0, fov=70.0, showPosition=False, extremal=None):
+	def __init__(self, mode, op_config, 
+				 scene=None, actor=None, animation=None,
+				 pose_gap=4, step_size_deg=3, extremal=None,
+				 size=(768, 768), zNear=0.1, zFar=1000.0, fov=70.0, showPosition=False):
 		super(SceneManager, self).__init__()
 
 		self.__dict__.update(size=size, zNear=zNear, zFar=zFar, fov=fov, showPosition=showPosition)
@@ -57,7 +60,8 @@ class SceneManager(ShowBase):
 			('skeletons.condition', []),
 			('pose.gap.size', pose_gap),
 			('pov.readings.rewind', []),
-			('pov.readings.condition', [])])
+			('pov.readings.condition', []),
+			('actor.step.size.rad', math.radians(step_size_deg))])
 		self.pov_state = OrderedDict([
 			('radius',    2.5), 
 			('phase',     0), 
@@ -82,9 +86,13 @@ class SceneManager(ShowBase):
 			self.pov_state_extremal.update(extremal)
 
 		# --- Essential node paths
-		self.scene = self.loader.loadModel(scene)
+		self.scene = None
+		self.actor = None
 		self.dummy = NodePath('dummy')
-		self.swapActor(actor, animation)
+		if scene is not None:
+			self.scene = self.loader.loadModel(scene)
+		if actor is not None and animation is not None:
+			self.swapActor(actor, animation)
 
 		# --- Initialise
 		self._initialiseScene()
@@ -169,16 +177,10 @@ class SceneManager(ShowBase):
 		lens.setNear(self.zNear)
 		lens.setFar(self.zFar)
 
-		self.scene.reparentTo(self.render)
-		self.actor.reparentTo(self.render)
 		self.dummy.reparentTo(self.render)
-
-		self.actor.setScale(0.085, 0.085, 0.085)
 		self.dummy.setPos(0, 0, 0)
 
 		self._addDefaultLighting()
-
-		self.povRandomiseState(to_actor=True)
 
 	def _initialiseOpenpose(self, config):
 		self.op_datum = None
@@ -260,9 +262,11 @@ class SceneManager(ShowBase):
 		# return task.cont
 
 	def _modeView(self, task):
-		self._povAdvancePhase(math.radians(1.))
-		self._povTurnToActor()
-		self.cameraCopyPOV()
+		for _ in range(120):
+			self._povAdvancePhase(math.radians(3.))
+			self._povTurnToActor()
+			self.cameraCopyPOV()
+			self._renderFrame()
 		return task.cont
 
 	def _modeCollect(self, task):
@@ -317,7 +321,7 @@ class SceneManager(ShowBase):
 
 		# Next, sample temporal data from a random position
 		self.povRandomiseState(phase_quadrant='all', to_actor=True)
-		step = math.copysign(math.radians(1), random.uniform(-1, 1))
+		step = math.copysign(self.loader_manifest['actor.step.size.rad'], random.uniform(-1, 1))
 		for i, q in enumerate(pose_slice_post):
 			k = i + num_pose_pre
 			self.actor.pose('act', q)
@@ -367,7 +371,7 @@ class SceneManager(ShowBase):
 
 		else:
 			# Circular sample
-			step = math.copysign(math.radians(1), random.uniform(-1, 1))
+			step = math.copysign(self.loader_manifest['actor.step.size.rad'], random.uniform(-1, 1))
 			for i, q in enumerate(pose_slice_rewind):
 				print('r: ', i)
 				self.actor.pose('act', q)
@@ -390,11 +394,9 @@ class SceneManager(ShowBase):
 		with open('manifest.json', 'w') as jf:
 			json.dump(self.loader_manifest, jf)
 
-
 		# --- Revert back to pending state
 		# self.taskMgr.add(self._modeCollectPending, 'mode-collect-pending')
-		print('Done!')
-		return task.done
+		return task.cont
 
 	def _modeCollectPending(self, task):
 		if self.global_clock.getFrameTime() < 5:
@@ -537,11 +539,12 @@ class SceneManager(ShowBase):
 		self.taskMgr.step()
 
 	def swapActor(self, actor, animation):
-		if hasattr(self, 'actor'):
+		if isinstance(self.actor, NodePath):
 			self.actor.detachNode()
 			self.actor.destroy()
 		self.actor = Actor(actor, {'act': animation})
 		self.actor.reparentTo(self.render)
+		self.actor.setScale(0.085, 0.085, 0.085)
 
 		total_frames = self.actor.getNumFrames('act')
 		gap = self.loader_manifest['pose.gap.size']
@@ -563,10 +566,12 @@ class SceneManager(ShowBase):
 		self.loader_manifest['pov.readings.condition'].clear()
 
 		self._actorRandomiseYaw()
+		self.povRandomiseState(to_actor=True)
 
 	def swapScene(self, scene, resample_light=True):
-		self.scene.detachNode()
-		self.scene.destroy()
+		if isinstance(self.scene, NodePath):
+			self.scene.detachNode()
+			self.scene.destroy()
 		self.scene = self.loader.loadMode(scene)
 		self.scene.reparentTo(self.render)
 
@@ -660,5 +665,8 @@ if __name__ == '__main__':
 	config = os.path.abspath('../../resources/openpose/default_config.json')
 	mode = 'collect'
 
-	mgr = SceneManager(scene, actor, animation, mode, config)
+	mgr = SceneManager(mode, config)
+	mgr.swapScene(scene)
+	mgr.swapActor(actor, animation)
+	mgr.rebase('/tmp/tmp-scene')
 	mgr.step()
