@@ -571,8 +571,8 @@ class SceneManager(ShowBase):
 	def swapActor(self, actor, animation, loop=False):
 		if isinstance(self.actor, NodePath):
 			self.actor.detachNode()
-			self.actor.cleanup()
-			self.actor.removeNode()
+			# self.actor.cleanup()  # The same actor/animation is likely to be loaded again...
+			# self.actor.removeNode()
 		self.actor = Actor(actor, {'act': animation})
 		self.actor.reparentTo(self.render)
 		self.actor.setScale(0.085, 0.085, 0.085)
@@ -610,7 +610,8 @@ class SceneManager(ShowBase):
 	def swapScene(self, scene, resample_light=True):
 		if isinstance(self.scene, NodePath):
 			self.scene.detachNode()
-			self.scene.destroy()
+			self.scene.cleanup()
+			self.scene.removeNode()
 		self.scene = self.loader.loadModel(scene)
 		self.scene.reparentTo(self.render)
 
