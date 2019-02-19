@@ -22,7 +22,7 @@ class SceneOpError(Exception):
 class SceneManager(ShowBase):
 	"""The SceneManager will import two models: one for the static 
 	environment layout, the other for an animated human animation. """
-	def __init__(self, mode, op_config, 
+	def __init__(self, mode, op_config=None, 
 				 scene=None, actor=None, animation=None,
 				 pose_gap=4, step_size_deg=3, extremal=None,
 				 size=(128, 128), zNear=0.1, zFar=1000.0, fov=70.0, showPosition=False):
@@ -111,10 +111,13 @@ class SceneManager(ShowBase):
 
 		# --- Initialise
 		self._initialiseScene()
-		self._initialiseOpenpose(op_config)
 
 		# --- Entering resepctive modes
 		if mode == 'collect':
+			if op_config is None:
+				raise
+				
+			self._initialiseOpenpose(op_config)
 			# --- Mode for data collection
 			self.taskMgr.add(self._modeCollect, 'mode-collect')
 
