@@ -1,5 +1,5 @@
 import multiprocessing as mp
-import queue, sys, argparse, json, scene, os, random
+import queue, sys, argparse, json, scene, os, random, shutil
 
 
 def mp_collect(worker, serial, bjson, sjson, wsize, extension, output_base):
@@ -86,8 +86,22 @@ if __name__ == '__main__':
 	_update_main_dict(main, arg_dict)
 
 	# Keep a copy of the arguments
-	with open(os.path.sep.join(outpath, 'worker_arguments.json'), 'w') as jw:
+	configpath = os.path.sep.join([outpath, '../config'])
+	if not os.path.exists(configpath):
+		os.mkdir(configpath)
+
+	with open(os.path.sep.join(configpath, 'worker_arguments.json'), 'w') as jw:
 		json.dump(arg_dict, jw)
+
+	# Keep a copy of the JSON files
+	try:
+		shutil.copy(bjson, configpath)
+	except shutil.SameFileError:
+		print('Blender JSON already exists ... skipping.')
+	try:
+		shutil.copy(sjson, configpath)
+	except shutil.SameFileError:
+		print('Scene JSON already exists ... skipping.')
 	
 	if nworker > 1:
 		mp.set_start_method('spawn')
