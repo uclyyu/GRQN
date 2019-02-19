@@ -281,7 +281,7 @@ def sample_floor(texture_path):
 	_texture_object(dup, imag_group, 3)
 
 
-def sample_environment(job, texture_path_floor, texture_path_wall, texture_path_blind, export_path):
+def sample_environment(job, texture_path_floor, texture_path_wall, texture_path_blind, export_path, use_bam=True):
 	sample_floor(texture_path_floor)
 	sample_wall(texture_path_wall)
 	sample_blind(texture_path_blind)
@@ -295,9 +295,13 @@ def sample_environment(job, texture_path_floor, texture_path_wall, texture_path_
 	bpy.data.objects['obj.wall.dup.S'].select = True
 	bpy.data.objects['obj.wall.dup.E'].select = True
 
-	export_name = 'scene_{:08d}.egg'.format(job)
+	export_name_egg = 'scene_{:08d}.egg'.format(job)
 	bpy.data.scenes['Scene'].yabee_settings.opt_tps_proc = 'PANDA'
-	bpy.ops.export.panda3d_egg(filepath='/'.join([export_path, export_name]))
+	bpy.ops.export.panda3d_egg(filepath='/'.join([export_path, export_name_egg]))
+
+	if use_bam:
+		export_name_bam = export_name_egg.replace('.egg', '.bam')
+		subprocess.run('egg2bam {} {}'.format(export_name_egg, export_name_bam).split(' '))
 
 
 if __name__ == '__main__':

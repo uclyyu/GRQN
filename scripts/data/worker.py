@@ -37,15 +37,15 @@ def mp_collect(worker, serial, bjson, sjson, wsize, extension, output_base):
 		else:
 			print('Worker ({}): processing job {:,}.'.format(worker, job))
 			# Sample and generate .egg scene
-			blender.sample_environment(job, bp_flor, bp_wall, bp_blnd, bp_expo)
-			scene_egg = os.path.sep.join([bp_expo, 'scene_{:08d}.egg'.format(job)])
+			blender.sample_environment(worker, bp_flor, bp_wall, bp_blnd, bp_expo)
+			scene_file = os.path.sep.join([bp_expo, 'scene_{:08d}{}'.format(worker, extension)])
 
 			# Sample actor and animation
 			actor, animation = _sample_actors(actors, sp_anim, extension)
 
 			# Update scene manager
 			output_path = os.path.sep.join([output_base, '{:08d}'.format(job)])
-			smgr.swapScene(scene_egg)
+			smgr.swapScene(scene_file)
 			smgr.swapActor(actor, animation)
 			smgr.rebase(output_path)
 			smgr.step()
