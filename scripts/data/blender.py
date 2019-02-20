@@ -28,7 +28,7 @@ def _deselect_all():
 def _remove_object_by_name(name):
 	if bpy.data.objects.find(name) >= 0:
 		obj = bpy.data.objects[name]
-		bpy.data.objects.remove(obj)
+		bpy.data.objects.remove(obj, do_unlink=True)
 
 
 def _duplicate_object(name_proto):
