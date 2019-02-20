@@ -127,19 +127,18 @@ def _texture_object(obj, image_group, repeat):
 	# Randomly sample a texture image and apply to uv_face.
 	# Make sure material exists
 	mtag = obj.name.replace('obj', 'mat')
-	if bpy.data.materials.find(mtag) < 0:
-		mat = bpy.data.materials.new(mtag)
-	else:
+
+	if bpy.data.materials.find(mtag) >= 0:
 		mat = bpy.data.materials[mtag] 
-		mat.user_clear()
+		bpy.data.materials.remove(mat, do_unlink=True)
+	mat = bpy.data.materials.new(mtag)
 
 	# Make sure texure exists
 	ttag = obj.name.replace('obj', 'tex')
-	if bpy.data.textures.find(ttag) < 0:
-		tex = bpy.data.textures.new(ttag, type='IMAGE')
-	else:
+	if bpy.data.textures.find(ttag) >= 0:
 		tex = bpy.data.textures[ttag]
-		tex.user_clear()
+		bpy.data.textures.remove(tex, do_unlink=True)
+	tex = bpy.data.textures.new(ttag, type='IMAGE')
 	tex.repeat_x = repeat
 	tex.repeat_y = repeat
 
@@ -290,11 +289,12 @@ def sample_floor(texture_path):
 
 def sample_environment(job, texture_path_floor, texture_path_wall, texture_path_blind, export_path, use_bam=True):
 	_deselect_all()
+
 	sample_floor(texture_path_floor)
 	sample_wall(texture_path_wall)
 	sample_blind(texture_path_blind)
 
-	_deselect_all()
+	_deselect_all() 
 
 	bpy.data.objects['obj.floor.dup'].select = True
 	bpy.data.objects['obj.blind.dup'].select = True
@@ -323,5 +323,4 @@ if __name__ == '__main__':
 	addon_utils.enable('io_scene_egg')
 	bpy.ops.wm.open_mainfile(filepath=blf)
 
-	for _ in range(2):
-		sample_environment(1, tpf, tpw, tpb, exp)
+	sample_environment(1, tpf, tpw, tpb, exp)
