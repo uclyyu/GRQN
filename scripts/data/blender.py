@@ -152,6 +152,7 @@ def _texture_object(obj, image_group, repeat):
 	tex_slot.uv_layer = name_uv
 		
 	# Assign material to object
+	obj.data.materials.clear()
 	obj.data.materials.append(mat)
 
 	# Sample texture image and assign to texture
