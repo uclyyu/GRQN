@@ -27,8 +27,13 @@ def _deselect_all():
 
 def _remove_object_by_name(name):
 	if bpy.data.objects.find(name) >= 0:
+		# remove object
 		obj = bpy.data.objects[name]
 		bpy.data.objects.remove(obj, do_unlink=True)
+
+		# remove mesh
+		mesh = name.replace('obj.', 'dat.')
+		bpy.data.meshes.remove(bpy.data.meshes[mesh], do_unlink=True)
 
 
 def _duplicate_object(name_proto):
@@ -181,6 +186,7 @@ def sample_blind (texture_path, sample_mode='train'):
 	array_count = Vec3(x=None, y=None, z=random.randint(8, 18))
 	seed_range = _get_seeds(sample_mode)
 
+	print(name_dup)
 	# find dup object and remove
 	_remove_object_by_name(name_dup)
 	
@@ -228,6 +234,7 @@ def sample_wall(texture_path, sample_mode='train'):
 	seed_range = _get_seeds(sample_mode)
 
 	for wall in ['N', 'W', 'S', 'E']:
+
 		name_dup = name_dup_.replace('_', wall)
 
 		# find dup object and remove
@@ -282,6 +289,7 @@ def sample_floor(texture_path):
 
 
 def sample_environment(job, texture_path_floor, texture_path_wall, texture_path_blind, export_path, use_bam=True):
+	_deselect_all()
 	sample_floor(texture_path_floor)
 	sample_wall(texture_path_wall)
 	sample_blind(texture_path_blind)
@@ -315,4 +323,5 @@ if __name__ == '__main__':
 	addon_utils.enable('io_scene_egg')
 	bpy.ops.wm.open_mainfile(filepath=blf)
 
-	sample_environment(1, tpf, tpw, tpb, exp)
+	for _ in range(2):
+		sample_environment(1, tpf, tpw, tpb, exp)
