@@ -21,8 +21,12 @@ def mp_collect(worker, serial, bjson, sjson, wsize, extension, output_base):
 	animations = glob.glob(os.path.sep.join([sp_anim, 'anim_*{}'.format(extension)]))
 
 	# --- blender: load export utility
+	bp_new = os.path.join(
+		output_base, '../blender', 
+		bp_main.split(os.path.sep)[-1].replace('.blend', '{}.blend'.format(worker)))
+	shutil.copy(bp_main, bp_new)
 	blender.addon_utils.enable('io_scene_egg')
-	blender.bpy.ops.wm.open_mainfile(filepath=bp_main)
+	blender.bpy.ops.wm.open_mainfile(filepath=bp_new)
 
 	# --- A new instance of scene manager
 	smgr = scene.SceneManager('collect', sp_pose, size=wsize)

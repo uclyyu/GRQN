@@ -185,7 +185,6 @@ def sample_blind (texture_path, sample_mode='train'):
 	array_count = Vec3(x=None, y=None, z=random.randint(8, 18))
 	seed_range = _get_seeds(sample_mode)
 
-	print(name_dup)
 	# find dup object and remove
 	_remove_object_by_name(name_dup)
 	
