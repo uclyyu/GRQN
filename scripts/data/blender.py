@@ -296,12 +296,13 @@ def sample_environment(job, texture_path_floor, texture_path_wall, texture_path_
 	bpy.data.objects['obj.wall.dup.E'].select = True
 
 	export_name_egg = 'scene_{:08d}.egg'.format(job)
+	export_name_egg = os.path.sep.join([export_path, export_name_egg])
 	bpy.data.scenes['Scene'].yabee_settings.opt_tps_proc = 'PANDA'
-	bpy.ops.export.panda3d_egg(filepath='/'.join([export_path, export_name_egg]))
+	bpy.ops.export.panda3d_egg(filepath=export_name_egg)
 
 	if use_bam:
 		export_name_bam = export_name_egg.replace('.egg', '.bam')
-		subprocess.run('egg2bam {} {}'.format(export_name_egg, export_name_bam).split(' '))
+		subprocess.run('egg2bam -o {} {}'.format(export_name_bam, export_name_egg).split(' '))
 
 
 if __name__ == '__main__':
