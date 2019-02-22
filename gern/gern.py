@@ -1,70 +1,9 @@
 import torch, imageio, os, random
 import torch.nn as nn
-import numpy as np
-import matplotlib.pyplot as plt
 from numpy.random import randint
 from torch.distributions import Normal
-from torch.nn.functional import interpolate
 from tqdm import tqdm
-from torchvision import models as visionmodels
-
-
-def count_parameters(cls, trainable_only=True):
-
-	if trainable_only:
-		filt = filter(lambda p: p.requires_grad, cls.parameters())
-	else:
-		filt = cls.parameters()
-
-	count = sum(map(lambda p: p.numel(), filt))
-
-	return count
-
-# Helper class for skip connection
-class SkipConnect(nn.Module):
-	def __init__(self, main, skip=None):
-		super(SkipConnect, self).__init__()
-		self.main = main
-		self.skip = skip
-		
-	def forward(self, inp):
-		if self.skip is None:
-			return self.main(inp) + inp
-		else:
-			return self.main(inp) + self.skip(inp)
-		
-
-class BilinearInterpolate(nn.Module):
-    def __init__(self, scale):
-        super(BilinearInterpolate, self).__init__()
-        
-        self.scale = scale
-        
-    def forward(self, inp):
-        return nn.functional.interpolate(inp, scale_factor=self.scale, mode='bilinear', align_corners=True)
-
-
-class GroupNorm(nn.Module):
-	def __init__(self, channels, groups, eps=1e-5):
-		super(GroupNorm, self).__init__()
-
-		self.gamma = nn.Parameter(torch.ones(1, channels, 1, 1))
-		self.beta = nn.Parameter(torch.zeros(1, channels, 1, 1))
-		self.num_groups = groups
-		self.eps = eps
-
-	def forward(self, x):
-		N, C, H, W = x.size()
-		G = self.num_groups
-
-		x = x.view(N, G, -1)
-		mean = x.mean(dim=2, keepdim=True)
-		var = (x - mean).pow(2).sum(2, keepdim=True) / x.size(2)
-
-		x = (x - mean) / (var + self.eps).sqrt()
-		x = x.view(N, C, H, W)
-
-		return x * self.gamma + self.beta
+from .utils import ConvLSTMCell, LSTMCell, GroupNorm2d, GroupNorm1d, SkipConnect, BilinearInterpolate, count_parameters
 
 
 class RepresentationEncoderPrimitive(nn.Module):
@@ -74,129 +13,264 @@ class RepresentationEncoderPrimitive(nn.Module):
 		self.features = self.features = nn.ModuleList([
 			# 0 ---
 			nn.Sequential(
-				nn.Conv2d(4, 32, (3, 3), (2, 2), padding=1), 
-				GroupNorm(32, 8), 
+				nn.Conv2d(7, 32, (3, 3), (2, 2), padding=1), 
+				GroupNorm2d(32, 8), 
 				nn.ReLU(True),
 				SkipConnect(
 					nn.Conv2d(32, 32, (3, 3), (1, 1), padding=1)), 
-				GroupNorm(32, 8), 
+				GroupNorm2d(32, 8), 
 				nn.ReLU(True),
 				nn.MaxPool2d((2, 2), stride=(2, 2)),
 				nn.Conv2d(32, 64, (3, 3), (1, 1), padding=1), 
-				GroupNorm(64, 8), 
+				GroupNorm2d(64, 8), 
 				nn.ReLU(True),
 				SkipConnect(
 					nn.Conv2d(64, 64, (3, 3), (1, 1), padding=1)), 
-				GroupNorm(64, 8), 
+				GroupNorm2d(64, 8), 
 				nn.ReLU(True),
 				nn.MaxPool2d((2, 2), stride=(2, 2)),
 				nn.Conv2d( 64, 128, (3, 3), (1, 1), padding=1), 
-				GroupNorm(128, 8), 
+				GroupNorm2d(128, 8), 
 				nn.ReLU(True),
 				SkipConnect(
 					nn.Sequential(
 						nn.Conv2d(128, 128, (3, 3), (1, 1), padding=1), 
-						GroupNorm(128, 8), 
+						GroupNorm2d(128, 8), 
 						nn.ReLU(True),
 						nn.Conv2d(128, 128, (3, 3), (1, 1), padding=1), 
 						)), 
-				GroupNorm(128, 8), 
+				GroupNorm2d(128, 8), 
 				nn.ReLU(True),
 				nn.MaxPool2d((2, 2), stride=(2, 2))
 			),
 			# 1 ---
 			nn.Sequential(
-				nn.Conv2d(135, 128, (3, 3), (1, 1), padding=1), 
-				GroupNorm(128, 8),
+				nn.Conv2d(135, 128, (3, 3), (2, 2), padding=1), 
+				GroupNorm2d(128, 8),
 				nn.ReLU(True),
 				nn.MaxPool2d((2, 2), stride=(2, 2)),
 				nn.Conv2d(128, 256, (3, 3), (1, 1), padding=1), 
-				GroupNorm(256, 8),
+				GroupNorm2d(256, 8),
 				nn.ReLU(True),
 				SkipConnect(
 					nn.Conv2d(256, 256, (1, 1), (1, 1), bias=False),
 					nn.Sequential(
 						nn.Conv2d(256, 256, (3, 3), (1, 1), padding=1),
-						GroupNorm(256, 8),
+						GroupNorm2d(256, 8),
 						nn.ReLU(True),
 						nn.Conv2d(256, 256, (3, 3), (1, 1), padding=1))
 					), 
-				GroupNorm(256, 8),
+				GroupNorm2d(256, 8),
 				nn.ReLU(True),
 				nn.MaxPool2d((2, 2), stride=(2, 2)),
 				nn.Conv2d(256, 256, (3, 3), (2, 2), padding=1)
 			)
 		])
 
+		print('{}: {:,} trainable parameters.'.format(self.__class__.__name__, count_parameters(self)))
 
-	def forward(self, x, m, q):
-		# x: RGB input (-1x3x128x128) [-1, 1]
-		# m: OpenPose heatmaps (-1x1x128x128) [-1, 1]
-		# q: Query vector (-1x7x1x1) [-1, 1]
+	def forward(self, x, k, m, q):
+		# x: RGB input (-1x3x256x256)
+		# k: Openpose keypoint without blending (-1x1x256x256)
+		# m: Openpose background heatmap
+		# q: Query vector (-1x7x1x1)
 		batch_size = x.size(0)
 		num_steps = x.size(1)
 		dev = x.device
 		
-		inp = torch.cat([x, m], dim=1)
+		inp = torch.cat([x, k, m], dim=1)
 		inp = self.features[0](inp)
-		inp = torch.cat([inp, q.expand(-1, -1, 8, 8)], dim=1)
+		inp = torch.cat([inp, q.expand(-1, -1, inp.size(2), inp.size(3))], dim=1)
 		out = self.features[1](inp)
 
 		return out
 
 
 class RepresentationEncoderState(nn.Module):
-	def __init__(self, input_channels=512, hidden_channels=512, output_channels=256):
-		super(RecurrentRepresentationAggregator, self).__init__()
+	def __init__(self, input_size=256, hidden_size=128, zoneout=.15, init=False):
+		super(RepresentationEncoderState, self).__init__()
 
-		self.input_channels = input_channels
-		self.hidden_channels = hidden_channels
-		self.output_channels = output_channels
-		
-		size_inp = input_channels + hidden_channels + output_channels
-		size_out = hidden_channels * 4
-		self.rnn = nn.Conv2d(size_inp, size_out, (1, 1), (1, 1))
-		self.feature = nn.Conv2d(hidden_channels, output_channels, (1, 1), (1, 1))
-		
-	def forward(self, z, r=None, h=None, c=None):
-		# z: Encoded representations
-		# r: Latent representation (256x1x1; default: zeros) 
-		# h: LSTM hidden state (512x1x1; default: zeros)
-		# c: LSTM cell state (512x1x1; default: zeros)
-		batch_size = z.size(0)
-		num_steps = z.size(1)
-		dev = z.device
-		
-		if r is None:
-			r = torch.zeros(batch_size, self.output_channels, 1, 1, device=dev)
-		if h is None or c is None:
-			h = torch.zeros(batch_size, self.hidden_channels, 1, 1, device=dev)
-			c = torch.zeros(batch_size, self.hidden_channels, 1, 1, device=dev)
-		
-		r_next = r
-		h_next = h
-		for n in range(num_steps):
-			rnn_inp = torch.cat([r_next, h_next, z[:, n]], dim=1)
-			gate_f, gate_i, gate_s, gate_o = torch.chunk(self.rnn(rnn_inp), 4, dim=1)
+		self.input_size = input_size
+		self.hidden_size = hidden_size
+		self.network = LSTMCell(input_size, hidden_size, zoneout=zoneout, bias=True)
 
-			gate_f = torch.sigmoid(gate_f)
-			gate_i = torch.sigmoid(gate_i)
-			gate_s = torch.tanh(gate_s)
-			gate_o = torch.sigmoid(gate_o)
-			c_next = gate_f * c + gate_i * gate_s
-			h_next = gate_o * torch.tanh(c_next)
+		if init:
+			self._init_hid = nn.Parameter(torch.zeros(1, hidden_size))
+			self._init_cel = nn.Parameter(torch.zeros(1, hidden_size))
+			self._init_pog = nn.Parameter(torch.zeros(1, hidden_size))
 
-			r_next = r_next + self.feature(h_next)
+		print('{}: {:,} trainable parameters.'.format(self.__class__.__name__, count_parameters(self)))
 		
-		return r_next, (h_next, c_next)
+	def forward(self, x, hid=None, cel=None, pog=None):
+		# x: Representation encoder primitive
+		# hid: LSTM hidden state
+		# cel: LSTM cell state
+		# pog: LSTM output gate from previous time step
+		batch_size = x.size(0)
+		num_steps = x.size(1)
+		dev = x.device
+		
+		default_size = torch.Size([batch_size, self.hidden_size])
+		if pog is None:
+			try:
+				pog = self._init_pog.expand(batch_size, -1)
+			except:
+				pog = torch.zeros(1, dtype=torch.float32, device=dev).expand(default_size)
+		if hid is None:
+			try:
+				hid = self._init_hid.expand(batch_size, -1)
+			except:
+				hid = torch.zeros(1, dtype=torch.float32, device=dev).expand(default_size)
+		if cel is None:
+			try:
+				cel = self._init_cel.expand(batch_size, -1)
+			except:
+				cel = torch.zeros(1, dtype=torch.float32, device=dev).expand(default_size)
+		
+		hids, cels, pogs = [], [], []
+		for x_ in torch.unbind(x, dim=1):
+			hid, cel, pog = self.network(x_, hid, cel, pog)
+			hids.append(hid)
+			cels.append(cel)
+			pogs.append(pog)
+
+		hids = torch.stack(hids, dim=1)
+		cels = torch.stack(cels, dim=1)
+		pogs = torch.stack(pogs, dim=1)
+		
+		return hids, cels, pogs
 
 
 class RepresentationEncoder(nn.Module):
-	pass
+	def __init__(self, primitive_size=256, state_size=128, hidden_size=256):
+		super(RepresentationEncoder, self).__init__()
+
+		input_size = primitive_size + state_size
+
+		self.features = nn.Sequential(
+			nn.Linear(input_size, hidden_size),
+			GroupNorm1d(hidden_size, 8),
+			nn.ReLU(True),
+			SkipConnect(nn.Sequential(
+				nn.Linear(hidden_size, hidden_size),
+				GroupNorm1d(hidden_size, 8),
+				nn.ReLU(),
+				nn.Linear(hidden_size, hidden_size, bias=False))),
+			GroupNorm1d(hidden_size, 8),
+			nn.ReLU(True),
+			SkipConnect(nn.Sequential(
+				nn.Linear(hidden_size, hidden_size),
+				GroupNorm1d(hidden_size, 8),
+				nn.ReLU(),
+				nn.Linear(hidden_size, hidden_size, bias=False))),
+			GroupNorm1d(hidden_size, 8),
+			nn.ReLU(True),
+			nn.Linear(hidden_size, primitive_size)
+			)
+
+		print('{}: {:,} trainable parameters.'.format(self.__class__.__name__, count_parameters(self)))
+
+	def forward(self, prim, state):
+		inp = torch.cat([prim, state], dim=1)
+
+		return self.features(inp) + prim
+
 
 
 class RepresentationAggregator(nn.Module):
-	pass
+	def __init__(self, input_size=128, output_size=256):
+		super(RepresentationAggregator, self).__init__()
+
+		self.features = nn.Sequential(
+			nn.Linear(input_size, output_size),
+			GroupNorm1d(output_size, 8),
+			nn.ReLU(True),
+			SkipConnect(nn.Sequential(
+				nn.Linear(output_size, output_size),
+				GroupNorm1d(output_size, 8),
+				nn.ReLU(),
+				nn.Linear(output_size, output_size, bias=False))),
+			GroupNorm1d(output_size, 8),
+			nn.ReLU(True),
+			SkipConnect(nn.Sequential(
+				nn.Linear(output_size, output_size),
+				GroupNorm1d(output_size, 8),
+				nn.ReLU(),
+				nn.Linear(output_size, output_size, bias=False))),
+			GroupNorm1d(output_size, 8),
+			nn.ReLU(True),
+			nn.Linear(output_size, output_size)
+			)
+
+		print('{}: {:,} trainable parameters.'.format(self.__class__.__name__, count_parameters(self)))
+
+	def forward(self, x):
+		return self.features(x)
+
+
+class AggregateRewind(nn.Module):
+	def __init__(self, input_size=256, hidden_size=128, learn_init=False):
+		super(AggregateRewind, self).__init__()
+
+		self.hidden_size = hidden_size
+		self.algo = LSTMCell(input_size, hidden_size, zoneout=.15)
+		self.rewind = nn.Sequential(
+			nn.Linear(input_size + hidden_size, hidden_size),
+			GroupNorm1d(hidden_size, 8),
+			nn.ReLU(True),
+			SkipConnect(nn.Sequential(
+				nn.Linear(hidden_size, hidden_size),
+				GroupNorm1d(hidden_size, 8),
+				nn.ReLU(True),
+				nn.Linear(hidden_size, hidden_size, bias=False))),
+			GroupNorm1d(hidden_size, 8),
+			nn.ReLU(True),
+			SkipConnect(nn.Sequential(
+				nn.Linear(hidden_size, hidden_size),
+				GroupNorm1d(hidden_size, 8),
+				nn.ReLU(True),
+				nn.Linear(hidden_size, hidden_size, bias=False))),
+			GroupNorm1d(hidden_size, 8),
+			nn.ReLU(True),
+			nn.Linear(hidden_size, input_size)
+			)
+
+		self.init_hid = None
+		self.init_cel = None
+		if learn_init:
+			self.init_hid = nn.Parameter(torch.zeros(1, hidden_size))
+			self.init_cel = nn.Parameter(torch.zeros(1, hidden_size))
+
+		print('{}: {:,} trainable parameters.'.format(self.__class__.__name__, count_parameters(self)))
+
+	def forward(self, x, hid=None, cel=None, pog=None, rewind_steps=0):
+		# x: input aggregate
+		# hid: lstm hidden state
+		# cel: lstm cell state
+		# pog: previous lstm output gate
+
+		if hid is None:
+			try:
+				hid = self.hid.expand(x.size(1), -1)
+			except:
+				hid = torch.zeros(1, device=x.device).expand(x.size(0), self.hidden_size)
+		if cel is None:
+			try:
+				cel = self.cel.expand(x.size(1), -1)
+			except:
+				cel = torch.zeros(1, device=x.device).expand(x.size(0), self.hidden_size)
+		if pog is None:
+			pog = torch.zeros(1, device=x.device).expand(x.size(0), self.hidden_size)
+
+		rewind = [x]
+		for _ in range(rewind_steps):
+			hid, cel, pog = self.algo(rewind[-1], hid, cel, pog)
+
+			r_input = torch.cat([x, hid], dim=1)
+			r = self.rewind(r_input) + x
+			rewind.append(r)
+
+		return torch.stack(rewind, dim=1), pog
 
 
 class Decoder(nn.Module):
@@ -350,62 +424,6 @@ class RecurrentCell(nn.Module):
 		h_next = gate_o * torch.tanh(c_next)
 
 		return h_next, c_next
-
-
-class PerceptualLoss(nn.Module):
-	def __init__(self, vgg_layers=[6, 13, 26, 39, 52]):
-		super(PerceptualLoss, self).__init__()
-		self.vggf = visionmodels.vgg19_bn(pretrained=True).eval().features
-		self.hook_handles = []
-		self.outputs_pred = []
-		self.outputs_targ = []
-		self.vgg_layers = vgg_layers
-
-		for p in self.vggf.parameters():
-			p.requires_grad = False
-
-		print('{}: {:,} trainable parameters.'.format(self.__class__.__name__, count_parameters(self)))
-
-	def _deregister_hooks(self):
-		print('D: {}'.format(len(self.hook_handles)))
-		while len(self.hook_handles) > 0:
-			h = self.hook_handles.pop()
-			h.remove()
-			print('D : {}'.format(len(self.hook_handles)))
-
-	def _register_hook_pred(self):
-		def _hook(module, inp, out):
-			self.outputs_pred.append(out)
-
-		self._deregister_hooks()
-		for l in self.vgg_layers:
-			h = self.vggf[l].register_forward_hook(_hook)
-			self.hook_handles.append(h)
-			print('Rp: {}'.format(len(self.hook_handles)))
-
-	def _register_hook_targ(self):
-		def _hook(module, inp, out):
-			self.outputs_targ.append(out)
-
-		self._deregister_hooks()
-		for l in self.vgg_layers:
-			h = self.vggf[l].register_forward_hook(_hook)
-			self.hook_handles.append(h)
-			print('Rt: {}'.format(len(self.hook_handles)))
-
-	def forward(self, pred, targ):
-		self._register_hook_pred()
-		self.vggf(pred)
-
-		self._register_hook_targ()
-		self.vggf(targ)
-
-		loss = 0
-		while len(self.outputs_pred) > 0:
-			mse = (self.outputs_pred.pop() - self.outputs_targ.pop()).pow(2).sum(dim=[1, 2, 3]).mean()
-			loss = loss + mse 
-
-		return loss / len(self.vgg_layers)
 
 
 class GeRN(nn.Module):
@@ -595,8 +613,10 @@ class GeRN(nn.Module):
 
 
 if __name__ == '__main__':
-	x = torch.randn(1, 3, 128, 128)
-	m = torch.randn(1, 1, 128, 128)
+	x = torch.randn(1, 3, 256, 256)
+	k = torch.randn(1, 1, 256, 256)
+	m = torch.randn(1, 3, 256, 256)
 	q = torch.randn(1, 7,   1,   1)
 	net = RepresentationEncoderPrimitive()
-	print(net(x, m, q).size())
+	# print(net.features[0](torch.cat([x, k, m], dim=1)).size())
+	print(net(x, k, m, q).size())
