@@ -101,7 +101,8 @@ if __name__ == '__main__':
 
 	parser = argparse.ArgumentParser(description='Multi-worker data generator.')
 	parser.add_argument('--num-worker', 	type=int, dest='nworker', 	metavar='N', 					   help='Number of multiprocessing workers.')
-	parser.add_argument('--num-sample', 	type=int, dest='nsample', 	metavar='M', 					   help='Number of samples to draw.')
+	parser.add_argument('--num-sample', 	type=int, dest='nsample', 	metavar='N', 					   help='Number of samples to draw.')
+	parser.add_argument('--from-sample',    type=int, dest='fsample',   metavar='N',                       help='Genearte from sample N.')
 	parser.add_argument('--file-extension', type=str, dest='extension', metavar='.EXT', default='.bam',	   help='Panda3D model extension.')
 	parser.add_argument('--win-size', 	  	type=str, dest='wsize', 	metavar='WxH',  default='128x128', help='Render window size.')
 	parser.add_argument('--out-base',	  	type=str, dest='outpath', 	metavar='PATH', 				   help='Root path for generated samples.')
@@ -126,7 +127,7 @@ if __name__ == '__main__':
 
 		# Set up a queue of serial numbers
 		serials = mp.Queue()
-		for i in range(nsample):
+		for i in range(fsample, fsample + nsample):
 			serials.put(i)
 
 		# Spawn workers
