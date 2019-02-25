@@ -205,6 +205,7 @@ def sample_blind (texture_path, sample_mode='train'):
 		dup.scale[0] = random.uniform(0.8, 1.8)
 		dup.scale[1] = random.uniform(0.8, 1.8)
 		dup.rotation_euler[2] = random.uniform(-math.pi, math.pi)
+		remove_rate = random.uniform(55, 65)
 	elif name_proto.split('.')[-1] == 'B':
 		bpy.context.scene.cursor_location = [0, 0, 0]
 		dup.location[1] = - 0.1 * array_count.z / 2
@@ -212,9 +213,10 @@ def sample_blind (texture_path, sample_mode='train'):
 		dup.scale[0] = random.uniform(0.8, 1.6)
 		dup.scale[1] = random.uniform(1.8, 2.0)
 		dup.rotation_euler[2] = random.uniform(-math.pi, math.pi)
+		remove_rate = random.uniform(45, 55)
 
 	# Select and delete random faces
-	if _remove_random_faces(dup, random.uniform(45, 55), random.randint(*seed_range)):
+	if _remove_random_faces(dup, remove_rate, random.randint(*seed_range)):
 		raise BadSampleException
 
 	# Solidify object
@@ -287,21 +289,28 @@ def sample_floor(texture_path):
 	_texture_object(dup, imag_group, 3)
 
 
-def sample_environment(job, texture_path_floor, texture_path_wall, texture_path_blind, export_path, use_bam=True):
+def sample_environment(job, texture_path_floor, texture_path_wall, texture_path_blind, export_path, 
+					   use_floor=True, use_wall=True, use_blind=True, use_bam=True):
 	_deselect_all()
 
-	sample_floor(texture_path_floor)
-	sample_wall(texture_path_wall)
-	sample_blind(texture_path_blind)
+	if use_floor:
+		sample_floor(texture_path_floor)
+	if use_wall:
+		sample_wall(texture_path_wall)
+	if use_blind:
+		sample_blind(texture_path_blind)
 
 	_deselect_all() 
 
-	bpy.data.objects['obj.floor.dup'].select = True
-	bpy.data.objects['obj.blind.dup'].select = True
-	bpy.data.objects['obj.wall.dup.N'].select = True
-	bpy.data.objects['obj.wall.dup.W'].select = True
-	bpy.data.objects['obj.wall.dup.S'].select = True
-	bpy.data.objects['obj.wall.dup.E'].select = True
+	if use_floor:
+		bpy.data.objects['obj.floor.dup'].select = True
+	if use_wall:
+		bpy.data.objects['obj.wall.dup.N'].select = True
+		bpy.data.objects['obj.wall.dup.W'].select = True
+		bpy.data.objects['obj.wall.dup.S'].select = True
+		bpy.data.objects['obj.wall.dup.E'].select = True
+	if use_blind:
+		bpy.data.objects['obj.blind.dup'].select = True
 
 	export_name_egg = 'scene_{:08d}.egg'.format(job)
 	export_name_egg = os.path.sep.join([export_path, export_name_egg])

@@ -40,8 +40,13 @@ def mp_collect(worker, serial, bjson, sjson, wsize, extension, output_base):
 			break
 		else:
 			print('Worker ({}): processing job {:,}.'.format(worker, job))
+			if random.uniform(0, 1) < .5:
+				use_blind = False
+			else:
+				use_blind = True
+
 			# Sample and generate .egg scene
-			blender.sample_environment(worker, bp_flor, bp_wall, bp_blnd, bp_expo)
+			blender.sample_environment(worker, bp_flor, bp_wall, bp_blnd, bp_expo, use_blind=use_blind)
 			scene_file = os.path.sep.join([bp_expo, 'scene_{:08d}{}'.format(worker, extension)])
 
 			# Sample actor and animation
@@ -62,6 +67,7 @@ def _sample_actors(actors, anim_search_path, extension):
 	animations = glob.glob(search_path)
 	animation, = random.sample(animations, 1)
 	return actor, animation
+
 
 def _update_main_dict(main, args):
 	if args['wjson'] is None:
