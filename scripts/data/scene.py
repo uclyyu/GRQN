@@ -57,7 +57,7 @@ class SceneManager(ShowBase):
 
 		# --- Containers
 		self.loader_manifest = OrderedDict([
-			('label': None)
+			('label', None),
 			('root', '.'),
 			('serial', 0),
 			('actor', ''),
