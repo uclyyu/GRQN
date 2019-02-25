@@ -277,7 +277,7 @@ def sample_wall(texture_path, sample_mode='train'):
 			dup.rotation_euler[2] = math.radians(-90)
 
 
-def sample_floor(texture_path):
+def sample_floor(texture_path, sample_mode='train'):
 	tag = 'floor'
 	name_proto = '.'.join(['obj', tag, 'proto'])
 	name_dup = name_proto.replace('proto', 'dup')
@@ -289,16 +289,16 @@ def sample_floor(texture_path):
 	_texture_object(dup, imag_group, 3)
 
 
-def sample_environment(job, texture_path_floor, texture_path_wall, texture_path_blind, export_path, 
+def sample_environment(job, mode, texture_path_floor, texture_path_wall, texture_path_blind, export_path, 
 					   use_floor=True, use_wall=True, use_blind=True, use_bam=True):
 	_deselect_all()
 
 	if use_floor:
-		sample_floor(texture_path_floor)
+		sample_floor(texture_path_floor, sample_mode=mode)
 	if use_wall:
-		sample_wall(texture_path_wall)
+		sample_wall(texture_path_wall, sample_mode=mode)
 	if use_blind:
-		sample_blind(texture_path_blind)
+		sample_blind(texture_path_blind, sample_mode=mode)
 
 	_deselect_all() 
 
