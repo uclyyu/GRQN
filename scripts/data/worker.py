@@ -2,7 +2,7 @@ import multiprocessing as mp
 import queue, sys, argparse, json, scene, os, random, shutil, glob
 
 
-def mp_collect(worker, serial, bjson, sjson, wsize, extension, output_base):
+def mp_collect(worker, mode, serial, bjson, sjson, wsize, extension, output_base):
 	import blender
 	# --- blender: json information 
 	bp_main = os.path.abspath(bjson['blender_main_file'])
@@ -17,8 +17,8 @@ def mp_collect(worker, serial, bjson, sjson, wsize, extension, output_base):
 	sp_pose = os.path.abspath(sjson['openpose_config'])
 
 	# --- List of actors
-	actors = glob.glob(os.path.sep.join([sp_actr, 'rigg_*{}'.format(extension)]))
-	animations = glob.glob(os.path.sep.join([sp_anim, 'anim_*{}'.format(extension)]))
+	actors = glob.glob(os.path.sep.join([sp_actr, 'L??.R????{}'.format(extension)]))
+	# animations = glob.glob(os.path.sep.join([sp_anim, 'L??.R????.A????_*{}'.format(extension)]))
 
 	# --- blender: load export utility
 	bp_new = os.path.join(
@@ -46,7 +46,7 @@ def mp_collect(worker, serial, bjson, sjson, wsize, extension, output_base):
 				use_blind = True
 
 			# Sample and generate .egg scene
-			blender.sample_environment(worker, bp_flor, bp_wall, bp_blnd, bp_expo, use_blind=use_blind)
+			blender.sample_environment(worker, mode, bp_flor, bp_wall, bp_blnd, bp_expo, use_blind=use_blind)
 			scene_file = os.path.sep.join([bp_expo, 'scene_{:08d}{}'.format(worker, extension)])
 
 			# Sample actor and animation
@@ -62,7 +62,7 @@ def mp_collect(worker, serial, bjson, sjson, wsize, extension, output_base):
 
 def _sample_actors(actors, anim_search_path, extension):
 	actor, = random.sample(actors, 1)
-	search_pattern = actor.split(os.path.sep)[-1].replace('rigg_', 'anim_').replace(extension, '_*' + extension)
+	search_pattern = actor.split(os.path.sep)[-1].replace(extension, '.A????' + extension)
 	search_path = os.path.sep.join([anim_search_path, search_pattern])
 	animations = glob.glob(search_path)
 	animation, = random.sample(animations, 1)
@@ -100,6 +100,7 @@ if __name__ == '__main__':
 	main = sys.modules['__main__']
 
 	parser = argparse.ArgumentParser(description='Multi-worker data generator.')
+	parser.add_argument('--mode',           type=str, dest='gmode',     metavar='MODE',                    help='Genearte {train|test} dataset.')
 	parser.add_argument('--num-worker', 	type=int, dest='nworker', 	metavar='N', 					   help='Number of multiprocessing workers.')
 	parser.add_argument('--num-sample', 	type=int, dest='nsample', 	metavar='N', 					   help='Number of samples to draw.')
 	parser.add_argument('--from-sample',    type=int, dest='fsample',   metavar='N',                       help='Genearte from sample N.')
@@ -133,7 +134,7 @@ if __name__ == '__main__':
 		# Spawn workers
 		workers = []
 		for nw in range(nworker):
-			args = (nw, serials, bjson, sjson, wsize, extension, outpath)
+			args = (nw, gmode, serials, bjson, sjson, wsize, extension, outpath)
 			p = mp.Process(target=mp_collect, args=args)
 			workers.append(p)
 
