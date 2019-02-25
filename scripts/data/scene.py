@@ -57,6 +57,7 @@ class SceneManager(ShowBase):
 
 		# --- Containers
 		self.loader_manifest = OrderedDict([
+			('label': None)
 			('root', '.'),
 			('serial', 0),
 			('actor', ''),
@@ -583,8 +584,10 @@ class SceneManager(ShowBase):
 		gap = self.loader_manifest['pose.gap.size']
 		self.actor_valid_poses = numpy.arange(0, total_frames, gap).tolist()
 
+		label = int(actor.split(os.path.sep)[-1].split('.')[0].split('L')[-1])
 		self.loader_manifest.update(
-			{'actor': actor, 
+			{'label': label,
+			 'actor': actor, 
 			 'animation': animation,
 			 'poses.pre': None,
 			 'poses.post': None,
