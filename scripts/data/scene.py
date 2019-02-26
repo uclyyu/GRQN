@@ -694,7 +694,7 @@ class SceneManager(ShowBase):
 
 	def _taskWriteVisual(self, name_visual, container):
 		self.graphicsEngine.renderFrame()
-		self.screenshot(name_visual, defaultFilename=False, source=self.dreg)
+		self.screenshot(name_visual, defaultFilename=False, source=self.win)
 		container.append(name_visual)
 
 	def _taskWriteHeatmap(self, name_heatmap, container):
