@@ -1,5 +1,5 @@
 import multiprocessing as mp
-import queue, sys, argparse, json, scene, os, random, shutil, glob
+import queue, sys, argparse, json, scene, os, random, shutil, glob, time
 
 
 def mp_collect(worker, mode, serial, bjson, sjson, wsize, extension, output_base):
@@ -104,6 +104,7 @@ if __name__ == '__main__':
 	parser.add_argument('--num-worker', 	type=int, dest='nworker', 	metavar='N', 					   help='Number of multiprocessing workers.')
 	parser.add_argument('--num-sample', 	type=int, dest='nsample', 	metavar='N', 					   help='Number of samples to draw.')
 	parser.add_argument('--from-sample',    type=int, dest='fsample',   metavar='N',                       help='Genearte from sample N.')
+	parser.add_argument('--chunk-size',     type=int, dest='chunk_size',metavar='N',                       help='')
 	parser.add_argument('--file-extension', type=str, dest='extension', metavar='.EXT', default='.bam',	   help='Panda3D model extension.')
 	parser.add_argument('--win-size', 	  	type=str, dest='wsize', 	metavar='WxH',  default='128x128', help='Render window size.')
 	parser.add_argument('--out-base',	  	type=str, dest='outpath', 	metavar='PATH', 				   help='Root path for generated samples.')
@@ -126,24 +127,29 @@ if __name__ == '__main__':
 	if nworker > 1:
 		mp.set_start_method('spawn')
 
-		# Set up a queue of serial numbers
-		serials = mp.Queue()
-		for i in range(fsample, fsample + nsample):
-			serials.put(i)
+		for chunk_start in range(fsample, fsample + nsample, chunk_size):
 
-		# Spawn workers
-		workers = []
-		for nw in range(nworker):
-			args = (nw, gmode, serials, bjson, sjson, wsize, extension, outpath)
-			p = mp.Process(target=mp_collect, args=args)
-			workers.append(p)
+			# Set up a queue of serial numbers
+			serials = mp.Queue()
+			for i in range(chunk_start, chunk_start + chunk_size):
+				serials.put(i)
 
-		# Start workers
-		for w in workers:
-			w.start()
+			# Spawn workers
+			workers = []
+			for nw in range(nworker):
+				args = (nw, gmode, serials, bjson, sjson, wsize, extension, outpath)
+				p = mp.Process(target=mp_collect, args=args)
+				workers.append(p)
 
-		for w in workers:
-			w.join()
+			# Start workers
+			for w in workers:
+				w.start()
+
+			for w in workers:
+				w.join()
+
+			serials.close()
+			serials.join_thread()
 
 	else:
 		raise NotImplementedError
