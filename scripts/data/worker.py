@@ -40,7 +40,7 @@ def mp_collect(worker, mode, serial, bjson, sjson, wsize, extension, output_base
 			break
 		else:
 			print('Worker ({}): processing job {:,}.'.format(worker, job))
-			if random.uniform(0, 1) < .5:
+			if job % 2 == 0:
 				use_blind = False
 			else:
 				use_blind = True
