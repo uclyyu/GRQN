@@ -131,7 +131,7 @@ if __name__ == '__main__':
 
 			# Set up a queue of serial numbers
 			serials = mp.Queue()
-			for i in range(chunk_start, min(fsample + nsample - chunk_start, chunk_start + chunk_size)):
+			for i in range(chunk_start, min(fsample + nsample, chunk_start + chunk_size)):
 				serials.put(i)
 
 			# Spawn workers
