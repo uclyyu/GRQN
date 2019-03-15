@@ -8,12 +8,14 @@ class TestRepresentationEncoderPrimitive(unittest.TestCase):
 		self.net = gern.RepresentationEncoderPrimitive()
 
 	def test_network(self):
-		x = torch.randn(1, 3, 256, 256)
-		k = torch.randn(1, 1, 256, 256)
-		m = torch.randn(1, 3, 256, 256)
-		q = torch.randn(1, 7,   1,   1)
+		B = 1
+		T = 3
+		x = torch.randn(B, T, 3, 256, 256)
+		m = torch.randn(B, T, 1, 256, 256)
+		k = torch.randn(B, T, 3, 256, 256)
+		v = torch.randn(B, T, 7,   1,   1)
 
-		self.assertEqual(self.net(x, k, m, q).size(), torch.Size([1, 256, 1, 1]))
+		self.assertEqual(self.net(x, m, k, v).size(), torch.Size([B, T, 256, 1, 1]))
 
 
 class TestRepresentationEncoderState(unittest.TestCase):
@@ -126,6 +128,113 @@ class TestAggregateRewind(unittest.TestCase):
 		y, o_hat = self.net_init(x, h, c, o, rewind_steps=N)
 		self.assertEqual(y.size(), torch.Size([1, N + 1, 256]))
 		self.assertEqual(o.size(), torch.Size([1, 128]))
+
+class TestRecurrentCell(unittest.TestCase):
+	def setUp(self):
+		self.net = gern.RecurrentCell(256, 128)
+		self.net_init = gern.RecurrentCell(256, 128, feature_size=(16, 16), kernel_size=(5, 5), learn_init=True)
+
+	def test_input(self):
+		x = torch.randn(2, 256, 16, 16)
+		hid, cel, pog = self.net(x)
+		self.assertEqual(hid.size(), torch.Size([2, 128, 16, 16]))
+		self.assertEqual(cel.size(), torch.Size([2, 128, 16, 16]))
+		self.assertEqual(pog.size(), torch.Size([2, 128, 16, 16]))
+		hid, cel, pog = self.net(x, hid, cel, pog)
+		self.assertEqual(hid.size(), torch.Size([2, 128, 16, 16]))
+		self.assertEqual(cel.size(), torch.Size([2, 128, 16, 16]))
+		self.assertEqual(pog.size(), torch.Size([2, 128, 16, 16]))
+
+	def test_input_init(self):
+		x = torch.randn(2, 256, 16, 16)
+		hid, cel, pog = self.net(x)
+		self.assertEqual(hid.size(), torch.Size([2, 128, 16, 16]))
+		self.assertEqual(cel.size(), torch.Size([2, 128, 16, 16]))
+		self.assertEqual(pog.size(), torch.Size([2, 128, 16, 16]))
+		hid, cel, pog = self.net(x, hid, cel, pog)
+		self.assertEqual(hid.size(), torch.Size([2, 128, 16, 16]))
+		self.assertEqual(cel.size(), torch.Size([2, 128, 16, 16]))
+		self.assertEqual(pog.size(), torch.Size([2, 128, 16, 16]))
+
+
+class TestGaussianFactor(unittest.TestCase):
+	def setUp(self):
+		self.net = gern.GaussianFactor()
+
+	def test_input(self):
+		x = torch.randn(3, 256, 16, 16)
+		dist, mean, logv = self.net(x)
+		self.assertEqual(mean.size(), torch.Size([3, 256, 16, 16]))
+		self.assertEqual(logv.size(), torch.Size([3, 256, 16, 16]))
+		self.assertEqual(dist.rsample().size(), torch.Size([3, 256, 16, 16]))
+
+
+class TestGeneratorDelta(unittest.TestCase):
+	def setUp(self):
+		self.net = gern.GeneratorDelta()
+
+	def test_input(self):
+		u = torch.randn(3, 256, 16, 16)
+		h = torch.randn(3, 256, 16, 16)
+		self.assertEqual(self.net(u, h).size(), torch.Size([3, 256, 16, 16]))
+
+
+class TestAuxiliaryClassifier(unittest.TestCase):
+	def setUp(self):
+		self.net = gern.AuxiliaryClassifier()
+
+	def test_input(self):
+		x = torch.randn(3, 256, 16, 16)
+		self.assertEqual(self.net(x).size(), torch.Size([3, 13]))
+
+
+class TestDecoders(unittest.TestCase):
+	def setUp(self):
+		self.netb = gern.DecoderBase()
+		self.neth = gern.DecoderHeatmap()
+		self.netv = gern.DecoderRGBVision()
+
+	def test_input(self):
+		x = torch.randn(3, 256, 16, 16)
+		b = self.netb(x)
+		h = self.neth(b)
+		v = self.netv(b, h)
+
+		self.assertEqual(b.size(), torch.Size([3, 128, 130, 130]))
+		self.assertEqual(h.size(), torch.Size([3,   1, 256, 256]))
+		self.assertEqual(v.size(), torch.Size([3,   3, 256, 256]))
+
+
+class TestGern(unittest.TestCase):
+	def setUp(self):
+		self.net = gern.GeRN()
+
+	def test_forward(self):
+		cnd_x = torch.randn(2, 5, 3, 256, 256)
+		cnd_m = torch.randn(2, 5, 1, 256, 256)
+		cnd_k = torch.randn(2, 5, 3, 256, 256)
+		cnd_v = torch.randn(2, 5, 7,   1,   1)
+		qry_x = torch.randn(2, 3, 3, 256, 256)
+		qry_m = torch.randn(2, 3, 1, 256, 256)
+		qry_k = torch.randn(2, 3, 3, 256, 256)
+		qry_v = torch.randn(2, 3, 7,   1,   1) 
+
+		out = self.net(
+			cnd_x, cnd_m, cnd_k, cnd_v, 
+			qry_x, qry_m, qry_k, qry_v)
+
+
+	# def test_compute_packed_representation(self):
+	# 	B = 1
+	# 	T = 3
+	# 	x = torch.randn(B, T, 3, 256, 256)
+	# 	m = torch.randn(B, T, 1, 256, 256)
+	# 	k = torch.randn(B, T, 3, 256, 256)
+	# 	v = torch.randn(B, T, 7,   1,   1)
+
+	# 	reps, aggr = self.net._compute_packed_representation(x, m, k, v)
+	# 	self.assertEqual(reps.size(), torch.Size([B, T, 256]))
+	# 	self.assertEqual(aggr.size(), torch.Size([B, T, 256]))
 
 
 if __name__ == '__main__':
