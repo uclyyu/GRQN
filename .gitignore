@@ -1,3 +1,5 @@
+.DS_Store
+*.blend1
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -22,7 +24,7 @@ var/
 wheels/
 *.egg-info/
 .installed.cfg
-*.egg
+# *.egg
 MANIFEST
 
 # PyInstaller
