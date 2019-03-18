@@ -5,14 +5,10 @@ loadPrcFileData('', 'audio-library-name null') # Avoid ALSA errors https://disco
 from direct.actor.Actor import Actor 
 from direct.showbase.ShowBase import ShowBase, WindowProperties, FrameBufferProperties, GraphicsPipe, GraphicsPipeSelection
 from direct.gui.OnscreenText import TextNode, OnscreenText
-
 from collections import OrderedDict
-try:
-	import cv2
-	from openpose import openpose
-	_PY_OPENPOSE_AVAIL_ = True
-except ImportError:
-	_PY_OPENPOSE_AVAIL_ = False
+import cv2
+from openpose import openpose
+_PY_OPENPOSE_AVAIL_ = True
 
 
 class SceneOpError(Exception):
