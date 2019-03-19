@@ -72,6 +72,12 @@ class GernDataset(torch.utils.data.Dataset):
 		Kq = [Image.open(f) for f in manifest['skeletons.rewind']]
 		Vq = manifest['pov.readings.condition']
 
+		Nq = manifest['num.rewind']
+		assert len(Xq) == Nq
+		assert len(Mq) == Nq
+		assert len(Kq) == Nq
+		assert len(Vq) == Nq
+
 		# . transformation
 		Xq = torch.stack([self.itransform(xq) for xq in Xq], dim=0)
 		Mq = torch.stack([self.itransform(mq) for xq in Mq], dim=0)
@@ -80,6 +86,8 @@ class GernDataset(torch.utils.data.Dataset):
 
 		# --- activity label
 		Lq = self.ltransform(manifest['label'])
+
+		return (Xc, Mc, Kc, Vc), (Xq, Mq, Kq, Vq), Lq
 
 
 class GernSampler(torch.utils.data.Sampler):
@@ -96,11 +104,13 @@ class GernSampler(torch.utils.data.Sampler):
 		return self.n_samples
 
 
-class GernBatchSampler(torch.utils.data.Sampler):
-	def __init__(self, sampler, batch_size, drop_last=True):
-		self.sampler = sampler
-		self.batch_size = batch_size
-		self.drop_last = drop_last
+class GernDataLoader(torch.utils.data.DataLoader):
+	def __init__(self, rootdir, cuda, subset_size=64, batch_size=8, drop_last=True, **kwargs):
+		dataset = GernDataset(rootdir, cuda=cuda)
+		sampler = GernSampler(dataset, subset_size)
+		batch_sampler = torch.utils.data.BatchSampler(sampler, batch_size, drop_last=drop_last)
+
+		super(GernDataLoader, self).__init__(dataset, batch_sampler=batch_sampler, **kwargs)
 	
 
 
