@@ -5,28 +5,29 @@ from collections import namedtuple
 from functools import reduce
 
 
-def _default_transforms_(obj, cuda):
-	if cuda is None:
-		device = 'cpu'
-	else:
-		cuda = str(cuda)
-		assert cuda.isdigit()
-		device = 'cuda:{}'.format(cuda)
-
+def _default_transforms_(obj):
+	# transform rgb images
 	itransform = torchvision.transforms.Compose([
 		torchvision.transforms.ToTensor(),
-		torchvision.transforms.Lambda(lambda x: x if cuda is None else x.cuda(device))
+		torchvision.transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
 		])
+	# transform monochromatic images
+	mtransform = torchvision.transforms.Compose([
+		torchvision.transforms.ToTensor(),
+		])
+	# transform orientation vector
 	vtransform = torchvision.transforms.Compose([
-		torchvision.transforms.Lambda(lambda x: torch.tensor(x, dtype=torch.float32, device=device)),
+		torchvision.transforms.Lambda(lambda x: torch.tensor(x, dtype=torch.float32)),
 		torchvision.transforms.Lambda(lambda x: x.unsqueeze(2).unsqueeze(3))
 		])
+	# transform target label
 	ltransform = torchvision.transforms.Compose([
-		torchvision.transforms.Lambda(lambda x: torch.tensor(x, dtype=torch.long, device=device)),
+		torchvision.transforms.Lambda(lambda x: torch.tensor(x, dtype=torch.long)),
 		torchvision.transforms.Lambda(lambda x: x.view(-1))
 		])
 	
 	setattr(obj, 'itransform', itransform)
+	setattr(obj, 'mtransform', mtransform)
 	setattr(obj, 'vtransform', vtransform)
 	setattr(obj, 'ltransform', ltransform)
 
@@ -63,13 +64,12 @@ def _collate_(samples):
 	return (Xc, Mc, Kc, Vc), (Xq, Mq, Kq, Vq), L
 
 
-
 class GernDataset(torch.utils.data.Dataset):
-	def __init__(self, rootdir, manifest='manifest.json', cuda=None):
+	def __init__(self, rootdir, manifest='manifest.json'):
 		self.rootdir = os.path.abspath(rootdir)
 		self.manifest = manifest
 		self.data = sorted(os.listdir(self.rootdir))
-		_default_transforms_(self, cuda)
+		_default_transforms_(self)
 
 		assert os.path.exists(self.rootdir)
 		assert len(self.data) > 0
@@ -98,7 +98,7 @@ class GernDataset(torch.utils.data.Dataset):
 
 		# . transformation
 		Xc = torch.stack([self.itransform(xc) for xc in Xc], dim=0)
-		Mc = torch.stack([self.itransform(mc) for mc in Mc], dim=0)
+		Mc = torch.stack([self.mtransform(mc) for mc in Mc], dim=0)
 		Kc = torch.stack([self.itransform(kc) for kc in Kc], dim=0)
 		Vc = self.vtransform(Vc)
 
@@ -116,7 +116,7 @@ class GernDataset(torch.utils.data.Dataset):
 
 		# . transformation
 		Xq = torch.stack([self.itransform(xq) for xq in Xq], dim=0)
-		Mq = torch.stack([self.itransform(mq) for mq in Mq], dim=0)
+		Mq = torch.stack([self.mtransform(mq) for mq in Mq], dim=0)
 		Kq = torch.stack([self.itransform(kq) for kq in Kq], dim=0)
 		Vq = self.vtransform(Vq)
 
@@ -140,10 +140,9 @@ class GernSampler(torch.utils.data.Sampler):
 		return self.n_samples
 
 
-
 class GernDataLoader(torch.utils.data.DataLoader):
-	def __init__(self, rootdir, cuda=None, subset_size=64, batch_size=8, drop_last=True, **kwargs):
-		dataset = GernDataset(rootdir, cuda=cuda)
+	def __init__(self, rootdir, subset_size=64, batch_size=8, drop_last=True, **kwargs):
+		dataset = GernDataset(rootdir)
 		sampler = GernSampler(dataset, subset_size)
 		batch_sampler = torch.utils.data.BatchSampler(sampler, batch_size, drop_last=drop_last)
 
