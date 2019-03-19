@@ -233,11 +233,4 @@ class GeRN(nn.Module):
 
 
 if __name__ == '__main__':
-	# x = torch.randn(1, 3, 256, 256)
-	# k = torch.randn(1, 1, 256, 256)
-	# m = torch.randn(1, 3, 256, 256)
-	# q = torch.randn(1, 7,   1,   1)
-	# net = RepresentationEncoderPrimitive()
-	# # print(net.features[0](torch.cat([x, k, m], dim=1)).size())
-	# print(net(x, k, m, q).size())
-	print('Called')
+	pass
