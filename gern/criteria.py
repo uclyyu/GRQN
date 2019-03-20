@@ -1,59 +1,67 @@
 from torchvision import models as visionmodels
 import torch
 import torch.nn as nn
-from .utils import count_parameters
 
 class PerceptualLoss(nn.Module):
 	def __init__(self, vgg_layers=[6, 13, 26, 39, 52]):
 		super(PerceptualLoss, self).__init__()
 		self.vggf = visionmodels.vgg19_bn(pretrained=True).eval().features
+		self.N = len(vgg_layers)
+		self.mseloss = nn.MSELoss(reduction='sum')
 		self.hook_handles = []
-		self.outputs_pred = []
-		self.outputs_targ = []
-		self.vgg_layers = vgg_layers
+		self.hidden_outputs = []
 
 		for p in self.vggf.parameters():
 			p.requires_grad = False
 
-		print('{}: {:,} trainable parameters.'.format(self.__class__.__name__, count_parameters(self)))
+		# register hooks
+		def fhk(module, inputs, output):
+			self.hidden_outputs.append(output)
 
-	def _deregister_hooks(self):
-		print('D: {}'.format(len(self.hook_handles)))
+		for l in vgg_layers:
+			hh = self.vggf[l].register_forward_hook(fhk)
+			self.hook_handles.append(hh)
+
+	def deregister_hooks(self):
+		# exhause hook handles and remove.
 		while len(self.hook_handles) > 0:
-			h = self.hook_handles.pop()
-			h.remove()
-			print('D : {}'.format(len(self.hook_handles)))
-
-	def _register_hook_pred(self):
-		def _hook(module, inp, out):
-			self.outputs_pred.append(out)
-
-		self._deregister_hooks()
-		for l in self.vgg_layers:
-			h = self.vggf[l].register_forward_hook(_hook)
-			self.hook_handles.append(h)
-			print('Rp: {}'.format(len(self.hook_handles)))
-
-	def _register_hook_targ(self):
-		def _hook(module, inp, out):
-			self.outputs_targ.append(out)
-
-		self._deregister_hooks()
-		for l in self.vgg_layers:
-			h = self.vggf[l].register_forward_hook(_hook)
-			self.hook_handles.append(h)
-			print('Rt: {}'.format(len(self.hook_handles)))
+			self.hook_handles.pop().remove()
 
 	def forward(self, pred, targ):
-		self._register_hook_pred()
-		self.vggf(pred)
+		# exhaust intermediate outputs and evaluate mse loss.
+		inp = torch.cat([pred, targ], dim=0)
+		self.vggf(inp)
 
-		self._register_hook_targ()
-		self.vggf(targ)
+		running_loss = 0.
+		while len(self.hidden_outputs) > 0:
+			running_loss += self.mseloss(*torch.chunk(self.hidden_outputs.pop(), 2, dim=0))
 
-		loss = 0
-		while len(self.outputs_pred) > 0:
-			mse = (self.outputs_pred.pop() - self.outputs_targ.pop()).pow(2).sum(dim=[1, 2, 3]).mean()
-			loss = loss + mse 
+		return running_loss / (self.N * pred.size(0))
 
-		return loss / len(self.vgg_layers)
+
+class GernCriterion(nn.Module):
+	# Need to track the following loss:
+	# - Perceptual loss
+	# 	- This is to replace the default L2 loss in pixel space. 
+	# 	- Comparisons are made between predicted "rewind" and target "rewind".
+	# - Binary cross entropy
+	# 	- This will be the loss for predicted heatmaps as they will fall within the [0, 1] value range. 
+	# 	  And we might as well treat it as probabilities. 
+	# - Categorical cross entropy
+	# 	- Clearly this is for our classifier which uses softmax output layer.
+	def __init__(self):
+		# loss functions
+		self.fcn_percept = PerceptualLoss()
+		self.fcn_bce = None
+		self.fcn_cel = None
+
+		# states
+		self.l_percept = None
+		self.l_bce = None
+		self.l_cel = None
+
+	def forward(self, gern_output):
+		pass
+
+	def sum(self):
+		return 
