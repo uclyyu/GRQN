@@ -576,11 +576,6 @@ class SceneManager(ShowBase):
 		self.actor = Actor(actor, {'act': animation})
 		self.actor.reparentTo(self.render)
 		self.actor.setScale(0.085, 0.085, 0.085)
-		self.dummy.setPos(0, 0, 0)
-
-		self._addDefaultLighting()
-
-		self.povRandomiseState(to_actor=True)
 
 		total_frames = self.actor.getNumFrames('act')
 		gap = self.loader_manifest['pose.gap.size']
