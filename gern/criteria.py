@@ -49,13 +49,17 @@ def classifier_loss(output, target):
 	loss = loss / output.label.size(0)
 	return loss
 
+def classifier_accuracy(output, target):
+	label = output.label.max(dim=1)[1].view(-1)
+	accu = (label == target.label).float().sum() / label.size(0) * 100
+	return accu
+
 def aggregator_loss(output):
 	rep = output.cnd_repr
 	agg = output.cnd_aggr
 	target = (output.gamma * agg[:, :-1] + rep).detach()
 	loss = 0.5 * (agg[:, 1:] - target).pow(2).sum() / (rep.size(0) * rep.size(1))
 	return loss
-
 
 def kl_divergence(output):
 	kl = 0.
@@ -84,6 +88,8 @@ class GernCriterion(nn.Module):
 		self.lfcn_aggregate = aggregator_loss
 		# - KL divergence
 		self.lfcn_kldiv = kl_divergence
+		# - Classifier accuracy
+		self.accu_classifier = classifier_accuracy
 
 		# states
 		self.l_percept = None
@@ -91,6 +97,7 @@ class GernCriterion(nn.Module):
 		self.l_classifier = None
 		self.l_aggregate = None
 		self.l_kldiv = None
+		self.accuracy = None
 
 	def forward(self, gern_output, gern_target, weights):
 		self.l_percept = self.lfcn_percept(gern_output, gern_target)
@@ -98,7 +105,8 @@ class GernCriterion(nn.Module):
 		self.l_classifier = self.lfcn_classifier(gern_output, gern_target)
 		self.l_aggregate = self.lfcn_aggregate(gern_output)
 		self.l_kldiv = self.lfcn_kldiv(gern_output)
-		return self.weighted_sum(weights)
+		self.accuracy = self.accu_classifier(gern_output, gern_target)
+		return self.weighted_sum(weights), self.accuracy
 
 	def weighted_sum(self, weights):
 		L = [self.l_percept, self.l_heatmap, self.l_classifier, self.l_aggregate, self.l_kldiv]
@@ -106,4 +114,6 @@ class GernCriterion(nn.Module):
 		return sum(map(lambda l, w: l * w, L, weights))
 
 	def item(self):
-		return self.l_percept.item(), self.l_heatmap.item(), self.l_classifier.item(), self.l_aggregate.item(), self.l_kldiv.item()
+		return (self.l_percept.item(), self.l_heatmap.item(), 
+				self.l_classifier.item(), self.l_aggregate.item(), 
+				self.l_kldiv.item(), self.accuracy.item())

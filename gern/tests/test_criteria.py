@@ -24,7 +24,7 @@ class TestGernCriteria(unittest.TestCase):
 		gern_output = self.net(*C, *Q)
 		gern_target = self.net.make_target(*Q, L)
 
-		sum_loss = self.criteria(gern_output, gern_target, weights)
+		sum_loss, accuracy = self.criteria(gern_output, gern_target, weights)
 		logger.info('Total weighted loss = {loss:.4f}', loss=sum_loss.item())
 
 		loss = self.criteria.item()
@@ -33,6 +33,7 @@ class TestGernCriteria(unittest.TestCase):
 		logger.info('Classifier CE Loss = {loss:.4f}', loss=loss[2])
 		logger.info('Aggregator L2 Loss = {loss:.4f}', loss=loss[3])
 		logger.info('Autoencoder KL Loss = {loss:.4f}', loss=loss[4])
+		logger.info('Classifier accuracy = {accu:.2f}', accu=loss[5])
 
 
 if __name__ == '__main__':
