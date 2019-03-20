@@ -67,7 +67,7 @@ class RepresentationEncoderPrimitive(nn.Module):
 			)
 		])
 
-		print('{}: {:,} trainable parameters.'.format(self.__class__.__name__, count_parameters(self)))
+		# print('{}: {:,} trainable parameters.'.format(self.__class__.__name__, count_parameters(self)))
 
 	def forward(self, x, m, k, v):
 		# --- Inputs (size)
@@ -110,7 +110,7 @@ class RepresentationEncoderState(nn.Module):
 			self._init_cel = nn.Parameter(torch.zeros(1, hidden_size))
 			self._init_pog = nn.Parameter(torch.zeros(1, hidden_size))
 
-		print('{}: {:,} trainable parameters.'.format(self.__class__.__name__, count_parameters(self)))
+		# print('{}: {:,} trainable parameters.'.format(self.__class__.__name__, count_parameters(self)))
 		
 	def forward(self, x, hid=None, cel=None, pog=None):
 		# --- Input (size)
@@ -183,7 +183,7 @@ class RepresentationEncoder(nn.Module):
 		self.op_key = nn.Linear(hidden_size, primitive_size)
 		self.op_query = nn.Linear(hidden_size, primitive_size)
 
-		print('{}: {:,} trainable parameters.'.format(self.__class__.__name__, count_parameters(self)))
+		# print('{}: {:,} trainable parameters.'.format(self.__class__.__name__, count_parameters(self)))
 
 	def forward(self, prim, state):
 		inp = torch.cat([prim, state], dim=1)
@@ -221,7 +221,7 @@ class RepresentationAggregator(nn.Module):
 			nn.Linear(output_size, output_size)
 			)
 
-		print('{}: {:,} trainable parameters.'.format(self.__class__.__name__, count_parameters(self)))
+		# print('{}: {:,} trainable parameters.'.format(self.__class__.__name__, count_parameters(self)))
 
 	def forward(self, x):
 		return self.features(x)
@@ -260,7 +260,7 @@ class AggregateRewind(nn.Module):
 			self.init_hid = nn.Parameter(torch.zeros(1, hidden_size))
 			self.init_cel = nn.Parameter(torch.zeros(1, hidden_size))
 
-		print('{}: {:,} trainable parameters.'.format(self.__class__.__name__, count_parameters(self)))
+		# print('{}: {:,} trainable parameters.'.format(self.__class__.__name__, count_parameters(self)))
 
 	def forward(self, x, hid=None, cel=None, pog=None, rewind_steps=0):
 		# x: input aggregate
@@ -521,8 +521,7 @@ class AuxiliaryClassifier(nn.Module):
 			SkipConnect(nn.Linear(128, 128)),
 			GroupNorm1d(128, 8),
 			nn.ReLU(True),
-			nn.Linear(128, nclass),
-			nn.Softmax(dim=1))
+			nn.Linear(128, nclass))
 
 	def forward(self, x):
 		B = x.size(0)
@@ -531,6 +530,9 @@ class AuxiliaryClassifier(nn.Module):
 
 
 GernOutput = namedtuple('GernOutput', 
-	['rgbv', 'heat', 'label', 
+	['rgbv', 'heat', 'label', 'gamma',
 	 'prior_mean', 'prior_logv', 'posterior_mean', 'posterior_logv',
 	 'cnd_repr', 'cnd_aggr'])
+
+GernTarget = namedtuple('GernTarget',
+	['rgbv', 'heat', 'label'])

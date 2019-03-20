@@ -46,12 +46,12 @@ class GeRN(nn.Module):
 		size = x.size()
 		T = size[1]
 		new_size = torch.Size([-1]) + size[2:]
-		return x.view(new_size), T
+		return x.contiguous().view(new_size), T
 
 	def unpack_time(self, x, t):
 		size = x.size()
 		new_size = torch.Size([-1, t]) + size[1:]
-		return x.view(new_size)
+		return x.contiguous().view(new_size)
 
 	# @torch.jit.script_method
 	# def _igloop(self, asteps, rwn_aggr, qry_repp, 
@@ -172,11 +172,11 @@ class GeRN(nn.Module):
 		dec_heat = self.dop_heat(dec_base)
 		dec_rgbv = self.dop_rgbv(dec_base, dec_heat)
 
-		'rgbv', 'heat', 'label', 'prior_mean', 'prior_logv', 'posterior_mean', 'posterior_logv'
 		return GernOutput(
 			rgbv=dec_rgbv,
 			heat=dec_heat,
 			label=cat_dist,
+			gamma=gamma,
 			cnd_repr=cnd_repf,
 			cnd_aggr=cnd_aggr,
 			prior_mean=prior_means,
@@ -184,6 +184,13 @@ class GeRN(nn.Module):
 			posterior_mean=posterior_means,
 			posterior_logv=posterior_logvs,
 			)
+
+	def make_target(self, qry_x, qry_m, qry_k, qry_v, label):
+		label = label.unsqueeze(1).expand(-1, qry_x.size(1))
+		return GernTarget(
+			rgbv=self.pack_time(qry_x)[0],
+			heat=self.pack_time(qry_m)[0],
+			label=self.pack_time(label)[0])
 
 	def predict(self, vq, xk=None, mk=None, vk=None, asteps=7, rsteps=None):
 		pass

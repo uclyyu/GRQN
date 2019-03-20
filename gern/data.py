@@ -59,7 +59,7 @@ def _collate_(samples):
 	Kq = torch.stack([k[:tq] for k in Kq], dim=0)
 	Vq = torch.stack([v[:tq] for v in Vq], dim=0)	
 
-	L = torch.stack(L, dim=0)
+	L = torch.cat(L, dim=0)
 
 	return (Xc, Mc, Kc, Vc), (Xq, Mq, Kq, Vq), L
 
@@ -131,7 +131,7 @@ class GernSampler(torch.utils.data.Sampler):
 		self.max_n = len(data_source)
 		self.n_samples = num_samples
 
-		assert self.n_samples < self.max_n
+		assert self.n_samples <= self.max_n
 
 	def __iter__(self):
 		yield from np.random.randint(0, self.max_n, self.n_samples)
