@@ -114,6 +114,7 @@ class GernCriterion(nn.Module):
 		return sum(map(lambda l, w: l * w, L, weights))
 
 	def item(self):
+		"""Return a 5-tuple consisting of all criteria except accuracy."""
 		return (self.l_percept.item(), self.l_heatmap.item(), 
 				self.l_classifier.item(), self.l_aggregate.item(), 
-				self.l_kldiv.item(), self.accuracy.item())
+				self.l_kldiv.item())
