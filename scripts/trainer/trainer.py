@@ -4,8 +4,10 @@ from gern.criteria import GernCriterion
 from gern.scheduler import LearningRateScheduler, PixelStdDevScheduler
 from loguru import logger
 from torch import distributed
-import torch, argparse, os, json, sys
+from glob import glob
+import torch, argparse, os, json, sys, csv, time
 
+_CHECKPOINT_DIR_NAME_ = 'checkpoints'
 
 def initialise_process(args):
 	distributed.init_process_group(
@@ -34,10 +36,10 @@ def train_distributed(args, model, criterion, optimiser, lr_scheduler, sd_schedu
 	best_correct = 0.	
 	# --- Load checkpoint if from_epoch > 0
 	if args.from_epoch > 0:
-		assert (args.from_epoch + 1) % args.checkpoint_interval == 0
-		load_name = os.path.join(args.savedir, 'checkpoint', 'model_{:08d}.pth'.format(args.from_epoch))
+		assert args.from_epoch % args.checkpoint_interval == 0
+		load_name = os.path.join(args.savedir, _CHECKPOINT_DIR_NAME_, 'model_{:08d}.pth'.format(args.from_epoch - 1))
 		model.load_state_dict(torch.load(load_name))
-		logger.info('Resumed training from checkpoint {chk}.', chk=args.from_epoch)
+		logger.info('Recovered model from checkpoint {chk}.', chk=args.from_epoch - 1)
 
 		# Load best model statisitcs
 		json_name = os.path.join(args.savedir, 'best_model.json')
@@ -46,11 +48,15 @@ def train_distributed(args, model, criterion, optimiser, lr_scheduler, sd_schedu
 			best_correct = json_data['accuracy']
 
 	# --- Build data loader
-	dataloader = {'train': GernDataLoader(args.rootdir_train, subset_size=args.sample_size, batch_size=args.batch_size, num_workers=args.data_worker),
+	dataloaders = {'train': GernDataLoader(args.rootdir_train, subset_size=args.sample_size, batch_size=args.batch_size, num_workers=args.data_worker),
 				  'test':  GernDataLoader(args.rootdir_test,  subset_size=args.sample_size, batch_size=args.batch_size, num_workers=args.data_worker)}
 	
+	since = time.time()
 	for epoch in range(args.from_epoch, args.total_epochs):
-		logger.opt(ansi=True).info('<cyan> ** Epoch {epoch}</cyan> **', epoch=epoch)
+
+		logger.opt(ansi=True).info('<cyan> ** Epoch {epoch}</cyan> (+ {sec:.0f}s) **', epoch=epoch, sec=time.time() - since)
+		since = time.time()
+
 		# alternating between training and testing phases
 		for phase in ['train', 'test']:
 			if phase == 'train':
@@ -74,10 +80,10 @@ def train_distributed(args, model, criterion, optimiser, lr_scheduler, sd_schedu
 
 				# --- Forward pass
 				with torch.set_grad_enabled(phase == 'train'):
-					gern_output = model(*C, *Q, asteps=args.asteps, rsteps=args.rsteps)
+					gern_output = model(*C, *Q, asteps=args.asteps, rsteps=args.max_rsteps)
 					gern_target = model.make_target(*Q, L)
 
-					weighted_loss, correct = criterion(outputs, target, args.criterion_weights)
+					weighted_loss, correct = criterion(gern_output, gern_target, args.criterion_weights)
 
 					running_loss += sum(criterion.item())
 					running_correct += correct
@@ -99,7 +105,7 @@ def train_distributed(args, model, criterion, optimiser, lr_scheduler, sd_schedu
 			if phase == 'test' and epoch_correct > best_correct:
 				is_best = True
 				best_correct = epoch_correct
-				save_name = os.path.join(args.savedir, 'best_model_{:02d}.pth'.format(args.rank))
+				save_name = os.path.join(args.savedir, 'best_model_rank_{:02d}.pth'.format(args.rank))
 				torch.save(model.state_dict(), save_name)
 				
 				logger.info('Reached a best model at epoch {epoch}.', epoch=epoch)
@@ -108,18 +114,18 @@ def train_distributed(args, model, criterion, optimiser, lr_scheduler, sd_schedu
 			# --- Make training checkpoint
 			if phase == 'train':
 				if epoch == 0 or ((epoch + 1) % args.checkpoint_interval) == 0:
-					save_name = os.path.join(args.savedir, 'checkpoints', 'model_{:08d}.pth'.format(epoch))
+					save_name = os.path.join(args.savedir, _CHECKPOINT_DIR_NAME_, 'model_{:08d}.pth'.format(epoch))
 					torch.save(model.state_dict(), save_name)
 					logger.info('Created training checkpoint at epoch {epoch}.', epoch=epoch)
 
 			# --- Log training / testing progress
 			progress = {'epoch': epoch,
 						'phase': phase, 
-						'l_percept': criterion.l_percept,
-						'l_heatmap': criterion.l_heatmap,
-						'l_classifier': criterion.l_classifier,
-						'l_aggregate': criterion.l_aggregate,
-						'l_kldiv': criterion.l_kldiv,
+						'l_percept': criterion.l_percept.item(),
+						'l_heatmap': criterion.l_heatmap.item(),
+						'l_classifier': criterion.l_classifier.item(),
+						'l_aggregate': criterion.l_aggregate.item(),
+						'l_kldiv': criterion.l_kldiv.item(),
 						'accuracy': criterion.accuracy,
 						'is_best': is_best}
 			csvwriter.writerow(progress)
@@ -128,18 +134,18 @@ def train_distributed(args, model, criterion, optimiser, lr_scheduler, sd_schedu
 def main(args):
 	# --- Setting up trainer
 	initialise_process(args)
-	model = GeRN().cuda(args.rank)
-	criterion = GernCriterion().cuda(args.rank)
-	optimiser = torch.optim.Adam(model.parameters(), args.lr_min, amsgrad=True)
+	model = GeRN().to(args.target_device)
+	criterion = GernCriterion().to(args.target_device)
+	optimiser = torch.optim.Adam(filter(lambda p: p.requires_grad, model.parameters()), args.lr_min, amsgrad=True)
 	lr_scheduler = LearningRateScheduler(optimiser, args.lr_min, args.lr_max, args.lr_saturate_epoch)
-	sd_scheduler = PixelStdDevScheduler(args.criterion_weights, args.sd_min, args.sd_max, args.sd_saturate_epoch)
+	sd_scheduler = PixelStdDevScheduler(args.criterion_weights, 0, args.sd_min, args.sd_max, args.sd_saturate_epoch)
 
 	# --- Logger
 	logger_file = os.path.join(args.savedir, 'logger.txt')
 	logger.add(logger_file)
 
 	# --- Sanity checks.
-	chkpdir = os.path.join(args.savedir, 'checkpoint')
+	chkpdir = os.path.join(args.savedir, _CHECKPOINT_DIR_NAME_)
 	if not os.path.exists(chkpdir):
 		logger.info('Adding new directory at {d}.', d=chkpdir)
 		os.makedirs(chkpdir)
@@ -147,10 +153,11 @@ def main(args):
 	# --- Get the latest epoch if forcing checkpoint.
 	if args.force_checkpoint:
 		latest_epoch = 0
-		for checkpoint in glob(os.path.join(args.savedir, 'checkpoint', '*.pth')):
+		for checkpoint in glob(os.path.join(args.savedir, _CHECKPOINT_DIR_NAME_, '*.pth')):
 			epoch = int(checkpoint.split('_')[-1].split('.')[0])
 			latest_epoch = max(epoch, latest_epoch)
-		args.from_epoch = latest_epoch
+		args.from_epoch = latest_epoch + 1
+		logger.opt(ansi=True).info('Forcing start from <cyan>epoch {chk}</cyan>.', chk=args.from_epoch)
 
 	# --- Training procedure
 	if args.rank is None:

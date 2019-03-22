@@ -105,7 +105,7 @@ class GernCriterion(nn.Module):
 		self.l_classifier = self.lfcn_classifier(gern_output, gern_target)
 		self.l_aggregate = self.lfcn_aggregate(gern_output)
 		self.l_kldiv = self.lfcn_kldiv(gern_output)
-		self.accuracy = self.accu_classifier(gern_output, gern_target)
+		self.accuracy = self.accu_classifier(gern_output, gern_target).item()
 		return self.weighted_sum(weights), self.accuracy
 
 	def weighted_sum(self, weights):
