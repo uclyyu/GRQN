@@ -6,6 +6,13 @@ from collections import namedtuple
 from .utils import ConvLSTMCell, LSTMCell, GroupNorm2d, GroupNorm1d, SkipConnect, BilinearInterpolate, count_parameters
 
 
+def init_parameters(module):
+	if type(module) in (nn.Linear, nn.Conv2d):
+		nn.init.xavier_uniform_(module.weight.data)
+		if module.bias is not None:
+			module.bias.data.fill_(0.)
+
+
 class RepresentationEncoderPrimitive(nn.Module):
 	def __init__(self):
 		super(RepresentationEncoderPrimitive, self).__init__()
@@ -67,6 +74,7 @@ class RepresentationEncoderPrimitive(nn.Module):
 			)
 		])
 
+		self.features.apply(init_parameters)
 		# print('{}: {:,} trainable parameters.'.format(self.__class__.__name__, count_parameters(self)))
 
 	def forward(self, x, m, k, v):
@@ -183,6 +191,8 @@ class RepresentationEncoder(nn.Module):
 		self.op_key = nn.Linear(hidden_size, primitive_size)
 		self.op_query = nn.Linear(hidden_size, primitive_size)
 
+		self.apply(init_parameters)
+
 		# print('{}: {:,} trainable parameters.'.format(self.__class__.__name__, count_parameters(self)))
 
 	def forward(self, prim, state):
@@ -220,6 +230,8 @@ class RepresentationAggregator(nn.Module):
 			nn.ReLU(True),
 			nn.Linear(output_size, output_size)
 			)
+
+		self.apply(init_parameters)
 
 		# print('{}: {:,} trainable parameters.'.format(self.__class__.__name__, count_parameters(self)))
 
@@ -259,6 +271,8 @@ class AggregateRewind(nn.Module):
 		if learn_init:
 			self.init_hid = nn.Parameter(torch.zeros(1, hidden_size))
 			self.init_cel = nn.Parameter(torch.zeros(1, hidden_size))
+
+		self.op_rewind.apply(init_parameters)
 
 		# print('{}: {:,} trainable parameters.'.format(self.__class__.__name__, count_parameters(self)))
 
@@ -311,6 +325,8 @@ class GaussianFactor(nn.Module):
 			nn.Conv2d(256, 512, (1, 1), (1, 1))  # mean, log-variance
 		)
 		
+		self.apply(init_parameters)
+
 	def forward(self, inp):
 		mean, logv = torch.chunk(self.layer(inp), 2, dim=1)
 		scale = (0.5 * logv).exp()
@@ -370,6 +386,8 @@ class GeneratorDelta(nn.Module):
 			nn.Conv2d(256, 256, (3, 3), (1, 1), padding=1)
 			)
 
+		self.apply(init_parameters)
+
 	def forward(self, u, h):
 		inp = torch.cat([u, h], dim=1)
 		return self.layers(inp)
@@ -406,6 +424,8 @@ class DecoderBase(nn.Module):
 			nn.ReLU(True)
 			)
 
+		self.apply(init_parameters)
+
 	def forward(self, x):
 		y = self.decoder_base(x)
 		return y[:, :, 2:-3, 2:-3]
@@ -434,6 +454,8 @@ class DecoderHeatmap(nn.Module):
 			nn.ReLU(True),
 			nn.Conv2d(16, 1, (3, 3), (1, 1), padding=1)
 			)
+
+		self.apply(init_parameters)
 
 	def forward(self, x):
 		return self.decoder_hm(x)[:, :, 2:-1, 2:-1]
@@ -483,6 +505,8 @@ class DecoderRGBVision(nn.Module):
 			nn.Conv2d(16, 3, (3, 3), (1, 1), padding=1)
 			)
 
+		self.apply(init_parameters)
+
 	def forward(self, b, h):
 		pre = self.decoder_pre(b)[:, :, 2:-1, 2:-1]
 		inp = torch.cat([pre, h], dim=1)
@@ -522,6 +546,8 @@ class AuxiliaryClassifier(nn.Module):
 			GroupNorm1d(128, 8),
 			nn.ReLU(True),
 			nn.Linear(128, nclass))
+
+		self.apply(init_parameters)
 
 	def forward(self, x):
 		B = x.size(0)

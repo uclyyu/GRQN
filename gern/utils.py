@@ -127,12 +127,12 @@ class ConvLSTMCell(nn.Module):
 
 		# --- weight initialisation
 		# Xavier uniform for input-to-hidden,
-		nn.init.xavier_uniform_(self._weight_ih)
+		nn.init.xavier_uniform_(self._weight_ih.data)
 		# Orthogonal for hidden-to-hidden,
-		nn.init.orthogonal_(self._weight_hh)
+		nn.init.orthogonal_(self._weight_hh.data)
 		# From "Learning to Forget: Continual Prediction with LSTM"
 		if bias:
-			self.bias[:hidden_size].fill_(1.)
+			self.bias[:hidden_size].data.fill_(1.)
 
 
 	def forward(self, x, h, c, o):
@@ -161,11 +161,11 @@ class LSTMCell(nn.Module):
 		if zoneout > 0:
 			self.zoneout = torch.distributions.Bernoulli(probs=zoneout)
 
-		nn.init.xavier_uniform_(self._weight_ih)
-		nn.init.orthogonal_(self._weight_hh)
+		nn.init.xavier_uniform_(self._weight_ih.data)
+		nn.init.orthogonal_(self._weight_hh.data)
 
 		if bias:
-			self.bias[:hidden_size].fill_(1.)
+			self.bias[:hidden_size].data.fill_(1.)
 
 	def forward(self, x, h, c, o):
 		inp = torch.cat([x, h], dim=1)
