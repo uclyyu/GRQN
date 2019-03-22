@@ -24,7 +24,7 @@ def average_gradients(args, model):
 		param.grad.data /= world_size
 
 def log_best_json(args, epoch, accuracy, l_percept, l_heatmap, l_classifier, l_aggregate, l_kldiv):
-	save_name = os.path.join(args.savedir, 'best_model.json')
+	save_name = os.path.join(args.savedir, 'best_model_rank_{:02d}.json').format(args.rank)
 	with open(save_name, 'w') as jw:
 		data = {'epoch': epoch, 'accuracy': accuracy, 
 				'l_percept': l_percept, 'l_heatmap': l_heatmap, 
@@ -37,12 +37,14 @@ def train_distributed(args, model, criterion, optimiser, lr_scheduler, sd_schedu
 	# --- Load checkpoint if from_epoch > 0
 	if args.from_epoch > 0:
 		assert args.from_epoch % args.checkpoint_interval == 0
-		load_name = os.path.join(args.savedir, _CHECKPOINT_DIR_NAME_, 'model_{:08d}.pth'.format(args.from_epoch - 1))
+		load_name = os.path.join(args.savedir, _CHECKPOINT_DIR_NAME_, 'model_rank_{:02d}_{:08d}.pth'.format(args.rank, args.from_epoch - 1))
 		model.load_state_dict(torch.load(load_name))
-		logger.info('Recovered model from checkpoint {chk}.', chk=args.from_epoch - 1)
+		(logger.opt(ansi=True)
+			   .info('<yellow>[Rank {rank}]</yellow> Recovered model from checkpoint {chk}.', 
+			   	     rank=args.rank, chk=args.from_epoch - 1))
 
 		# Load best model statisitcs
-		json_name = os.path.join(args.savedir, 'best_model.json')
+		json_name = os.path.join(args.savedir, 'best_model_rank_{:02d}.json').format(args.rank)
 		with open(json_name, 'r') as jr:
 			json_data = json.load(jr)
 			best_correct = json_data['accuracy']
@@ -54,7 +56,9 @@ def train_distributed(args, model, criterion, optimiser, lr_scheduler, sd_schedu
 	since = time.time()
 	for epoch in range(args.from_epoch, args.total_epochs):
 
-		logger.opt(ansi=True).info('<cyan> ** Epoch {epoch}</cyan> (+ {sec:.0f}s) **', epoch=epoch, sec=time.time() - since)
+		(logger.opt(ansi=True)
+			   .info('<yellow>[Rank {rank}]</yellow> <cyan> ** Epoch {epoch} **</cyan> (+ {sec:.0f}s)', 
+			   	     rank=args.rank, epoch=epoch, sec=time.time() - since))
 		since = time.time()
 
 		# alternating between training and testing phases
@@ -108,18 +112,23 @@ def train_distributed(args, model, criterion, optimiser, lr_scheduler, sd_schedu
 				save_name = os.path.join(args.savedir, 'best_model_rank_{:02d}.pth'.format(args.rank))
 				torch.save(model.state_dict(), save_name)
 				
-				logger.info('Reached a best model at epoch {epoch}.', epoch=epoch)
+				(logger.opt(ansi=True)
+					   .info('<yellow>[Rank {rank}]</yellow> Update the best model at epoch {epoch}.', 
+					   	     rank=args.rank, epoch=epoch))
 				log_best_json(args, epoch, best_correct, *criterion.item())
 
 			# --- Make training checkpoint
 			if phase == 'train':
 				if epoch == 0 or ((epoch + 1) % args.checkpoint_interval) == 0:
-					save_name = os.path.join(args.savedir, _CHECKPOINT_DIR_NAME_, 'model_{:08d}.pth'.format(epoch))
+					save_name = os.path.join(args.savedir, _CHECKPOINT_DIR_NAME_, 'model_rank_{:02d}_{:08d}.pth'.format(args.rank, epoch))
 					torch.save(model.state_dict(), save_name)
-					logger.info('Created training checkpoint at epoch {epoch}.', epoch=epoch)
+					(logger.opt(ansi=True)
+						   .info('<yellow>[Rank {rank}]</yellow> Created training checkpoint at epoch {epoch}.', 
+						   	     rank=args.rank, epoch=epoch))
 
 			# --- Log training / testing progress
-			progress = {'epoch': epoch,
+			progress = {'rank': args.rank,
+						'epoch': epoch,
 						'phase': phase, 
 						'l_percept': criterion.l_percept.item(),
 						'l_heatmap': criterion.l_heatmap.item(),
@@ -147,7 +156,9 @@ def main(args):
 	# --- Sanity checks.
 	chkpdir = os.path.join(args.savedir, _CHECKPOINT_DIR_NAME_)
 	if not os.path.exists(chkpdir):
-		logger.info('Adding new directory at {d}.', d=chkpdir)
+		(logger.opt(ansi=True)
+			   .info('<yellow>[Rank {rank}]</yellow> Adding new directory at {d}.',
+			   	     rank=args.rank, d=chkpdir))
 		os.makedirs(chkpdir)
 
 	# --- Get the latest epoch if forcing checkpoint.
@@ -156,18 +167,25 @@ def main(args):
 		for checkpoint in glob(os.path.join(args.savedir, _CHECKPOINT_DIR_NAME_, '*.pth')):
 			epoch = int(checkpoint.split('_')[-1].split('.')[0])
 			latest_epoch = max(epoch, latest_epoch)
-		args.from_epoch = latest_epoch + 1
-		logger.opt(ansi=True).info('Forcing start from <cyan>epoch {chk}</cyan>.', chk=args.from_epoch)
+			args.from_epoch = latest_epoch + 1  # 
+		(logger.opt(ansi=True)
+			   .info('<yellow>[Rank {rank}]</yellow> Forcing start from <cyan>epoch {chk}</cyan>.', 
+			   	     rank=args.rank, chk=args.from_epoch))
 
 	# --- Training procedure
 	if args.rank is None:
 		raise NotImplementedError
 	else:
-		csv_columns = ['epoch', 'phase', 'l_percept', 'l_heatmap', 'l_classifier', 'l_aggregate', 'l_kldiv', 'accuracy', 'is_best']
+		# Set csv file headers
+		csv_columns = ['rank', 'epoch', 'phase', 'l_percept', 
+					   'l_heatmap', 'l_classifier', 'l_aggregate', 
+					   'l_kldiv', 'accuracy', 'is_best']
 		csv_name = os.path.join(args.savedir, 'log_training.csv')
-		with open(csv_name, 'w') as csvfile:
+
+		with open(csv_name, 'a') as csvfile:
 			csvwriter = csv.DictWriter(csvfile, fieldnames=csv_columns)
-			csvwriter.writeheader()
+			if args.from_epoch == 0 and args.rank == 0:
+				csvwriter.writeheader()
 			train_distributed(args, model, criterion, optimiser, lr_scheduler, sd_scheduler, csvwriter)
 
 
