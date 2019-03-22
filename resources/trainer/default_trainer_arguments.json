@@ -5,6 +5,7 @@
   "world_size": 1,
   "backend": "nccl",
   "init_method": "tcp://192.168.1.116:23456",
+  "device": "cuda",
   "asteps": 7,
   "max_rsteps": 100,
   "criterion_weights": [2.0, 1.0, 1.0, 1.0, 1.0],

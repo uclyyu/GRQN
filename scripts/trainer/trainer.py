@@ -30,9 +30,7 @@ def log_best_json(args, epoch, accuracy, l_percept, l_heatmap, l_classifier, l_a
 		json.dump(data, jw)
 
 def train_distributed(args, model, criterion, optimiser, lr_scheduler, sd_scheduler, csvwriter):
-	# --- Set target cuda device 
-	device = 'cuda:{}'.format(args.rank)
-	
+
 	best_correct = 0.	
 	# --- Load checkpoint if from_epoch > 0
 	if args.from_epoch > 0:
@@ -70,9 +68,9 @@ def train_distributed(args, model, criterion, optimiser, lr_scheduler, sd_schedu
 
 			for C, Q, L in dataloaders[phase]:
 				# copy to device
-				C = [c.to(device) for c in C]
-				Q = [q.to(device) for q in Q]
-				L = L.to(device)
+				C = [c.to(args.target_device) for c in C]
+				Q = [q.to(args.target_device) for q in Q]
+				L = L.to(args.target_device)
 
 				# --- Forward pass
 				with torch.set_grad_enabled(phase == 'train'):
@@ -178,6 +176,7 @@ if __name__ == '__main__':
 	parser.add_argument('--backend', type=str, default='nccl')
 	parser.add_argument('--init-method', type=str, default='tcp://192.168.1.116:23456')
 	# Main training hyperparameters
+	parser.add_argument('--device', type=str, default='cuda', choices=['cuda', 'cpu'])
 	parser.add_argument('--asteps', type=int, default=7)
 	parser.add_argument('--max-rsteps', type=int, default=100)
 	parser.add_argument('--criterion-weights', nargs=5, type=float, default=[2.0, 1.0, 1.0, 1.0, 1.0])
@@ -219,7 +218,20 @@ if __name__ == '__main__':
 			args.__dict__.update(json_data)
 			logger.opt(ansi=True).info('Loaded trainer arguments from <cyan>{file}</cyan>.', file=args.use_json)
 
+	# Assert savedir
 	if not os.path.exists(args.savedir):
 		logger.exception('--savedir "{path}" is not a valid path name.', path=args.savedir)
 
+	# Assert rank and world size
+	if args.rank >= args.world_size:
+		logger.exception('Rank exceeds world size limit: {rank} >= {ws}.', rank=args.rank, ws=args.world_size)
+
+	# Set target device
+	if args.device == 'cpu':
+		target_device = 'cpu'
+	elif args.device == 'cuda':
+		target_device = 'cuda:{}'.format(args.rank)
+	setattr(args, 'target_device', target_device)
+
+	# --- --- ---
 	main(args)
