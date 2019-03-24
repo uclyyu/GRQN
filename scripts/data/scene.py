@@ -1,7 +1,7 @@
 import math, random, sys, os, json, numpy, shutil
 from panda3d.core import NodePath, PerspectiveLens, AmbientLight, Spotlight, VBase4, ClockObject, loadPrcFileData
-loadPrcFileData('', 'window-type offscreen')   # Spawn an offscreen buffer
-loadPrcFileData('', 'audio-library-name null') # Avoid ALSA errors https://discourse.panda3d.org/t/solved-render-only-one-frame-and-other-questions/12899/5
+# loadPrcFileData('', 'window-type offscreen')   # Spawn an offscreen buffer
+# loadPrcFileData('', 'audio-library-name null') # Avoid ALSA errors https://discourse.panda3d.org/t/solved-render-only-one-frame-and-other-questions/12899/5
 from direct.actor.Actor import Actor 
 from direct.showbase.ShowBase import ShowBase, WindowProperties, FrameBufferProperties, GraphicsPipe, GraphicsPipeSelection
 from direct.gui.OnscreenText import TextNode, OnscreenText
@@ -32,26 +32,26 @@ class SceneManager(ShowBase):
 		self.disableMouse()
 
 		# --- Configure offsceen properties
-		flags = GraphicsPipe.BFFbPropsOptional | GraphicsPipe.BFRefuseWindow
-		wprop = WindowProperties(WindowProperties.getDefault())
-		wprop.setSize(size[0], size[1])
-		fprop = FrameBufferProperties(FrameBufferProperties.getDefault())
-		fprop.setRgbColor(1)
-		fprop.setColorBits(24)
-		fprop.setAlphaBits(8)
-		fprop.setDepthBits(1)
-		self.pipe = GraphicsPipeSelection.getGlobalPtr().makeDefaultPipe()
-		self.buff = self.graphicsEngine.makeOutput(
-			pipe=self.pipe, name='RGB buffer', sort=0, 
-			fb_prop=fprop, win_prop=wprop, flags=flags)
-		self.dreg = self.buff.makeDisplayRegion()
+		# flags = GraphicsPipe.BFFbPropsOptional | GraphicsPipe.BFRefuseWindow
+		# wprop = WindowProperties(WindowProperties.getDefault())
+		# wprop.setSize(size[0], size[1])
+		# fprop = FrameBufferProperties(FrameBufferProperties.getDefault())
+		# fprop.setRgbColor(1)
+		# fprop.setColorBits(24)
+		# fprop.setAlphaBits(8)
+		# fprop.setDepthBits(1)
+		# self.pipe = GraphicsPipeSelection.getGlobalPtr().makeDefaultPipe()
+		# self.buff = self.graphicsEngine.makeOutput(
+		# 	pipe=self.pipe, name='RGB buffer', sort=0, 
+		# 	fb_prop=fprop, win_prop=wprop, flags=flags)
+		# self.dreg = self.buff.makeDisplayRegion()
 	
 		# --- Configure onscreen properties
-		# wp = WindowProperties()
-		# wp.setSize(size[0], size[1])
-		# wp.setTitle("Viewer")
-		# wp.setCursorHidden(True)
-		# self.win.requestProperties(wp)
+		wp = WindowProperties()
+		wp.setSize(size[0], size[1])
+		wp.setTitle("Viewer")
+		wp.setCursorHidden(True)
+		self.win.requestProperties(wp)
 
 		# --- Containers
 		self.loader_manifest = OrderedDict([
