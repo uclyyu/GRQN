@@ -56,7 +56,7 @@ def mp_collect(worker, mode, serial, bjson, sjson, wsize, extension, output_base
 			output_path = os.path.sep.join([output_base, '{:08d}'.format(job)])
 			smgr.swapScene(scene_file)
 			smgr.swapActor(actor, animation)
-			smgr.rebase(output_path)
+			smgr.rebase(job, output_path)
 			smgr.step()
 
 

@@ -536,7 +536,7 @@ class SceneManager(ShowBase):
 		reading = list(self.pov_reading.values())
 		container.append(reading)
 
-	def rebase(self, path, mkdir=True, clean=False):
+	def rebase(self, job, path, mkdir=True, clean=False):
 		apath = os.path.abspath(path)
 		if mkdir:
 			try:
@@ -552,6 +552,7 @@ class SceneManager(ShowBase):
 				else:
 					print('Directory alreay exists!')
 					raise SceneOpError
+		self.loader_manifest.update({'serial': jog})			
 		self.loader_manifest.update({'root': path})
 
 	def _renderFrame(self):
