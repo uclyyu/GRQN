@@ -552,7 +552,7 @@ class SceneManager(ShowBase):
 				else:
 					print('Directory alreay exists!')
 					raise SceneOpError
-		self.loader_manifest.update({'serial': jog})			
+		self.loader_manifest.update({'serial': job})			
 		self.loader_manifest.update({'root': path})
 
 	def _renderFrame(self):
@@ -694,7 +694,9 @@ class SceneManager(ShowBase):
 		self.graphicsEngine.renderFrame()
 		self.screenshot(name_visual, defaultFilename=False, source=self.win)
 		# Perform checks
-		assert Image.open(name_visual).size == self.size
+		visual = Image.open(name_visual)
+		assert visual.size[0] == self.size[0] and visual.size[1] == self.size[1], \
+			"Visual size is {} but expected {}.".format(visual.size, self.size)
 		container.append(name_visual)
 
 	def _taskWriteHeatmap(self, name_heatmap, container):
