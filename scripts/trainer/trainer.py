@@ -5,7 +5,7 @@ from gern.scheduler import LearningRateScheduler, PixelStdDevScheduler
 from loguru import logger
 from torch import distributed
 from glob import glob
-import torch, argparse, os, json, sys, csv, time
+import torch, argparse, os, json, sys, csv, time, threading
 
 _CHECKPOINT_DIR_NAME_ = 'checkpoints'
 
@@ -137,7 +137,8 @@ def train_distributed(args, model, criterion, optimiser, lr_scheduler, sd_schedu
 						'l_kldiv': criterion.l_kldiv.item(),
 						'accuracy': criterion.accuracy,
 						'is_best': is_best}
-			csvwriter.writerow(progress)
+			with args.writer_lock:
+				csvwriter.writerow(progress)
 
 
 def main(args):
@@ -159,7 +160,12 @@ def main(args):
 		(logger.opt(ansi=True)
 			   .info('<yellow>[Rank {rank}]</yellow> Adding new directory at {d}.',
 			   	     rank=args.rank, d=chkpdir))
-		os.makedirs(chkpdir)
+		try:
+			os.makedirs(chkpdir)
+		except FileExistsError:
+			(logger.opt(ansi=True)
+			   .info('<yellow>[Rank {rank}]</yellow> Directory already exists.',
+			   	     rank=args.rank, d=chkpdir))
 
 	# --- Get the latest epoch if forcing checkpoint.
 	if args.force_checkpoint:
@@ -257,6 +263,10 @@ if __name__ == '__main__':
 	elif args.device == 'cuda':
 		target_device = 'cuda:{}'.format(args.rank)
 	setattr(args, 'target_device', target_device)
+
+	# Set thread lock
+	writer_lock = threading.Lock()
+	setattr(args, 'writer_lock', writer_lock)
 
 	# --- --- ---
 	main(args)
