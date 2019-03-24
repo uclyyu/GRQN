@@ -6,6 +6,7 @@ from direct.actor.Actor import Actor
 from direct.showbase.ShowBase import ShowBase, WindowProperties, FrameBufferProperties, GraphicsPipe, GraphicsPipeSelection
 from direct.gui.OnscreenText import TextNode, OnscreenText
 from collections import OrderedDict
+from PIL import Image
 import cv2
 from openpose import openpose
 _PY_OPENPOSE_AVAIL_ = True
@@ -21,7 +22,7 @@ class SceneManager(ShowBase):
 	def __init__(self, mode, op_config=None, 
 				 scene=None, actor=None, animation=None,
 				 pose_gap=4, step_size_deg=3, extremal=None,
-				 size=(768, 768), zNear=0.1, zFar=1000.0, fov=70.0, showPosition=False):
+				 size=(256, 256), zNear=0.1, zFar=1000.0, fov=70.0, showPosition=False):
 		super(SceneManager, self).__init__()
 
 		self.__dict__.update(size=size, zNear=zNear, zFar=zFar, fov=fov, showPosition=showPosition)
@@ -691,6 +692,8 @@ class SceneManager(ShowBase):
 	def _taskWriteVisual(self, name_visual, container):
 		self.graphicsEngine.renderFrame()
 		self.screenshot(name_visual, defaultFilename=False, source=self.win)
+		# Perform checks
+		assert Image.open(name_visual).size == self.size
 		container.append(name_visual)
 
 	def _taskWriteHeatmap(self, name_heatmap, container):
