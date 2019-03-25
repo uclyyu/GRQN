@@ -207,8 +207,11 @@ class SceneManager(ShowBase):
 			self.op_datum = openpose.Datum()
 			self.op_wrapper = openpose.WrapperPython()
 
-			with open(config, 'r') as jc:
-				self.op_wrapper.configure(json.load(jc))
+			if type(config) is str:
+				with open(config, 'r') as jc:
+					self.op_wrapper.configure(json.load(jc))
+			elif type(config) is dict:
+				self.op_wrapper.configure(config)
 
 			self.op_wrapper.start()
 
