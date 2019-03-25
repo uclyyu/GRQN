@@ -60,7 +60,7 @@ def mp_collect(worker, serialq, args):
 					job, args.generation_phase, bp_flor, bp_wall, bp_blnd, bp_expo, 
 					use_blind=use_blind, use_bam=use_bam)
 			elif args.generation_mode == 'sample':
-				scene_file = os.path.join(bp_expo, 'scene_{:08d}{}'.format(job, args.scene_fileext))
+				scene_file = os.path.join(bp_expo, 'scene_{:08d}{}'.format(job, args.fileext_3dscene))
 				# Sample actor and animation
 				actor, animation = _sample_actors(actors, sp_anim, args.fileext_actor)
 				# Update scene manager
