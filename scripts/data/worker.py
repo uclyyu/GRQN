@@ -1,6 +1,8 @@
 import multiprocessing as mp
+import numpy as np
 import queue, sys, argparse, json, scene, os, random, shutil, glob, time
 from loguru import logger
+from PIL import Image
 
 
 # def mp_collect(worker, mode, serial, bjson, sjson, wsize, scene_ext, model_ext, output_base):
@@ -71,6 +73,12 @@ def mp_collect(worker, serialq, args):
 				smgr.step()
 			else:
 				logger.exception('Unknown mode to proceed: {mode}.', mode=args.generation_mode)
+
+			# For every job, check first rgb image for content
+			if args.generation_mode == 'sample':
+				visual = Image.open(os.path.join(job_savedir_sample, 'visual-cond-000.jpg'))
+				visual = np.array(visual)
+				assert not (visual == visual[0, 0, 0]).all()
 
 
 def _sample_actors(actors, anim_search_path, extension):
