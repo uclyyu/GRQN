@@ -37,8 +37,6 @@ def mp_collect(worker, serialq, args):
 
 	# --- A new instance of scene manager
 	if args.generation_mode == 'sample':
-		# dummy = scene.SceneDummy(args.render_size)
-		# dummy.destroy()
 		smgr = scene.SceneManager('collect', sp_pose, size=args.render_size)
 
 	# --- Main procedures
