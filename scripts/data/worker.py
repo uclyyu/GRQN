@@ -36,7 +36,7 @@ def mp_collect(worker, serialq, args):
 	blender.bpy.ops.wm.open_mainfile(filepath=bp_proto)
 
 	# --- A new instance of scene manager
-	if args.generateion_mode == 'sample':
+	if args.generation_mode == 'sample':
 		smgr = scene.SceneManager('collect', sp_pose, size=args.render_size)
 
 	# --- Main procedures
