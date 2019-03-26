@@ -41,11 +41,11 @@ class SceneManager(ShowBase):
 		fprop.setAlphaBits(8)
 		fprop.setDepthBits(1)
 		self.pipe = GraphicsPipeSelection.getGlobalPtr().makeDefaultPipe()
-		self.buff = self.graphicsEngine.makeOutput(
+		self.win = self.graphicsEngine.makeOutput(
 			pipe=self.pipe, name='RGB buffer', sort=0, 
 			fb_prop=fprop, win_prop=wprop, flags=flags)
-		self.win = self.buff.makeDisplayRegion()
-		self.cam = self.makeCamera(self.buff)
+		self.displayRegion = self.win.makeDisplayRegion()
+		self.displayRegion.setCamera(self.cam)
 	
 		# --- Configure onscreen properties
 		# wp = WindowProperties()
