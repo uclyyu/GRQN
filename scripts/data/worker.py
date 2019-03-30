@@ -28,14 +28,15 @@ def mp_collect(worker, serialq, args):
 		actors = glob.glob(os.path.sep.join([sp_actr, 'L??.R????{}'.format(args.fileext_actor)]))
 
 	# --- blender: make a new copy of blender proto file and load export utility
-	savedir_proto = os.path.join(args.savedir_sample, '../blender')
-	proto_name = os.path.basename(bp_main).replace('.blend', '{}.blend'.format(worker))
-	if not os.path.isdir(savedir_proto):
-		os.mkdir(savedir_proto)
-	bp_proto = os.path.join(savedir_proto, proto_name)
-	shutil.copy(bp_main, bp_proto)
-	blender.addon_utils.enable('io_scene_egg')
-	blender.bpy.ops.wm.open_mainfile(filepath=bp_proto)
+	if args.generation_mode == '3dscene':
+		savedir_proto = os.path.join(args.savedir_sample, '../blender')
+		proto_name = os.path.basename(bp_main).replace('.blend', '{}.blend'.format(worker))
+		if not os.path.isdir(savedir_proto):
+			os.mkdir(savedir_proto)
+		bp_proto = os.path.join(savedir_proto, proto_name)
+		shutil.copy(bp_main, bp_proto)
+		blender.addon_utils.enable('io_scene_egg')
+		blender.bpy.ops.wm.open_mainfile(filepath=bp_proto)
 
 	# --- A new instance of scene manager
 	if args.generation_mode == 'sample':
@@ -80,6 +81,11 @@ def mp_collect(worker, serialq, args):
 				visual = Image.open(os.path.join(job_savedir_sample, 'visual-cond-000.jpg'))
 				visual = np.array(visual)
 				assert not (visual == visual[0, 0, 0]).all()
+
+				heatmap_file = os.path.join(job_savedir_sample, 'heatmap-cond-000.jpg')
+				skeleton_file = os.path.join(job_savedir_sample, 'skeleton-cond-000.jpg')
+				assert os.path.isfile(heatmap_file)
+				assert os.path.isfile(skeleton_file)
 
 
 def _sample_actors(actors, anim_search_path, extension):
