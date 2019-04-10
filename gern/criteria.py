@@ -1,4 +1,5 @@
 from torchvision import models as visionmodels
+from torch.utils import checkpoint as ptcp
 import torch
 import torch.nn as nn
 
@@ -29,14 +30,14 @@ class PerceptualLoss(nn.Module):
 
 	def forward(self, output, target):
 		# exhaust intermediate outputs and evaluate mse loss.
-		inp = torch.cat([output.rgbv, target.rgbv], dim=0)
+		inp = torch.cat([output, target], dim=0)
 		self.vggf(inp)
 
 		running_loss = 0.
 		while len(self.hidden_outputs) > 0:
 			running_loss += self.mseloss(*torch.chunk(self.hidden_outputs.pop(), 2, dim=0))
 
-		return running_loss / (self.N * output.rgbv.size(0))
+		return running_loss / (self.N * output.size(0))
 
 
 def heatmap_loss(output, target):
@@ -100,7 +101,7 @@ class GernCriterion(nn.Module):
 		self.accuracy = None
 
 	def forward(self, gern_output, gern_target, weights):
-		self.l_percept = self.lfcn_percept(gern_output, gern_target)
+		self.l_percept = ptcp.checkpoint(self.lfcn_percept, gern_output.rgbv, gern_target.rgbv)
 		self.l_heatmap = self.lfcn_heatmap(gern_output, gern_target)
 		self.l_classifier = self.lfcn_classifier(gern_output, gern_target)
 		self.l_aggregate = self.lfcn_aggregate(gern_output)
