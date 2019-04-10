@@ -34,7 +34,7 @@ def _default_transforms_(obj):
 
 def _rebase_(root, serial, filename):
 	name = filename.split(os.path.sep)[-1]
-	return os.path.join(root, serial, filename)
+	return os.path.join(root, serial, name)
 
 
 def _collate_(samples):
