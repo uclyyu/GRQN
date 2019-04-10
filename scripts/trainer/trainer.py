@@ -122,7 +122,7 @@ def train_distributed(args, model, criterion, optimiser, lr_scheduler, sd_schedu
 					{'lpercept': criterion.l_percept.item(),
 					 'lheatmap': criterion.l_heatmap.item(),
 					 'lclassifier': criterion.l_classifier.item(),
-					 'laggreate': criterion.l_aggregate.item(),
+					 'laggregate': criterion.l_aggregate.item(),
 					 'lkldiv': criterion.l_kldiv.item(),
 					 'accuracy': criterion.accuracy},
 					 epoch)
@@ -144,7 +144,7 @@ def train_distributed(args, model, criterion, optimiser, lr_scheduler, sd_schedu
 					{'lpercept': criterion.l_percept.item(),
 					 'lheatmap': criterion.l_heatmap.item(),
 					 'lclassifier': criterion.l_classifier.item(),
-					 'laggreate': criterion.l_aggregate.item(),
+					 'laggregate': criterion.l_aggregate.item(),
 					 'lkldiv': criterion.l_kldiv.item(),
 					 'accuracy': criterion.accuracy},
 					 epoch)
