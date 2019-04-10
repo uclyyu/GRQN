@@ -2,12 +2,12 @@ from gern.gern import GeRN
 from gern.data import GernDataLoader
 from gern.criteria import GernCriterion
 from gern.scheduler import LearningRateScheduler, PixelStdDevScheduler
-from loguru import logger
 from torch import distributed
+from torch.utils import checkpoint as ptcp
 from glob import glob
-import torch, argparse, os, json, sys, csv, time, threading
+from tensorboardX import SummaryWriter
+import torch, argparse, os, json, sys, time
 
-_CHECKPOINT_DIR_NAME_ = 'checkpoints'
 
 def initialise_process(args):
 	distributed.init_process_group(
@@ -24,27 +24,27 @@ def average_gradients(args, model):
 		param.grad.data /= world_size
 
 def log_best_json(args, epoch, accuracy, l_percept, l_heatmap, l_classifier, l_aggregate, l_kldiv):
-	save_name = os.path.join(args.savedir, 'best_model_rank_{:02d}.json').format(args.rank)
+	save_name = os.path.join(args.bestdir, 'stats.json')
 	with open(save_name, 'w') as jw:
 		data = {'epoch': epoch, 'accuracy': accuracy, 
 				'l_percept': l_percept, 'l_heatmap': l_heatmap, 
 				'l_classifier': l_classifier, 'l_aggregate': l_aggregate, 'l_kldiv': l_kldiv }
 		json.dump(data, jw)
 
-def train_distributed(args, model, criterion, optimiser, lr_scheduler, sd_scheduler, csvwriter):
+def train_distributed(args, model, criterion, optimiser, lr_scheduler, sd_scheduler, writer):
 
 	best_correct = 0.	
 	# --- Load checkpoint if from_epoch > 0
 	if args.from_epoch > 0:
 		assert args.from_epoch % args.checkpoint_interval == 0
-		load_name = os.path.join(args.savedir, _CHECKPOINT_DIR_NAME_, 'model_rank_{:02d}_{:08d}.pth'.format(args.rank, args.from_epoch - 1))
+		load_name = os.path.join(args.chkptdir, 'chkpt_{:08d}.pth').format(args.from_epoch - 1)
 		model.load_state_dict(torch.load(load_name))
-		(logger.opt(ansi=True)
-			   .info('<yellow>[Rank {rank}]</yellow> Recovered model from checkpoint {chk}.', 
-			   	     rank=args.rank, chk=args.from_epoch - 1))
+		writer.add_text(
+			args.tag_general,
+			'Loaded checkpoint: {}'.format(load_name))
 
 		# Load best model statisitcs
-		json_name = os.path.join(args.savedir, 'best_model_rank_{:02d}.json').format(args.rank)
+		json_name = os.path.join(args.bestdir, 'stats.json')
 		with open(json_name, 'r') as jr:
 			json_data = json.load(jr)
 			best_correct = json_data['accuracy']
@@ -56,9 +56,9 @@ def train_distributed(args, model, criterion, optimiser, lr_scheduler, sd_schedu
 	since = time.time()
 	for epoch in range(args.from_epoch, args.total_epochs):
 
-		(logger.opt(ansi=True)
-			   .info('<yellow>[Rank {rank}]</yellow> <cyan> ** Epoch {epoch} **</cyan> (+ {sec:.0f}s)', 
-			   	     rank=args.rank, epoch=epoch, sec=time.time() - since))
+		writer.add_text(
+			args.tag_epoch, 
+			'Epoch {} (+{:.0f}s)'.format(epoch, time.time() - since))
 		since = time.time()
 
 		# alternating between training and testing phases
@@ -109,36 +109,43 @@ def train_distributed(args, model, criterion, optimiser, lr_scheduler, sd_schedu
 			if phase == 'test' and epoch_correct > best_correct:
 				is_best = True
 				best_correct = epoch_correct
-				save_name = os.path.join(args.savedir, 'best_model_rank_{:02d}.pth'.format(args.rank))
+				save_name = os.path.join(args.bestdir, 'model.pth')
 				torch.save(model.state_dict(), save_name)
 				
-				(logger.opt(ansi=True)
-					   .info('<yellow>[Rank {rank}]</yellow> Update the best model at epoch {epoch}.', 
-					   	     rank=args.rank, epoch=epoch))
+				writer.add_text(
+					args.tag_best,
+					'Best model @{}, correct rate={}'.format(epoch, best_correct))
+				writer.add_scalars(
+					args.tag_best,
+					{'lpercept': criterion.l_percept.item(),
+					 'lheatmap': criterion.l_heatmap.item(),
+					 'lclassifier': criterion.l_classifier.item(),
+					 'laggreate': criterion.l_aggregate.item(),
+					 'lkldiv': criterion.l_kldiv.item(),
+					 'accuracy': criterion.accuracy},
+					 epoch)
 				log_best_json(args, epoch, best_correct, *criterion.item())
 
 			# --- Make training checkpoint
 			if phase == 'train':
 				if epoch == 0 or ((epoch + 1) % args.checkpoint_interval) == 0:
-					save_name = os.path.join(args.savedir, _CHECKPOINT_DIR_NAME_, 'model_rank_{:02d}_{:08d}.pth'.format(args.rank, epoch))
+					save_name = os.path.join(args.chkptdir, 'chkpt_{:08d}.pth'.format(epoch))
 					torch.save(model.state_dict(), save_name)
-					(logger.opt(ansi=True)
-						   .info('<yellow>[Rank {rank}]</yellow> Created training checkpoint at epoch {epoch}.', 
-						   	     rank=args.rank, epoch=epoch))
 
 			# --- Log training / testing progress
-			progress = {'rank': args.rank,
-						'epoch': epoch,
-						'phase': phase, 
-						'l_percept': criterion.l_percept.item(),
-						'l_heatmap': criterion.l_heatmap.item(),
-						'l_classifier': criterion.l_classifier.item(),
-						'l_aggregate': criterion.l_aggregate.item(),
-						'l_kldiv': criterion.l_kldiv.item(),
-						'accuracy': criterion.accuracy,
-						'is_best': is_best}
-			with args.writer_lock:
-				csvwriter.writerow(progress)
+			if phase == 'train':
+				tag = args.tag_train
+			else:
+				tag = args.tag_test
+			writer.add_scalars(
+					tag,
+					{'lpercept': criterion.l_percept.item(),
+					 'lheatmap': criterion.l_heatmap.item(),
+					 'lclassifier': criterion.l_classifier.item(),
+					 'laggreate': criterion.l_aggregate.item(),
+					 'lkldiv': criterion.l_kldiv.item(),
+					 'accuracy': criterion.accuracy},
+					 epoch)
 
 
 def main(args):
@@ -150,49 +157,67 @@ def main(args):
 	lr_scheduler = LearningRateScheduler(optimiser, args.lr_min, args.lr_max, args.lr_saturate_epoch)
 	sd_scheduler = PixelStdDevScheduler(args.criterion_weights, 0, args.sd_min, args.sd_max, args.sd_saturate_epoch)
 
-	# --- Logger
-	logger_file = os.path.join(args.savedir, 'logger.txt')
-	logger.add(logger_file)
+	# --- Tensorboard writer
+	writerdir = os.path.join(args.savedir, 'board', 'rank', '{:02d}'.format(args.rank))
+	if args.coward:
+		assert not os.path.isdir(writerdir), 'Cowardly avoid overwriting run folder.'
+	try:
+		os.makedirs(writerdir)
+	except FileExistsError:
+		pass
 
-	# --- Sanity checks.
-	chkpdir = os.path.join(args.savedir, _CHECKPOINT_DIR_NAME_)
-	if not os.path.exists(chkpdir):
-		(logger.opt(ansi=True)
-			   .info('<yellow>[Rank {rank}]</yellow> Adding new directory at {d}.',
-			   	     rank=args.rank, d=chkpdir))
+	writer = SummaryWriter(log_dir=writerdir, filename_suffix='.r{:03d}'.format(args.run))
+
+	# --- Add tensorboard tags
+	setattr(args, 'tag_general', 'run/{:03d}/general'.format(args.run))
+	setattr(args, 'tag_best', 'run/{:03d}/best'.format(args.run))
+	setattr(args, 'tag_epoch', 'run/{:03d}/epoch'.format(args.run))
+	setattr(args, 'tag_train', 'run/{:03d}/train'.format(args.run))
+	setattr(args, 'tag_test', 'run/{:03d}/test'.format(args.run))
+
+	# --- Sanity-checks: checkpoint
+	chkptdir = os.path.join(args.savedir, 'checkpoints', 'rank', '{:02d}', 'run', '{:03d}').format(args.rank, args.run)
+	if args.coward:
+		assert not os.path.isdir(chkptdir), 'Cowardly avoid overwriting checkpoints: {}'.format(chkptdir)
+	else:
+		# create checkpoint folder
 		try:
-			os.makedirs(chkpdir)
+			os.makedirs(chkptdir)
 		except FileExistsError:
-			(logger.opt(ansi=True)
-			   .info('<yellow>[Rank {rank}]</yellow> Directory already exists.',
-			   	     rank=args.rank, d=chkpdir))
+			writer.add_text(
+				args.tag_general, 
+				'Re-using checkpoint folder.')
+	setattr(args, 'chkptdir', chkptdir)
+
+	# --- Sanity-checks: best model
+	bestdir = os.path.join(args.savedir, 'best', 'rank', '{:02d}', 'run', '{:03d}').format(args.rank, args.run)
+	if args.coward:
+		assert not os.path.isdir(bestdir), 'Cowardly avoid overwriting best models.'
+	else:
+		try:
+			os.makedirs(bestdir)
+		except FileExistsError:
+			writer.add_text(
+				args.tag_general, 
+				'Reusing best model folder.')
+	setattr(args, 'bestdir', bestdir)
 
 	# --- Get the latest epoch if forcing checkpoint.
 	if args.force_checkpoint:
 		latest_epoch = 0
-		for checkpoint in glob(os.path.join(args.savedir, _CHECKPOINT_DIR_NAME_, '*.pth')):
+		for checkpoint in glob(os.path.join(args.chkptdir, '*.pth')):
 			epoch = int(checkpoint.split('_')[-1].split('.')[0])
 			latest_epoch = max(epoch, latest_epoch)
 			args.from_epoch = latest_epoch + 1  # 
-		(logger.opt(ansi=True)
-			   .info('<yellow>[Rank {rank}]</yellow> Forcing start from <cyan>epoch {chk}</cyan>.', 
-			   	     rank=args.rank, chk=args.from_epoch))
+		writer.add_text(
+			args.tag_general, 
+			'Resuming epoch {}'.format(args.from_epoch))
 
 	# --- Training procedure
 	if args.rank is None:
 		raise NotImplementedError
-	else:
-		# Set csv file headers
-		csv_columns = ['rank', 'epoch', 'phase', 'l_percept', 
-					   'l_heatmap', 'l_classifier', 'l_aggregate', 
-					   'l_kldiv', 'accuracy', 'is_best']
-		csv_name = os.path.join(args.savedir, 'log_training.csv')
-
-		with open(csv_name, 'a') as csvfile:
-			csvwriter = csv.DictWriter(csvfile, fieldnames=csv_columns)
-			if args.from_epoch == 0 and args.rank == 0:
-				csvwriter.writeheader()
-			train_distributed(args, model, criterion, optimiser, lr_scheduler, sd_scheduler, csvwriter)
+	else:	
+		train_distributed(args, model, criterion, optimiser, lr_scheduler, sd_scheduler, writer)
 
 
 if __name__ == '__main__':
@@ -206,7 +231,8 @@ if __name__ == '__main__':
 	parser.add_argument('--world-size', type=int, default=1)
 	parser.add_argument('--backend', type=str, default='nccl')
 	parser.add_argument('--init-method', type=str, default='tcp://192.168.1.116:23456')
-	# Main training hyperparameters
+	# Main training arguments
+	parser.add_argument('--run', type=int, default=0)
 	parser.add_argument('--device', type=str, default='cuda', choices=['cuda', 'cpu'])
 	parser.add_argument('--asteps', type=int, default=7)
 	parser.add_argument('--max-rsteps', type=int, default=100)
@@ -226,36 +252,35 @@ if __name__ == '__main__':
 	parser.add_argument('--batch-size', type=int, default=8)
 	parser.add_argument('--data-worker', type=int, default=4)
 	# Trained model and checkpoint output
+	parser.add_argument('--coward', action='store_true')
 	parser.add_argument('--savedir', type=str, default=UNDEFINED)
-	parser.add_argument('--force-checkpoint', type=bool, default=False)
+	parser.add_argument('--force-checkpoint', action='store_true')
 	parser.add_argument('--checkpoint-interval', type=int, default=2000)
 
 	args = parser.parse_args()
 
 	# If generate-json is set, write arguments to file.
-	if os.path.exists(args.generate_default_json):
+	if os.path.isdir(args.generate_default_json):
 		json_name = os.path.join(args.generate_default_json, 'trainer_arguments.json')
-		logger.opt(ansi=True).info('Generate default .json at <cyan>{name}</cyan>.', name=json_name)
-		args.generate_default_json = None
+		delattr(args, 'generate_default_json')
+		delattr(args, 'use_json')
 		with open(json_name, 'w') as jw:
 			json.dump(vars(args), jw)
 		sys.exit(0)
 
 	# If an argument .json file is assigned, update args.
-	if os.path.exists(args.use_json):
+	if os.path.isfile(args.use_json):
 		with open(args.use_json, 'r') as jr:
 			json_data = json.load(jr)
 			json_data['use_json'] = args.use_json
 			args.__dict__.update(json_data)
-			logger.opt(ansi=True).info('Loaded trainer arguments from <cyan>{file}</cyan>.', file=args.use_json)
+			print('Loaded trainer argument from file.')
 
 	# Assert savedir
-	if not os.path.exists(args.savedir):
-		logger.exception('--savedir "{path}" is not a valid path name.', path=args.savedir)
+	assert os.path.isdir(args.savedir), 'Not a valid pathname.'
 
 	# Assert rank and world size
-	if args.rank >= args.world_size:
-		logger.exception('Rank exceeds world size limit: {rank} >= {ws}.', rank=args.rank, ws=args.world_size)
+	assert args.rank <= args.world_size, 'Rank exceeds world size.'
 
 	# Set target device
 	if args.device == 'cpu':
@@ -263,10 +288,6 @@ if __name__ == '__main__':
 	elif args.device == 'cuda':
 		target_device = 'cuda:{}'.format(args.rank)
 	setattr(args, 'target_device', target_device)
-
-	# Set thread lock
-	writer_lock = threading.Lock()
-	setattr(args, 'writer_lock', writer_lock)
 
 	# --- --- ---
 	main(args)
