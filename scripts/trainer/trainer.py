@@ -85,7 +85,7 @@ def train_distributed(args, model, criterion, optimiser, lr_scheduler, sd_schedu
 				# --- Forward pass
 				with torch.set_grad_enabled(phase == 'train'):
 					gern_output = model(*C, *Q, asteps=args.asteps, rsteps=args.max_rsteps)
-					gern_target = model.make_target(*Q, L)
+					gern_target = model.make_target(*Q, L, rsteps=args.max_rsteps)
 
 					weighted_loss, correct = criterion(gern_output, gern_target, args.criterion_weights)
 
