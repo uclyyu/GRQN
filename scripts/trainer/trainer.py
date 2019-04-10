@@ -58,7 +58,8 @@ def train_distributed(args, model, criterion, optimiser, lr_scheduler, sd_schedu
 
 		writer.add_text(
 			args.tag_epoch, 
-			'Epoch {} (+{:.0f}s)'.format(epoch, time.time() - since))
+			'Epoch {} (+{:.0f}s)'.format(epoch, time.time() - since), 
+			epoch)
 		since = time.time()
 
 		# alternating between training and testing phases
@@ -114,7 +115,8 @@ def train_distributed(args, model, criterion, optimiser, lr_scheduler, sd_schedu
 				
 				writer.add_text(
 					args.tag_best,
-					'Best model @{}, correct rate={}'.format(epoch, best_correct))
+					'Best model @{}, correct rate={}'.format(epoch, best_correct),
+					epoch)
 				writer.add_scalars(
 					args.tag_best,
 					{'lpercept': criterion.l_percept.item(),
