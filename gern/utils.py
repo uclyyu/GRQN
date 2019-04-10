@@ -90,7 +90,7 @@ def _lstm_zoneout(gf, gi, gs, go, hid, cel, zo, go_prev):
 
 	if isinstance(zo, torch.distributions.Bernoulli):
 		# Use shared zoneout mask
-		z = zo.sample(go.size())
+		z = zo.sample(go.size()).to(gf.device)
 		c_next = gf * cel + z * gi * gs
 		h_next = ((1 - z) * go + z * go_prev) * torch.tanh(c_next)
 	else:
@@ -141,7 +141,10 @@ class ConvLSTMCell(nn.Module):
 
 		out = nn.functional.conv2d(inp, weight, self.bias, stride=1, padding=self.padding)
 		gf, gi, gs, go = torch.chunk(out, 4, dim=1)
-		h, c, o = _lstm_zoneout(gf, gi, gs, go, h, c, self.zoneout, o)
+		if self.training:
+			h, c, o = _lstm_zoneout(gf, gi, gs, go, h, c, self.zoneout, o)
+		else:
+			h, c, o = _lstm_zoneout(gf, gi, gs, go, h, c, None, o)
 
 		return h, c, o
 

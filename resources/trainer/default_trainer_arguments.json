@@ -1,10 +1,9 @@
 {
-  "use_json": null,
-  "generate_default_json": null,
   "rank": 0,
-  "world_size": 1,
+  "world_size": 2,
   "backend": "nccl",
-  "init_method": "tcp://192.168.1.116:23456",
+  "init_method": "tcp://192.168.1.100:23555",
+  "run": 0,
   "device": "cuda",
   "asteps": 7,
   "max_rsteps": 100,
@@ -21,7 +20,8 @@
   "rootdir_test": "<UNDEFINED>",
   "sample_size": 64,
   "batch_size": 8,
-  "data_worker": 4,
+  "data_worker": 2,
+  "coward": true,
   "savedir": "<UNDEFINED>",
   "force_checkpoint": false,
   "checkpoint_interval": 2000
