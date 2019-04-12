@@ -1,5 +1,5 @@
 {
-  "rank": 0,
+  "local_rank": 0,
   "world_size": 2,
   "backend": "nccl",
   "init_method": "tcp://192.168.1.100:23555",

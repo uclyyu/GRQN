@@ -13,7 +13,7 @@ def initialise_process(args):
 	distributed.init_process_group(
 		backend=args.backend,
 		init_method=args.init_method,
-		rank=args.rank,
+		rank=args.local_rank,
 		world_size=args.world_size)
 
 def average_gradients(args, model):
@@ -160,7 +160,7 @@ def main(args):
 	sd_scheduler = PixelStdDevScheduler(args.criterion_weights, 0, args.sd_min, args.sd_max, args.sd_saturate_epoch)
 
 	# --- Tensorboard writer
-	writerdir = os.path.join(args.savedir, 'board', 'rank', '{:02d}'.format(args.rank))
+	writerdir = os.path.join(args.savedir, 'board', 'rank', '{:02d}'.format(args.local_rank))
 	if args.coward:
 		assert not os.path.isdir(writerdir), 'Cowardly avoid overwriting run folder.'
 	try:
@@ -178,7 +178,7 @@ def main(args):
 	setattr(args, 'tag_test', 'run/{:03d}/test'.format(args.run))
 
 	# --- Sanity-checks: checkpoint
-	chkptdir = os.path.join(args.savedir, 'checkpoints', 'rank', '{:02d}', 'run', '{:03d}').format(args.rank, args.run)
+	chkptdir = os.path.join(args.savedir, 'checkpoints', 'rank', '{:02d}', 'run', '{:03d}').format(args.local_rank, args.run)
 	if args.coward:
 		assert not os.path.isdir(chkptdir), 'Cowardly avoid overwriting checkpoints: {}'.format(chkptdir)
 	else:
@@ -192,7 +192,7 @@ def main(args):
 	setattr(args, 'chkptdir', chkptdir)
 
 	# --- Sanity-checks: best model
-	bestdir = os.path.join(args.savedir, 'best', 'rank', '{:02d}', 'run', '{:03d}').format(args.rank, args.run)
+	bestdir = os.path.join(args.savedir, 'best', 'rank', '{:02d}', 'run', '{:03d}').format(args.local_rank, args.run)
 	if args.coward:
 		assert not os.path.isdir(bestdir), 'Cowardly avoid overwriting best models.'
 	else:
@@ -216,7 +216,7 @@ def main(args):
 			'Resuming epoch {}'.format(args.from_epoch))
 
 	# --- Training procedure
-	if args.rank is None:
+	if args.local_rank is None:
 		raise NotImplementedError
 	else:	
 		train_distributed(args, model, criterion, optimiser, lr_scheduler, sd_scheduler, writer)
@@ -229,7 +229,7 @@ if __name__ == '__main__':
 	parser.add_argument('--use-json', type=str, default=UNDEFINED)
 	parser.add_argument('--generate-default-json', type=str, default=UNDEFINED)
 	# Settings for PyTorch distributed module
-	parser.add_argument('--rank', type=int, default=0)
+	parser.add_argument('--local_rank', type=int, default=0)
 	parser.add_argument('--world-size', type=int, default=1)
 	parser.add_argument('--backend', type=str, default='nccl')
 	parser.add_argument('--init-method', type=str, default='tcp://192.168.1.116:23456')
@@ -282,13 +282,13 @@ if __name__ == '__main__':
 	assert os.path.isdir(args.savedir), 'Not a valid pathname.'
 
 	# Assert rank and world size
-	assert args.rank <= args.world_size, 'Rank exceeds world size.'
+	assert args.local_rank <= args.world_size, 'Rank exceeds world size.'
 
 	# Set target device
 	if args.device == 'cpu':
 		target_device = 'cpu'
 	elif args.device == 'cuda':
-		target_device = 'cuda:{}'.format(args.rank)
+		target_device = 'cuda:{}'.format(args.local_rank)
 	setattr(args, 'target_device', target_device)
 
 	# --- --- ---
