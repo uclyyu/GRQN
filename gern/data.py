@@ -85,45 +85,55 @@ class GernDataset(torch.utils.data.Dataset):
 			manifest = json.load(jr)
 
 		# --- conditionals
-		Xc = [Image.open(_rebase_(self.rootdir, serial, f)) for f in manifest['visuals.condition']]
-		Mc = [Image.open(_rebase_(self.rootdir, serial, f)) for f in manifest['heatmaps.condition']]
-		Kc = [Image.open(_rebase_(self.rootdir, serial, f)) for f in manifest['skeletons.condition']]
-		Vc = manifest['pov.readings.condition']
+		fXc = [Image.open(_rebase_(self.rootdir, serial, f)) for f in manifest['visuals.condition']]
+		fMc = [Image.open(_rebase_(self.rootdir, serial, f)) for f in manifest['heatmaps.condition']]
+		fKc = [Image.open(_rebase_(self.rootdir, serial, f)) for f in manifest['skeletons.condition']]
+		fVc = manifest['pov.readings.condition']
 
 		Nc = manifest['num.pre'] + manifest['num.post']
-		assert len(Xc) == Nc 
-		assert len(Mc) == Nc
-		assert len(Kc) == Nc
-		assert len(Vc) == Nc
+		assert len(fXc) == Nc 
+		assert len(fMc) == Nc
+		assert len(fKc) == Nc
+		assert len(fVc) == Nc
 
 		# . transformation
-		Xc = torch.stack([self.itransform(xc) for xc in Xc], dim=0)
-		Mc = torch.stack([self.mtransform(mc) for mc in Mc], dim=0)
-		Kc = torch.stack([self.itransform(kc) for kc in Kc], dim=0)
-		Vc = self.vtransform(Vc)
+		tXc = torch.stack([self.itransform(xc) for xc in fXc], dim=0)
+		tMc = torch.stack([self.mtransform(mc) for mc in fMc], dim=0)
+		tKc = torch.stack([self.itransform(kc) for kc in fKc], dim=0)
+		tVc = self.vtransform(fVc)
+
+		#	close files
+		for c in [fXc, fMc, fKc]:
+			for f in c: 
+				f.close()
 
 		# --- queries
-		Xq = [Image.open(_rebase_(self.rootdir, serial, f)) for f in manifest['visuals.rewind']]
-		Mq = [Image.open(_rebase_(self.rootdir, serial, f)) for f in manifest['heatmaps.rewind']]
-		Kq = [Image.open(_rebase_(self.rootdir, serial, f)) for f in manifest['skeletons.rewind']]
-		Vq = manifest['pov.readings.rewind']
+		fXq = [Image.open(_rebase_(self.rootdir, serial, f)) for f in manifest['visuals.rewind']]
+		fMq = [Image.open(_rebase_(self.rootdir, serial, f)) for f in manifest['heatmaps.rewind']]
+		fKq = [Image.open(_rebase_(self.rootdir, serial, f)) for f in manifest['skeletons.rewind']]
+		fVq = manifest['pov.readings.rewind']
 
 		Nq = manifest['num.rewind']
-		assert len(Xq) == Nq
-		assert len(Mq) == Nq
-		assert len(Kq) == Nq
-		assert len(Vq) == Nq
+		assert len(fXq) == Nq
+		assert len(fMq) == Nq
+		assert len(fKq) == Nq
+		assert len(fVq) == Nq
 
 		# . transformation
-		Xq = torch.stack([self.itransform(xq) for xq in Xq], dim=0)
-		Mq = torch.stack([self.mtransform(mq) for mq in Mq], dim=0)
-		Kq = torch.stack([self.itransform(kq) for kq in Kq], dim=0)
-		Vq = self.vtransform(Vq)
+		tXq = torch.stack([self.itransform(xq) for xq in fXq], dim=0)
+		tMq = torch.stack([self.mtransform(mq) for mq in fMq], dim=0)
+		tKq = torch.stack([self.itransform(kq) for kq in fKq], dim=0)
+		tVq = self.vtransform(fVq)
+
+		#	close files
+		for q in [fXq, fMq, fKq]:
+			for f in q: 
+				f.close()
 
 		# --- activity label
 		Lq = self.ltransform(manifest['label'])
 
-		return (Xc, Mc, Kc, Vc), (Xq, Mq, Kq, Vq), Lq
+		return (tXc, tMc, tKc, tVc), (tXq, tMq, tKq, tVq), Lq
 
 
 class GernSampler(torch.utils.data.Sampler):
