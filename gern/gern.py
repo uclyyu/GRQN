@@ -108,6 +108,12 @@ class GeRN(nn.Module):
 			rsteps = Tq - 1
 		else:
 			rsteps = min(Tq - 1, rsteps)
+			Tq = rsteps + 1
+
+			qry_x = qry_x[:, :Tq]
+			qry_m = qry_m[:, :Tq]
+			qry_k = qry_k[:, :Tq]
+			qry_v = qry_v[:, :Tq]
 
 		# --- Conditional filtered and aggregated representations
 		prim = ptcp.checkpoint(self.rop_primitive, cnd_x, cnd_m, cnd_k, cnd_v).squeeze(4).squeeze(3)
@@ -186,7 +192,15 @@ class GeRN(nn.Module):
 			posterior_logv=posterior_logvs,
 			)
 
-	def make_target(self, qry_x, qry_m, qry_k, qry_v, label):
+	def make_target(self, qry_x, qry_m, qry_k, qry_v, label, rsteps=None):
+		Tq = qry_v.size(1)
+		if rsteps is not None:
+			Tq = min(Tq, rsteps + 1)
+			qry_x = qry_x[:, :Tq]
+			qry_m = qry_m[:, :Tq]
+			qry_k = qry_k[:, :Tq]
+			qry_v = qry_v[:, :Tq]
+			
 		label = label.unsqueeze(1).expand(-1, qry_x.size(1))
 		return GernTarget(
 			rgbv=self.pack_time(qry_x)[0],
