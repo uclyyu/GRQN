@@ -1,3 +1,5 @@
+import torch.multiprocessing
+torch.multiprocessing.set_sharing_strategy('file_system')
 from gern.gern import GeRN
 from gern.data import GernDataLoader
 from gern.criteria import GernCriterion

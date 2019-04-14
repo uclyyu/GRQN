@@ -31,11 +31,9 @@ def _default_transforms_(obj):
 	setattr(obj, 'vtransform', vtransform)
 	setattr(obj, 'ltransform', ltransform)
 
-
 def _rebase_(root, serial, filename):
 	name = filename.split(os.path.sep)[-1]
 	return os.path.join(root, serial, name)
-
 
 def _collate_(samples):
 	# samples: [(C, Q, L), (C, Q, L), ...]
@@ -63,6 +61,16 @@ def _collate_(samples):
 
 	return (Xc, Mc, Kc, Vc), (Xq, Mq, Kq, Vq), L
 
+def _load_images(manifest, root, serial, transform):
+	stack = []
+	for file in manifest:
+		img = Image.open(_rebase_(root, serial, file))
+		arr = np.array(img, dtype=np.float32)
+		img.close()
+		stack.append(transform(arr))
+
+	return torch.stack(stack, dim=0)
+
 
 class GernDataset(torch.utils.data.Dataset):
 	def __init__(self, rootdir, manifest='manifest.json'):
@@ -85,50 +93,28 @@ class GernDataset(torch.utils.data.Dataset):
 			manifest = json.load(jr)
 
 		# --- conditionals
-		fXc = [Image.open(_rebase_(self.rootdir, serial, f)) for f in manifest['visuals.condition']]
-		fMc = [Image.open(_rebase_(self.rootdir, serial, f)) for f in manifest['heatmaps.condition']]
-		fKc = [Image.open(_rebase_(self.rootdir, serial, f)) for f in manifest['skeletons.condition']]
-		fVc = manifest['pov.readings.condition']
+		tXc = _load_images(manifest['visuals.condition'], self.rootdir, serial, self.itransform)
+		tMc = _load_images(manifest['heatmaps.condition'], self.rootdir, serial, self.mtransform)
+		tKc = _load_images(manifest['skeletons.condition'], self.rootdir, serial, self.itransform)
+		tVc = self.vtransform(manifest['pov.readings.condition'])
 
 		Nc = manifest['num.pre'] + manifest['num.post']
-		assert len(fXc) == Nc 
-		assert len(fMc) == Nc
-		assert len(fKc) == Nc
-		assert len(fVc) == Nc
-
-		# . transformation
-		tXc = torch.stack([self.itransform(xc) for xc in fXc], dim=0)
-		tMc = torch.stack([self.mtransform(mc) for mc in fMc], dim=0)
-		tKc = torch.stack([self.itransform(kc) for kc in fKc], dim=0)
-		tVc = self.vtransform(fVc)
-
-		#	close files
-		for c in [fXc, fMc, fKc]:
-			for f in c: 
-				f.close()
+		assert tXc.size(0) == Nc 
+		assert tMc.size(0) == Nc
+		assert tKc.size(0) == Nc
+		assert tVc.size(0) == Nc
 
 		# --- queries
-		fXq = [Image.open(_rebase_(self.rootdir, serial, f)) for f in manifest['visuals.rewind']]
-		fMq = [Image.open(_rebase_(self.rootdir, serial, f)) for f in manifest['heatmaps.rewind']]
-		fKq = [Image.open(_rebase_(self.rootdir, serial, f)) for f in manifest['skeletons.rewind']]
-		fVq = manifest['pov.readings.rewind']
+		tXq = _load_images(manifest['visuals.rewind'], self.rootdir, serial, self.itransform)
+		tMq = _load_images(manifest['heatmaps.rewind'], self.rootdir, serial, self.mtransform)
+		tKq = _load_images(manifest['skeletons.rewind'], self.rootdir, serial, self.itransform)
+		tVq = self.vtransform(manifest['pov.readings.rewind'])
 
 		Nq = manifest['num.rewind']
-		assert len(fXq) == Nq
-		assert len(fMq) == Nq
-		assert len(fKq) == Nq
-		assert len(fVq) == Nq
-
-		# . transformation
-		tXq = torch.stack([self.itransform(xq) for xq in fXq], dim=0)
-		tMq = torch.stack([self.mtransform(mq) for mq in fMq], dim=0)
-		tKq = torch.stack([self.itransform(kq) for kq in fKq], dim=0)
-		tVq = self.vtransform(fVq)
-
-		#	close files
-		for q in [fXq, fMq, fKq]:
-			for f in q: 
-				f.close()
+		assert tXq.size(0) == Nq 
+		assert tMq.size(0) == Nq
+		assert tKq.size(0) == Nq
+		assert tVq.size(0) == Nq
 
 		# --- activity label
 		Lq = self.ltransform(manifest['label'])
