@@ -19,10 +19,10 @@ def initialise_process(args):
 		world_size=args.world_size)
 
 def average_gradients(args, model):
-	group = distributed.new_group(range(args.world_size))
+	# group = distributed.new_group(range(args.world_size))
 	world_size = float(args.world_size)
 	for param in filter(lambda p: p.requires_grad, model.parameters()):
-		distributed.all_reduce(param.grad.data, op=distributed.ReduceOp.SUM, group=group)
+		distributed.all_reduce(param.grad.data, op=distributed.ReduceOp.SUM)
 		param.grad.data /= world_size
 
 def log_best_json(args, epoch, accuracy, l_percept, l_heatmap, l_classifier, l_aggregate, l_kldiv):
