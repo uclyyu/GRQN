@@ -17,12 +17,13 @@ def initialise_process(args):
 		init_method=args.init_method,
 		rank=args.local_rank,
 		world_size=args.world_size)
+	group = distributed.new_group(list(range(args.world_size)))
+	return group
 
-def average_gradients(args, model):
-	# group = distributed.new_group(range(args.world_size))
+def average_gradients(args, model, group):
 	world_size = float(args.world_size)
 	for param in filter(lambda p: p.requires_grad, model.parameters()):
-		distributed.all_reduce(param.grad.data, op=distributed.ReduceOp.SUM)
+		distributed.all_reduce(param.grad.data, op=distributed.ReduceOp.SUM, group=group)
 		param.grad.data /= world_size
 
 def log_best_json(args, epoch, accuracy, l_percept, l_heatmap, l_classifier, l_aggregate, l_kldiv):
@@ -33,7 +34,7 @@ def log_best_json(args, epoch, accuracy, l_percept, l_heatmap, l_classifier, l_a
 				'l_classifier': l_classifier, 'l_aggregate': l_aggregate, 'l_kldiv': l_kldiv }
 		json.dump(data, jw)
 
-def train_distributed(args, model, criterion, optimiser, lr_scheduler, sd_scheduler, writer):
+def train_distributed(args, model, criterion, optimiser, lr_scheduler, sd_scheduler, writer, group):
 
 	best_correct = 0.	
 	# --- Load checkpoint if from_epoch > 0
@@ -101,7 +102,7 @@ def train_distributed(args, model, criterion, optimiser, lr_scheduler, sd_schedu
 
 			# --- Step optimiser (training phase only)
 			if phase == 'train':
-				average_gradients(args, model)
+				average_gradients(args, model, group)
 				optimiser.step()
 			
 			epoch_loss = running_loss / args.total_epochs
@@ -154,7 +155,7 @@ def train_distributed(args, model, criterion, optimiser, lr_scheduler, sd_schedu
 
 def main(args):
 	# --- Setting up trainer
-	initialise_process(args)
+	group = initialise_process(args)
 	model = GeRN().to(args.target_device)
 	criterion = GernCriterion().to(args.target_device)
 	optimiser = torch.optim.Adam(filter(lambda p: p.requires_grad, model.parameters()), args.lr_min, amsgrad=True)
@@ -221,7 +222,7 @@ def main(args):
 	if args.local_rank is None:
 		raise NotImplementedError
 	else:	
-		train_distributed(args, model, criterion, optimiser, lr_scheduler, sd_scheduler, writer)
+		train_distributed(args, model, criterion, optimiser, lr_scheduler, sd_scheduler, writer, group)
 
 
 if __name__ == '__main__':
