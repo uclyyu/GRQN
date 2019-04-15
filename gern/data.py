@@ -143,7 +143,3 @@ class GernDataLoader(torch.utils.data.DataLoader):
 		batch_sampler = torch.utils.data.BatchSampler(sampler, batch_size, drop_last=drop_last)
 
 		super(GernDataLoader, self).__init__(dataset, batch_sampler=batch_sampler, collate_fn=_collate_, **kwargs)
-	
-
-
-
