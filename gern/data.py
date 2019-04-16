@@ -64,10 +64,8 @@ def _collate_(samples):
 def _load_images(manifest, root, serial, transform):
 	stack = []
 	for file in manifest:
-		img = Image.open(_rebase_(root, serial, file))
-		arr = np.array(img, dtype=np.float32)
-		img.close()
-		stack.append(transform(arr))
+		with Image.open(_rebase_(root, serial, file)) as img:
+			stack.append(transform(img))
 
 	return torch.stack(stack, dim=0)
 
