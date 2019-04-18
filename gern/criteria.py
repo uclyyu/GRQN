@@ -35,9 +35,10 @@ class PerceptualLoss(nn.Module):
 
 		running_loss = 0.
 		while len(self.hidden_outputs) > 0:
-			running_loss += self.mseloss(*torch.chunk(self.hidden_outputs.pop(), 2, dim=0))
+			pred, targ = torch.chunk(self.hidden_outputs.pop(), 2, dim=0)
+			running_loss += (self.mseloss(pred, targ) / pred.size(0))
 
-		return running_loss / (self.N * output.size(0))
+		return running_loss / self.N
 
 
 def heatmap_loss(output, target):
