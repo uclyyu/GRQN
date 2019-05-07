@@ -28,15 +28,14 @@ def mp_collect(worker, serialq, args):
 		actors = glob.glob(os.path.sep.join([sp_actr, 'L??.R????{}'.format(args.fileext_actor)]))
 
 	# --- blender: make a new copy of blender proto file and load export utility
-	if args.generation_mode == '3dscene':
-		savedir_proto = os.path.join(args.savedir_sample, '../blender')
-		proto_name = os.path.basename(bp_main).replace('.blend', '{}.blend'.format(worker))
-		if not os.path.isdir(savedir_proto):
-			os.mkdir(savedir_proto)
-		bp_proto = os.path.join(savedir_proto, proto_name)
-		shutil.copy(bp_main, bp_proto)
-		blender.addon_utils.enable('io_scene_egg')
-		blender.bpy.ops.wm.open_mainfile(filepath=bp_proto)
+	savedir_proto = os.path.join(args.savedir_sample, '../blender')
+	proto_name = os.path.basename(bp_main).replace('.blend', '{}.blend'.format(worker))
+	if not os.path.isdir(savedir_proto):
+		os.mkdir(savedir_proto)
+	bp_proto = os.path.join(savedir_proto, proto_name)
+	shutil.copy(bp_main, bp_proto)
+	blender.addon_utils.enable('io_scene_egg')
+	blender.bpy.ops.wm.open_mainfile(filepath=bp_proto)
 
 	# --- A new instance of scene manager
 	if args.generation_mode == 'sample':
@@ -57,14 +56,23 @@ def mp_collect(worker, serialq, args):
 				logger.info('Worker {worker}: handling job {job:,} using a blind.', worker=worker, job=job)
 				use_blind = True
 
-			# Sample and generate .egg scene
+			# Generate
+			# - If generation_mode is set to `3dscene' then it will proceed to output .egg/.bam only
+			# - If generation_mode is set to `sample' then it will check if the corresponding .egg/bam exists;
+			# 	if not, a temporary .egg/.bam will be (over-)written before generating samples.
 			scene_file = os.path.join(bp_expo, 'scene_{:08d}{}'.format(job, args.fileext_3dscene))
 			if args.generation_mode == '3dscene':
 				if not os.path.isfile(scene_file):
 					blender.sample_environment(
-						job, args.generation_phase, bp_flor, bp_wall, bp_blnd, bp_expo, 
+						job, args.generation_phase, bp_flor, bp_wall, bp_blnd, scene_file, 
 						use_blind=use_blind, use_bam=use_bam)
 			elif args.generation_mode == 'sample':
+				if not os.path.isfile(scene_file):
+					# in the absence of pre-generated 3dscene, genearte a temporary 3dscene
+					scene_file = os.path.join(bp_expo, '_temp_scene_{:02d}{}'.format(worker, args.fileext_3dscene))
+					blender.sample_environment(
+						job, args.generation_phase, bp_flor, bp_wall, bp_blnd, scene_file,
+						use_blind=use_blind, use_bam=use_bam)
 				# Sample actor and animation
 				actor, animation = _sample_actors(actors, sp_anim, args.fileext_actor)
 				# Update scene manager
