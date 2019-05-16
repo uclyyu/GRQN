@@ -42,9 +42,8 @@ class LaplacianPyramidLoss(nn.Module):
 		pyr_target = self.lappyr(target)
 
 		L = [torch.norm(o - t, p=1) / o.numel() for o, t in zip(pyr_output, pyr_target)]
-		L = sum(L) * output.size(0)
 
-		return L
+		return sum(L)
 
 
 class PerceptualLoss(nn.Module):
@@ -123,44 +122,45 @@ def kl_divergence(output):
 class GernCriterion(nn.Module):
 	def __init__(self):
 		super(GernCriterion, self).__init__()
-		# loss functions
-		# - Perceptual loss to replace naive L2 loss in pixel space
-		self.lfcn_percept = PerceptualLoss()
-		# - Heatmap loss is a binary cross-entropy with logits
-		self.lfcn_heatmap = heatmap_loss
+		# Loss functions
+		# - Laplacian pyramic loss for sharper edges 
+		#   (cf. `Optimising the latent space of generative networks')
+		self.fl_deccam = LaplacianPyramidLoss(7, 2.0, 5)
+		self.fl_dechmp = LaplacianPyramidLoss(7, 2.0, 5)
 		# - Classifier loss is a cross-entropy loss
-		self.lfcn_classifier = classifier_loss
+		self.fl_clasif = classifier_loss
 		# - Aggregate loss is a temporal difference loss (L2)
-		self.lfcn_aggregate = aggregator_loss
+		self.fl_aggreg = aggregator_loss
 		# - KL divergence
-		self.lfcn_kldiv = kl_divergence
+		self.fl_kldvrg = kl_divergence
 		# - Classifier accuracy
 		self.accu_classifier = classifier_accuracy
 
 		# states
-		self.l_percept = None
-		self.l_heatmap = None
-		self.l_classifier = None
-		self.l_aggregate = None
-		self.l_kldiv = None
-		self.accuracy = None
+		self.vl_deccam = None # loss for camera view decoder
+		self.vl_dechmp = None # loss for heatmap decoder
+		self.vl_clasif = None # classifier loss
+		self.vl_aggreg = None # td aggregator loss
+		self.vl_kldvrg = None # kl-divergence
+		self.accuracy = None  # classifier accuracy
 
 	def forward(self, gern_output, gern_target, weights):
-		self.l_percept = ptcp.checkpoint(self.lfcn_percept, gern_output.rgbv, gern_target.rgbv)
-		self.l_heatmap = self.lfcn_heatmap(gern_output, gern_target)
-		self.l_classifier = self.lfcn_classifier(gern_output, gern_target)
-		self.l_aggregate = self.lfcn_aggregate(gern_output)
-		self.l_kldiv = self.lfcn_kldiv(gern_output)
+		self.vl_deccam = self.fl_deccam(gern_output.rgbv, gern_target.rgbv)
+		self.vl_dechmp = self.fl_dechmp(torch.sigmoid(gern_output.heat), gern_target.heat)
+		self.vl_clasif = self.fl_clasif(gern_output, gern_target)
+		self.vl_aggreg = self.fl_aggreg(gern_output)
+		self.vl_kldvrg = self.fl_kldvrg(gern_output)
 		self.accuracy = self.accu_classifier(gern_output, gern_target).item()
+
 		return self.weighted_sum(weights), self.accuracy
 
 	def weighted_sum(self, weights):
-		L = [self.l_percept, self.l_heatmap, self.l_classifier, self.l_aggregate, self.l_kldiv]
+		L = [self.vl_deccam, self.vl_dechmp, 
+			 self.vl_clasif, self.vl_aggreg, self.vl_kldvrg]
 		assert len(L) == len(weights)
 		return sum(map(lambda l, w: l * w, L, weights))
 
 	def item(self):
 		"""Return a 5-tuple consisting of all criteria except accuracy."""
-		return (self.l_percept.item(), self.l_heatmap.item(), 
-				self.l_classifier.item(), self.l_aggregate.item(), 
-				self.l_kldiv.item())
+		return (self.vl_deccam.item(), self.vl_dechmp.item(), 
+				self.vl_clasif.item(), self.vl_aggreg.item(), self.vl_kldvrg.item())
