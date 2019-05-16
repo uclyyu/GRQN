@@ -7,6 +7,22 @@ import unittest, torch
 import torch.nn as nn
 
 
+class TestLaplacianPyramidLoss(unittest.TestCase):
+	def setUp(self):
+		self.crit = criteria.LaplacianPyramidLoss(7, 2.0, 4)
+
+	def test_pyrloss(self):
+		output = torch.randn(7, 3, 256, 256)
+		target = torch.randn(7, 3, 256, 256)
+
+		self.crit(output, target)
+
+		output = torch.randn(7, 1, 256, 256)
+		target = torch.randn(7, 1, 256, 256)
+
+		self.crit(output, target)
+
+
 class TestGernCriteria(unittest.TestCase):
 	def setUp(self):
 		self.net = GeRN()
@@ -28,12 +44,12 @@ class TestGernCriteria(unittest.TestCase):
 		logger.info('Total weighted loss = {loss:.4f}', loss=sum_loss.item())
 
 		loss = self.criteria.item()
-		logger.info('Perceptual L2 Loss = {loss:.4f}', loss=loss[0])
-		logger.info('Heatmap BCE Loss = {loss:.4f}', loss=loss[1])
+		logger.info('Camera decoder LapPyramid Loss = {loss:.4f}', loss=loss[0])
+		logger.info('Heatmap decoder LapPyramid Loss = {loss:.4f}', loss=loss[1])
 		logger.info('Classifier CE Loss = {loss:.4f}', loss=loss[2])
 		logger.info('Aggregator L2 Loss = {loss:.4f}', loss=loss[3])
 		logger.info('Autoencoder KL Loss = {loss:.4f}', loss=loss[4])
-		logger.info('Classifier accuracy = {accu:.2f}', accu=loss[5])
+		logger.info('Classifier accuracy = {accu:.2f}', accu=self.criteria.accuracy)
 
 
 if __name__ == '__main__':
