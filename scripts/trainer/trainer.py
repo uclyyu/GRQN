@@ -31,12 +31,12 @@ def average_gradients(args, model, group):
 		distributed.all_reduce(param.grad.data, op=distributed.ReduceOp.SUM, group=group)
 		param.grad.data /= (world_size * args.batch_size)
 
-def log_best_json(args, epoch, accuracy, l_percept, l_heatmap, l_classifier, l_aggregate, l_kldiv):
+def log_best_json(args, epoch, accuracy, deccam, dechmp, clasif, aggreg, kldvrg):
 	save_name = os.path.join(args.bestdir, 'stats.json')
 	with open(save_name, 'w') as jw:
 		data = {'epoch': epoch, 'accuracy': accuracy, 
-				'l_percept': l_percept, 'l_heatmap': l_heatmap, 
-				'l_classifier': l_classifier, 'l_aggregate': l_aggregate, 'l_kldiv': l_kldiv }
+				'deccam': deccam, 'dechmp': dechmp, 
+				'clasif': clasif, 'aggreg': aggreg, 'kldvrg': kldvrg }
 		json.dump(data, jw)
 
 def split_batch(C, Q, L, size=1, dim=0):
