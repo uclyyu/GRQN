@@ -2,6 +2,50 @@ from torchvision import models as visionmodels
 from torch.utils import checkpoint as ptcp
 import torch
 import torch.nn as nn
+import numpy as np
+import scipy.stats as ss
+
+
+def gaussian_kernel(size, sigma):
+	assert sigma > 0
+	b = size // 2 + (size % 2) / 2
+	x = np.linspace(-b, b, size + 1)
+	k1d = np.diff(ss.norm(0, sigma).cdf(x))
+	k2d = np.outer(k1d, k1d)
+	k2d = k2d.reshape([1, 1, size, size]) / k2d.sum()
+	return k2d
+
+
+class LaplacianPyramidLoss(nn.Module):
+	def __init__(self, ksize, sigma, plevel):
+		super(LaplacianPyramidLoss, self).__init__()
+		self.register_buffer('kernel', torch.tensor(gaussian_kernel(ksize, sigma), dtype=torch.float32))
+		self.kernel_size = ksize
+		self.padding = ksize // 2
+		self.sigma = sigma
+		self.pyramid_levels = plevel
+
+	def lappyr(self, x):
+		# returns the laplacian pyramid given input
+		pyr = []
+		cur = x
+		for l in range(self.pyramid_levels):
+			blr = nn.functional.conv2d(cur, self.kernel.expand(-1, cur.size(1), -1, -1), padding=self.padding)
+			pyr.append(cur - blr)
+			cur = nn.functional.avg_pool2d(blr, 2, 2)
+
+		pyr.append(cur)
+		return pyr
+
+	def forward(self, output, target):
+		pyr_output = self.lappyr(output)
+		pyr_target = self.lappyr(target)
+
+		L = [torch.norm(o - t, p=1) / o.numel() for o, t in zip(pyr_output, pyr_target)]
+		L = sum(L) * output.size(0)
+
+		return L
+
 
 class PerceptualLoss(nn.Module):
 	def __init__(self, vgg_layers=[6, 13, 26, 39, 52]):
