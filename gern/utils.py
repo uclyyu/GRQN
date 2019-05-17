@@ -1,4 +1,4 @@
-import torch
+import torch, typing
 import torch.nn as nn
 
 
@@ -81,26 +81,44 @@ class GroupNorm2d(nn.Module):
 
 		return x * self.gamma + self.beta
 
-
-def _lstm_zoneout(gf, gi, gs, go, hid, cel, zo, go_prev):
+@torch.jit.script
+def _lstm_zoneout(gf, gi, gs, go, hid, cel, mask, go_prev):
+	# gates:
+	# 	gf - forget gate
+	# 	gi - input gate
+	# 	gs - state (cell) gate
+	# 	go - output gate
+	# hid - hidden units
+	# cel - cell units
+	# mask - 1 for keeping previous output gate, 0 otherwise
 	gf = torch.sigmoid(gf)
 	gi = torch.sigmoid(gi)
 	gs = torch.tanh(gs)
 	go = torch.sigmoid(go)
 
-	if isinstance(zo, torch.distributions.Bernoulli):
-		# Use shared zoneout mask
-		z = zo.sample(go.size()).to(gf.device)
-		c_next = gf * cel + z * gi * gs
-		h_next = ((1 - z) * go + z * go_prev) * torch.tanh(c_next)
-	else:
-		c_next = gf * cel + gi * gs
-		h_next = go * torch.tanh(c_next)
+	c_next = gf * cel + mask * gi * gs
+	h_next = ((1 - mask) * go + mask * go_prev) * torch.tanh(c_next)
 
 	return h_next, c_next, go
 
 
-class ConvLSTMCell(nn.Module):
+@torch.jit.script
+def _lstm(gf, gi, gs, go, hid, cel):
+	gf = torch.sigmoid(gf)
+	gi = torch.sigmoid(gi)
+	gs = torch.tanh(gs)
+	go = torch.sigmoid(go)
+
+	c_next = gf * cel + gi * gs
+	h_next = go * torch.tanh(c_next)
+
+	return h_next, c_next
+
+
+
+class ConvLSTMCell(torch.jit.ScriptModule):
+	__constants__ = ['padding', 'zoneout_prob']
+
 	def __init__(self, input_size, hidden_size, kernel_size, zoneout=0, bias=True):
 		super(ConvLSTMCell, self).__init__()
 
@@ -109,21 +127,19 @@ class ConvLSTMCell(nn.Module):
 		# 	Recurrent Dropout, https://arxiv.org/pdf/1603.05118.pdf
 		# 	Layer Normalisation
 		# 	Recurrent Batch Normalisation, https://arxiv.org/pdf/1603.09025.pdf
-
 		kH, kW = kernel_size
 
 		self.kernel_size = kernel_size
-		self.padding = kH // 2
+		self.padding = int(kH // 2)
 		self._weight_ih = nn.Parameter(torch.empty(hidden_size * 4, input_size, kH, kW))
 		self._weight_hh = nn.Parameter(torch.empty(hidden_size * 4, hidden_size, kH, kW))
 		self.bias = None
-		self.zoneout = 0
+		self.zoneout_prob = zoneout
 
 		if bias:
 			self.bias = nn.Parameter(torch.zeros(hidden_size * 4))
 
-		if zoneout > 0:
-			self.zoneout = torch.distributions.Bernoulli(probs=zoneout)
+		
 
 		# --- weight initialisation
 		# Xavier uniform for input-to-hidden,
@@ -134,35 +150,39 @@ class ConvLSTMCell(nn.Module):
 		if bias:
 			self.bias[:hidden_size].data.fill_(1.)
 
-
+	@torch.jit.script_method
 	def forward(self, x, h, c, o):
+		# x: input
+		# h: hidden units
+		# c: state (cell) units
+		# o: previous output gate
 		inp = torch.cat([x, h], dim=1)
 		weight = torch.cat([self._weight_ih, self._weight_hh], dim=1)
-
 		out = nn.functional.conv2d(inp, weight, self.bias, stride=1, padding=self.padding)
 		gf, gi, gs, go = torch.chunk(out, 4, dim=1)
+
 		if self.training:
-			h, c, o = _lstm_zoneout(gf, gi, gs, go, h, c, self.zoneout, o)
+			mask = torch.zeros_like(h).bernoulli_(self.zoneout_prob)
+			h, c, o = _lstm_zoneout(gf, gi, gs, go, h, c, mask, o)
 		else:
-			h, c, o = _lstm_zoneout(gf, gi, gs, go, h, c, None, o)
+			mask = torch.zeros_like(h)
+			h, c, o = _lstm_zoneout(gf, gi, gs, go, h, c, mask, o)
 
 		return h, c, o
 
 
-class LSTMCell(nn.Module):
+class LSTMCell(torch.jit.ScriptModule):
+	__constants__ = ['zoneout_prob']
 	def __init__(self, input_size, hidden_size, zoneout=0, bias=True):
 		super(LSTMCell, self).__init__()
 
 		self._weight_ih = nn.Parameter(torch.empty(hidden_size * 4, input_size))
 		self._weight_hh = nn.Parameter(torch.empty(hidden_size * 4, hidden_size))
 		self.bias = None
-		self.zoneout = 0
+		self.zoneout_prob = zoneout
 
 		if bias:
 			self.bias = nn.Parameter(torch.zeros(hidden_size * 4))
-
-		if zoneout > 0:
-			self.zoneout = torch.distributions.Bernoulli(probs=zoneout)
 
 		nn.init.xavier_uniform_(self._weight_ih.data)
 		nn.init.orthogonal_(self._weight_hh.data)
@@ -170,6 +190,7 @@ class LSTMCell(nn.Module):
 		if bias:
 			self.bias[:hidden_size].data.fill_(1.)
 
+	@torch.jit.script_method
 	def forward(self, x, h, c, o):
 		inp = torch.cat([x, h], dim=1)
 		weight = torch.cat([self._weight_ih, self._weight_hh], dim=1)
@@ -177,9 +198,11 @@ class LSTMCell(nn.Module):
 		out = nn.functional.linear(inp, weight, self.bias)
 		gf, gi, gs, go = torch.chunk(out, 4, dim=1)
 		if self.training:
-			h, c, o = _lstm_zoneout(gf, gi, gs, go, h, c, self.zoneout, o)
+			mask = torch.zeros_like(h).bernoulli(self.zoneout_prob)
+			h, c, o = _lstm_zoneout(gf, gi, gs, go, h, c, mask, o)
 		else:
-			h, c, o = _lstm_zoneout(gf, gi, gs, go, h, c, None, o)
+			mask = torch.zeros_like(h)
+			h, c, o = _lstm_zoneout(gf, gi, gs, go, h, c, mask, o)
 
 		return h, c, o
 

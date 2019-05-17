@@ -101,26 +101,19 @@ class RepresentationEncoderPrimitive(nn.Module):
 		return out.view(B, T, -1, out.size(2), out.size(3))
 
 
-class RepresentationEncoderState(nn.Module):
-	def __init__(self, input_size=256, hidden_size=128, zoneout=.15, learn_init=False):
+class RepresentationEncoderState(torch.jit.ScriptModule):
+	__constants__ = ['hidden_size']
+	def __init__(self, input_size=256, hidden_size=128, zoneout=.15):
 		super(RepresentationEncoderState, self).__init__()
 
 		self.input_size = input_size
 		self.hidden_size = hidden_size
 		self.network = LSTMCell(input_size, hidden_size, zoneout=zoneout, bias=True)
 
-		self._init_hid = None
-		self._init_cel = None
-		self._init_pog = None
-
-		if learn_init:
-			self._init_hid = nn.Parameter(torch.zeros(1, hidden_size))
-			self._init_cel = nn.Parameter(torch.zeros(1, hidden_size))
-			self._init_pog = nn.Parameter(torch.zeros(1, hidden_size))
-
 		# print('{}: {:,} trainable parameters.'.format(self.__class__.__name__, count_parameters(self)))
 		
-	def forward(self, x, hid=None, cel=None, pog=None):
+	@torch.jit.script_method
+	def forward(self, x, hid, cel, pog):
 		# --- Input (size)
 		# x: Representation encoder primitive (B, T, 256)
 		# hid: LSTM hidden state (B, hidden_size)
@@ -130,28 +123,20 @@ class RepresentationEncoderState(nn.Module):
 		# hid: State (B, T, hidden_size)
 		# cel: (B, hidden_size)
 		# pog: (B, hidden_size)
-		batch_size = x.size(0)
-		num_steps = x.size(1)
-		dev = x.device
+
+		# batch_size = x.size(0)
+		# num_steps = x.size(1)
+		# dev = x.device
 		
-		default_size = torch.Size([batch_size, self.hidden_size])
-		if pog is None:
-			if self._init_pog is None:
-				pog = torch.zeros(1, dtype=torch.float32, device=dev).expand(default_size)
-			else:
-				pog = self._init_pog.expand(batch_size, -1)
+		# default_size = torch.Size([batch_size, self.hidden_size])
+		# if pog is None:
+		# 	pog = torch.zeros(1, dtype=torch.float32, device=dev).expand(default_size)
 				
-		if hid is None:
-			if self._init_hid is None:
-				hid = torch.zeros(1, dtype=torch.float32, device=dev).expand(default_size)
-			else:
-				hid = self._init_hid.expand(batch_size, -1)
+		# if hid is None:
+		# 	hid = torch.zeros(1, dtype=torch.float32, device=dev).expand(default_size)
 				
-		if cel is None:
-			if self._init_cel is None:
-				cel = torch.zeros(1, dtype=torch.float32, device=dev).expand(default_size)
-			elif cel is None:
-				cel = self._init_cel.expand(batch_size, -1)
+		# if cel is None:
+		# 	cel = torch.zeros(1, dtype=torch.float32, device=dev).expand(default_size)
 				
 		hids = []
 		for x_ in torch.unbind(x, dim=1):
