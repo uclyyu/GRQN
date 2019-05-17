@@ -21,60 +21,7 @@ class TestRepresentationEncoderPrimitive(unittest.TestCase):
 		optimiser = torch.optim.Adam(self.net.parameters(), 1e-3)
 
 
-class TestRepresentationEncoderState(unittest.TestCase):
-	def setUp(self):
-		self.net = gern.RepresentationEncoderState(input_size=256, hidden_size=128, zoneout=.15)
-		self.net_init = gern.RepresentationEncoderState(input_size=256, hidden_size=128, zoneout=.15, learn_init=True)
 
-	def test_optmiser(self):
-		optimiser = torch.optim.Adam(self.net.parameters(), 1e-3)
-		optimiser = torch.optim.Adam(self.net_init.parameters(), 1e-3)
-
-	def test_input(self):
-		x = torch.randn(1, 7, 256)
-		try:
-			h, c, o = self.net(x)
-		except:
-			self.fail('RepresentationEncoderState failed!')
-		self.assertEqual(h.size(), torch.Size([1, 7, 128]))
-		self.assertEqual(c.size(), torch.Size([1, 128]))
-		self.assertEqual(o.size(), torch.Size([1, 128]))
-
-	def test_input_hco(self):
-		x = torch.randn(1, 7, 256)
-		h = torch.randn(1, 128)
-		c = torch.randn(1, 128)
-		o = torch.randn(1, 128)
-		try:
-			h, c, o = self.net(x, h, c, o)
-		except:
-			self.fail('RepresentationEncoderState failed!')
-		self.assertEqual(h.size(), torch.Size([1, 7, 128]))
-		self.assertEqual(c.size(), torch.Size([1, 128]))
-		self.assertEqual(o.size(), torch.Size([1, 128]))
-
-	def test_input_init(self):
-		x = torch.randn(1, 7, 256)
-		try:
-			h, c, o = self.net_init(x)
-		except:
-			self.fail('RepresentationEncoderState failed!')
-		self.assertEqual(h.size(), torch.Size([1, 7, 128]))
-		self.assertEqual(c.size(), torch.Size([1, 128]))
-		self.assertEqual(o.size(), torch.Size([1, 128]))
-
-	def test_input_init_hco(self):
-		x = torch.randn(1, 7, 256)
-		h = torch.randn(1, 128)
-		c = torch.randn(1, 128)
-		o = torch.randn(1, 128)
-		try:
-			h, c, o = self.net_init(x, h, c, o)
-		except:
-			self.fail('RepresentationEncoderState failed!')
-		self.assertEqual(h.size(), torch.Size([1, 7, 128]))
-		self.assertEqual(c.size(), torch.Size([1, 128]))
-		self.assertEqual(o.size(), torch.Size([1, 128]))
 
 
 class TestRepresentationEncoder(unittest.TestCase):
