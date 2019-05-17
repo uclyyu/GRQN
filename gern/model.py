@@ -1,4 +1,4 @@
-import torch, random
+import torch, random, typing
 import torch.nn as nn
 from numpy.random import randint
 from torch.distributions import Normal
@@ -113,30 +113,33 @@ class RepresentationEncoderState(torch.jit.ScriptModule):
 		# print('{}: {:,} trainable parameters.'.format(self.__class__.__name__, count_parameters(self)))
 		
 	@torch.jit.script_method
-	def forward(self, x, hid, cel, pog):
-		# --- Input (size)
-		# x: Representation encoder primitive (B, T, 256)
-		# hid: LSTM hidden state (B, hidden_size)
-		# cel: LSTM cell state (B, hidden_size)
-		# pog: LSTM output gate from previous time step (B, hidden_size)
-		# --- Output (size)
-		# hid: State (B, T, hidden_size)
-		# cel: (B, hidden_size)
-		# pog: (B, hidden_size)
+	def forward(self, x, hid=None, cel=None, pog=None):
+		# type: (Tensor, Optional[Tensor], Optional[Tensor], Optional[Tensor]) -> Tuple[Tensor, Tensor, Tensor]
+		"""Summary
+		
+		Args:
+		    x (Tensor, 3D): scene repressentation primitives
+		    hid (Tensor, 2D, optional): LSTM hidden neurons at t=T
+		    cel (Tensor, 2D, optional): LSTM cell neurons at t=T
+		    pog (Tensor, 2D, optional): LSTM hidden neurons at t=T-1
+		
+		Returns:
+		    Tuple[Tensor, Tensor, Tensor]: Description
+		"""
 
 		# batch_size = x.size(0)
 		# num_steps = x.size(1)
 		# dev = x.device
 		
-		# default_size = torch.Size([batch_size, self.hidden_size])
-		# if pog is None:
-		# 	pog = torch.zeros(1, dtype=torch.float32, device=dev).expand(default_size)
+		default_shape = torch.Size([x.size(0), self.hidden_size])
+		if pog is None:
+			pog = torch.zeros(1, dtype=torch.float32, device=x.device).expand(default_shape)
 				
-		# if hid is None:
-		# 	hid = torch.zeros(1, dtype=torch.float32, device=dev).expand(default_size)
+		if hid is None:
+			hid = torch.zeros(1, dtype=torch.float32, device=x.device).expand(default_shape)
 				
-		# if cel is None:
-		# 	cel = torch.zeros(1, dtype=torch.float32, device=dev).expand(default_size)
+		if cel is None:
+			cel = torch.zeros(1, dtype=torch.float32, device=x.device).expand(default_shape)
 				
 		hids = []
 		for x_ in torch.unbind(x, dim=1):
@@ -224,8 +227,11 @@ class RepresentationAggregator(nn.Module):
 		return self.features(x)
 
 
-class AggregateRewind(nn.Module):
-	def __init__(self, input_size=256, hidden_size=128, zoneout=.15, learn_init=False):
+class AggregateRewind(torch.jit.ScriptModule):
+
+	__constants__ = ['hidden_size']
+
+	def __init__(self, input_size=256, hidden_size=128, zoneout=.15):
 		super(AggregateRewind, self).__init__()
 
 		self.hidden_size = hidden_size
@@ -251,41 +257,43 @@ class AggregateRewind(nn.Module):
 			nn.Linear(hidden_size, input_size)
 			)
 
-		self.init_hid = None
-		self.init_cel = None
-		if learn_init:
-			self.init_hid = nn.Parameter(torch.zeros(1, hidden_size))
-			self.init_cel = nn.Parameter(torch.zeros(1, hidden_size))
-
 		self.op_rewind.apply(init_parameters)
 
 		# print('{}: {:,} trainable parameters.'.format(self.__class__.__name__, count_parameters(self)))
 
-	def forward(self, x, hid=None, cel=None, pog=None, rewind_steps=0):
+	@torch.jit.script_method
+	def forward(self, x, hid=None, cel=None, pog=None, steps=0):
+		# type: (Tensor, Optional[Tensor], Optional[Tensor], Optional[Tensor], int) -> Tuple[Tensor, Tensor]
+		"""Summary
+		
+		Args:
+		    x (Tensor, 2D): aggregated scene representation
+		    hid (Tensor, 2D, optional): lstm hidden neurons at t=T
+		    pog (Tensor, 2D, optional): lstm hidden neurons at t=T-1
+		    steps (int, optional): number of step to look back in time
+		
+		Returns:
+		    Tuple[Tensor, Tensor]: Description
+		"""
+		
+
 		# x: input aggregate
 		# hid: lstm hidden state
 		# cel: lstm cell state
 		# pog: previous lstm output gate
-		B = x.size(0)
-		C = self.hidden_size
 
+		hidden_shape = torch.Size([x.size(0), self.hidden_size])
 		if hid is None:
-			if self.init_hid is None:
-				hid = torch.zeros(1, device=x.device).expand(B, C)
-			else:
-				hid = self.init_hid.expand(B, -1)
-				
+			hid = torch.zeros(1, device=x.device).expand(hidden_shape)
+
 		if cel is None:
-			if self.init_cel is None:
-				cel = torch.zeros(1, device=x.device).expand(B, C)
-			else:
-				cel = self.init_cel.expand(B, -1)
-				
+			cel = torch.zeros(1, device=x.device).expand(hidden_shape)
+
 		if pog is None:
-			pog = torch.zeros(1, device=x.device).expand(B, C)
+			pog = torch.zeros(1, device=x.device).expand(hidden_shape)
 
 		rewind = [x]
-		for _ in range(rewind_steps):
+		for _ in range(steps):
 			x_ = rewind[-1]
 			hid, cel, pog = self.op_progrm(x_, hid, cel, pog)
 
