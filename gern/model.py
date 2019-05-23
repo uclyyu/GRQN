@@ -21,54 +21,54 @@ class RepresentationEncoderPrimitive(nn.Module):
 			# 0 ---
 			nn.Sequential(
 				nn.Conv2d(7, 32, (3, 3), (2, 2), padding=1), 
-				GroupNorm2d(32, 8), 
 				nn.ReLU(True),
+				GroupNorm2d(32, 8), 
 				SkipConnect(
 					nn.Conv2d(32, 32, (3, 3), (1, 1), padding=1)), 
-				GroupNorm2d(32, 8), 
 				nn.ReLU(True),
+				GroupNorm2d(32, 8), 
 				nn.MaxPool2d((2, 2), stride=(2, 2)),
 				nn.Conv2d(32, 64, (3, 3), (1, 1), padding=1), 
-				GroupNorm2d(64, 8), 
 				nn.ReLU(True),
+				GroupNorm2d(64, 8), 
 				SkipConnect(
 					nn.Conv2d(64, 64, (3, 3), (1, 1), padding=1)), 
-				GroupNorm2d(64, 8), 
 				nn.ReLU(True),
+				GroupNorm2d(64, 8), 
 				nn.MaxPool2d((2, 2), stride=(2, 2)),
 				nn.Conv2d( 64, 128, (3, 3), (1, 1), padding=1), 
-				GroupNorm2d(128, 8), 
 				nn.ReLU(True),
+				GroupNorm2d(128, 8), 
 				SkipConnect(
 					nn.Sequential(
 						nn.Conv2d(128, 128, (3, 3), (1, 1), padding=1), 
-						GroupNorm2d(128, 8), 
 						nn.ReLU(True),
+						GroupNorm2d(128, 8), 
 						nn.Conv2d(128, 128, (3, 3), (1, 1), padding=1), 
 						)), 
-				GroupNorm2d(128, 8), 
 				nn.ReLU(True),
+				GroupNorm2d(128, 8), 
 				nn.MaxPool2d((2, 2), stride=(2, 2))
 			),
 			# 1 ---
 			nn.Sequential(
 				nn.Conv2d(135, 128, (3, 3), (2, 2), padding=1), 
-				GroupNorm2d(128, 8),
 				nn.ReLU(True),
+				GroupNorm2d(128, 8),
 				nn.MaxPool2d((2, 2), stride=(2, 2)),
 				nn.Conv2d(128, 256, (3, 3), (1, 1), padding=1), 
-				GroupNorm2d(256, 8),
 				nn.ReLU(True),
+				GroupNorm2d(256, 8),
 				SkipConnect(
 					nn.Conv2d(256, 256, (1, 1), (1, 1), bias=False),
 					nn.Sequential(
 						nn.Conv2d(256, 256, (3, 3), (1, 1), padding=1),
-						GroupNorm2d(256, 8),
 						nn.ReLU(True),
+						GroupNorm2d(256, 8),
 						nn.Conv2d(256, 256, (3, 3), (1, 1), padding=1))
 					), 
-				GroupNorm2d(256, 8),
 				nn.ReLU(True),
+				GroupNorm2d(256, 8),
 				nn.MaxPool2d((2, 2), stride=(2, 2)),
 				nn.Conv2d(256, 256, (3, 3), (2, 2), padding=1)
 			)
@@ -159,22 +159,22 @@ class RepresentationEncoder(nn.Module):
 
 		self.op_hidden = nn.Sequential(
 			nn.Linear(input_size, hidden_size),
-			GroupNorm1d(hidden_size, 8),
 			nn.ReLU(True),
+			GroupNorm1d(hidden_size, 8),
 			SkipConnect(nn.Sequential(
 				nn.Linear(hidden_size, hidden_size),
-				GroupNorm1d(hidden_size, 8),
 				nn.ReLU(),
+				GroupNorm1d(hidden_size, 8),
 				nn.Linear(hidden_size, hidden_size, bias=False))),
-			GroupNorm1d(hidden_size, 8),
 			nn.ReLU(True),
+			GroupNorm1d(hidden_size, 8),
 			SkipConnect(nn.Sequential(
 				nn.Linear(hidden_size, hidden_size),
-				GroupNorm1d(hidden_size, 8),
 				nn.ReLU(),
+				GroupNorm1d(hidden_size, 8),
 				nn.Linear(hidden_size, hidden_size, bias=False))),
-			GroupNorm1d(hidden_size, 8),
 			nn.ReLU(True),
+			GroupNorm1d(hidden_size, 8),
 			)
 		self.op_key = nn.Linear(hidden_size, primitive_size)
 		self.op_query = nn.Linear(hidden_size, primitive_size)
@@ -200,22 +200,22 @@ class RepresentationAggregator(nn.Module):
 
 		self.features = nn.Sequential(
 			nn.Linear(input_size, output_size),
-			GroupNorm1d(output_size, 8),
 			nn.ReLU(True),
+			GroupNorm1d(output_size, 8),
 			SkipConnect(nn.Sequential(
 				nn.Linear(output_size, output_size),
-				GroupNorm1d(output_size, 8),
 				nn.ReLU(),
+				GroupNorm1d(output_size, 8),
 				nn.Linear(output_size, output_size, bias=False))),
-			GroupNorm1d(output_size, 8),
 			nn.ReLU(True),
+			GroupNorm1d(output_size, 8),
 			SkipConnect(nn.Sequential(
 				nn.Linear(output_size, output_size),
-				GroupNorm1d(output_size, 8),
 				nn.ReLU(),
+				GroupNorm1d(output_size, 8),
 				nn.Linear(output_size, output_size, bias=False))),
-			GroupNorm1d(output_size, 8),
 			nn.ReLU(True),
+			GroupNorm1d(output_size, 8),
 			nn.Linear(output_size, output_size)
 			)
 
@@ -238,22 +238,22 @@ class AggregateRewind(torch.jit.ScriptModule):
 		self.op_progrm = LSTMCell(input_size, hidden_size, zoneout=zoneout)
 		self.op_rewind = nn.Sequential(
 			nn.Linear(input_size + hidden_size, hidden_size),
-			GroupNorm1d(hidden_size, 8),
 			nn.ReLU(True),
+			GroupNorm1d(hidden_size, 8),
 			SkipConnect(nn.Sequential(
 				nn.Linear(hidden_size, hidden_size),
-				GroupNorm1d(hidden_size, 8),
 				nn.ReLU(True),
+				GroupNorm1d(hidden_size, 8),
 				nn.Linear(hidden_size, hidden_size, bias=False))),
-			GroupNorm1d(hidden_size, 8),
 			nn.ReLU(True),
+			GroupNorm1d(hidden_size, 8),
 			SkipConnect(nn.Sequential(
 				nn.Linear(hidden_size, hidden_size),
-				GroupNorm1d(hidden_size, 8),
 				nn.ReLU(True),
+				GroupNorm1d(hidden_size, 8),
 				nn.Linear(hidden_size, hidden_size, bias=False))),
-			GroupNorm1d(hidden_size, 8),
 			nn.ReLU(True),
+			GroupNorm1d(hidden_size, 8),
 			nn.Linear(hidden_size, input_size)
 			)
 
@@ -373,11 +373,11 @@ class GeneratorDelta(nn.Module):
 
 		self.layers = nn.Sequential(
 			nn.Conv2d(512, 256, (3, 3), (1, 1), padding=1),
-			GroupNorm2d(256, 8),
 			nn.ReLU(True),
+			GroupNorm2d(256, 8),
 			SkipConnect(nn.Conv2d(256, 256, (3, 3), (1, 1), padding=1)),
-			GroupNorm2d(256, 8),
 			nn.ReLU(True),
+			GroupNorm2d(256, 8),
 			nn.Conv2d(256, 256, (3, 3), (1, 1), padding=1)
 			)
 
@@ -394,29 +394,29 @@ class DecoderBase(nn.Module):
 
 		self.decoder_base = nn.Sequential(
 			nn.ConvTranspose2d(256, 256, (3, 3), (2, 2), padding=0),
-			GroupNorm2d(256, 8),
 			nn.ReLU(True),
+			GroupNorm2d(256, 8),
 			SkipConnect(
 				nn.Conv2d(256, 256, (3, 3), (1, 1), padding=1),
 				nn.Conv2d(256, 256, (1, 1), (1, 1), bias=False)),
+			nn.ReLU(True),
 			GroupNorm2d(256, 8),
-			nn.ReLU(True),
 			nn.ConvTranspose2d(256, 128, (3, 3), (2, 2), padding=0),
-			GroupNorm2d(128, 8),
 			nn.ReLU(True),
+			GroupNorm2d(128, 8),
 			SkipConnect(
 				nn.Conv2d(128, 128, (3, 3), (1, 1), padding=1),
 				nn.Conv2d(128, 128, (1, 1), (1, 1), bias=False)),
-			GroupNorm2d(128, 8),
 			nn.ReLU(True),
+			GroupNorm2d(128, 8),
 			nn.ConvTranspose2d(128, 128, (3, 3), (2, 2), padding=0),
-			GroupNorm2d(128, 8),
 			nn.ReLU(True),
+			GroupNorm2d(128, 8),
 			SkipConnect(
 				nn.Conv2d(128, 128, (3, 3), (1, 1), padding=1),
 				nn.Conv2d(128, 128, (1, 1), (1, 1), bias=False)),
+			nn.ReLU(True),
 			GroupNorm2d(128, 8),
-			nn.ReLU(True)
 			)
 
 		self.apply(init_parameters)
@@ -432,21 +432,21 @@ class DecoderHeatmap(nn.Module):
 
 		self.decoder_hm = nn.Sequential(
 			nn.ConvTranspose2d(128, 64, (3, 3), (1, 1), padding=1),
-			GroupNorm2d(64, 8),
 			nn.ReLU(True),
+			GroupNorm2d(64, 8),
 			SkipConnect(
 				nn.Conv2d(64, 64, (3, 3), (1, 1), padding=1),
 				nn.Conv2d(64, 64, (1, 1), (1, 1), bias=False)),
+			nn.ReLU(True),
 			GroupNorm2d(64, 8),
-			nn.ReLU(True),
 			nn.ConvTranspose2d(64, 16, (3, 3), (2, 2), padding=1),
-			GroupNorm2d(16, 8),
 			nn.ReLU(True),
+			GroupNorm2d(16, 8),
 			SkipConnect(
 				nn.Conv2d(16, 16, (3, 3), (1, 1), padding=1),
 				nn.Conv2d(16, 16, (1, 1), (1, 1), bias=False)),
-			GroupNorm2d(16, 4),
 			nn.ReLU(True),
+			GroupNorm2d(16, 4),
 			nn.Conv2d(16, 1, (3, 3), (1, 1), padding=1)
 			)
 
@@ -462,41 +462,41 @@ class DecoderRGBVision(nn.Module):
 
 		self.decoder_pre = nn.Sequential(
 			nn.ConvTranspose2d(128, 64, (3, 3), (1, 1), padding=1),
-			GroupNorm2d(64, 8),
 			nn.ReLU(True),
+			GroupNorm2d(64, 8),
 			SkipConnect(
 				nn.Conv2d(64, 64, (3, 3), (1, 1), padding=1),
 				nn.Conv2d(64, 64, (1, 1), (1, 1), bias=False)),
+			nn.ReLU(True),
 			GroupNorm2d(64, 8),
-			nn.ReLU(True),
 			nn.ConvTranspose2d(64, 16, (3, 3), (2, 2), padding=1),
-			GroupNorm2d(16, 4),
 			nn.ReLU(True),
+			GroupNorm2d(16, 4),
 			SkipConnect(
 				nn.Conv2d(16, 16, (3, 3), (1, 1), padding=1),
 				nn.Conv2d(16, 16, (1, 1), (1, 1), bias=False)),
-			GroupNorm2d(16, 4),
 			nn.ReLU(True),
+			GroupNorm2d(16, 4),
 			nn.Conv2d(16, 16, (3, 3), (1, 1), padding=1)
 			)
 
 		self.decoder_post = nn.Sequential(
 			nn.Conv2d(17, 16, (3, 3), (1, 1), padding=1), 
-			GroupNorm2d(16, 4), 
 			nn.ReLU(True),
+			GroupNorm2d(16, 4), 
 			SkipConnect(
 				nn.Conv2d(16, 16, (3, 3), (1, 1), padding=1),
 				nn.Conv2d(16, 16, (1, 1), (1, 1), bias=False)),
-			GroupNorm2d(16, 4), 
 			nn.ReLU(True),
+			GroupNorm2d(16, 4), 
 			nn.Conv2d(16, 16, (3, 3), (1, 1), padding=1),
-			GroupNorm2d(16, 4), 
 			nn.ReLU(True),
+			GroupNorm2d(16, 4), 
 			SkipConnect(
 				nn.Conv2d(16, 16, (3, 3), (1, 1), padding=1),
 				nn.Conv2d(16, 16, (1, 1), (1, 1), bias=False)),
-			GroupNorm2d(16, 4), 
 			nn.ReLU(True),
+			GroupNorm2d(16, 4), 
 			nn.Conv2d(16, 3, (3, 3), (1, 1), padding=1)
 			)
 
@@ -517,29 +517,29 @@ class AuxiliaryClassifier(nn.Module):
 			SkipConnect(
 				nn.Sequential(
 					nn.Conv2d(256, 256, (3, 3), (1, 1), padding=1),
-					GroupNorm2d(256, 8),
 					nn.ReLU(True),
+					GroupNorm2d(256, 8),
 					nn.Conv2d(256, 256, (3, 3), (2, 2), padding=1)),
 				nn.Conv2d(256, 256, (1, 1), (2, 2), bias=False)),
-			GroupNorm2d(256, 8),
 			nn.ReLU(True),
+			GroupNorm2d(256, 8),
 			nn.MaxPool2d((2, 2)),
 			nn.Conv2d(256, 128, (3, 3), (1, 1), padding=1),
 			SkipConnect(
 				nn.Sequential(
 					nn.Conv2d(128, 128, (3, 3), (1, 1), padding=1),
-					GroupNorm2d(128, 8),
 					nn.ReLU(True),
+					GroupNorm2d(128, 8),
 					nn.Conv2d(128, 128, (3, 3), (2, 2), padding=1)),
 				nn.Conv2d(128, 128, (1, 1), (2, 2), bias=False)),
-			GroupNorm2d(128, 8),
 			nn.ReLU(True),
+			GroupNorm2d(128, 8),
 			nn.MaxPool2d((2, 2)),
 			)
 		self.classifier = nn.Sequential(
 			SkipConnect(nn.Linear(128, 128)),
-			GroupNorm1d(128, 8),
 			nn.ReLU(True),
+			GroupNorm1d(128, 8),
 			nn.Linear(128, nclass))
 
 		self.apply(init_parameters)
