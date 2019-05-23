@@ -55,31 +55,15 @@ class GeRN(torch.jit.ScriptModule):
 		return x.contiguous().view(new_size)
 
 	@torch.jit.script_method
-	def _forward_mc_loop(self, 
-		asteps, 			# type: int
-		rwn_aggr, 			# type: Tensor
-		qry_repp, 			# type: Tensor
-		h_iop, 				# type: Tensor
-		c_iop, 				# type: Tensor
-		o_iop, 				# type: Tensor
-		h_gop, 				# type: Tensor
-		c_gop, 				# type: Tensor
-		o_gop, 				# type: Tensor
-		u_gop,				# type: Tensor
-		prior_means=[], 	# type: List[Tensor]
-		prior_logvs=[],		# type: List[Tensor]
-		posterior_means=[], # type: List[Tensor]
-		posterior_logvs=[]	# type: List[Tensor]
-		):
-		# type: (...) -> Tuple[Tensor, List[Tensor], List[Tensor], List[Tensor], List[Tensor]]
+	def _forward_mc_loop(self, asteps, rwn_aggr, qry_repp, qry_v, h_iop, c_iop, o_iop, h_gop, c_gop, o_gop, u_gop, prior_means, prior_logvs, posterior_means, posterior_logvs):
+		# type: (int, Tensor, Tensor, Tensor, Tensor, Tensor, Tensor, Tensor, Tensor, Tensor, Tensor, List[Tensor], List[Tensor], List[Tensor], List[Tensor]) -> Tuple[Tensor, List[Tensor], List[Tensor], List[Tensor], List[Tensor]]
 
 		for ast in range(asteps):
-			prior_dist, prior_mean, prior_logv = self.gop_prior(h_gop)
+			prior_z, prior_mean, prior_logv = self.gop_prior(h_gop)
 
 			input_iop = torch.cat([rwn_aggr, qry_repp, h_gop], dim=1)
 			h_iop, c_iop, o_iop = self.iop_state(input_iop, h_iop, c_iop, o_iop)
-			posterior_dist, posterior_mean, posterior_logv = self.iop_posterior(h_iop)
-			posterior_z = posterior_dist.rsample()
+			posterior_z, posterior_mean, posterior_logv = self.iop_posterior(h_iop)
 
 			input_gop = torch.cat([rwn_aggr, posterior_z, qry_v], dim=1)
 			h_gop, c_gop, o_gop = self.gop_state(input_gop, h_gop, c_gop, o_gop)
@@ -89,11 +73,22 @@ class GeRN(torch.jit.ScriptModule):
 			prior_means.append(prior_mean), prior_logvs.append(prior_logv)
 			posterior_means.append(posterior_mean), posterior_logvs.append(posterior_logv)
 
-		return u_gop, prior_means, prior_logvs, posterior_means, posteiror_logvs
+		return u_gop, prior_means, prior_logvs, posterior_means, posterior_logvs
 
 	@torch.jit.script_method
-	def _predict_mc_loop(self):
-		pass
+	def _predict_mc_loop(self, asteps, rwn_aggr, qry_v, h_gop, c_gop, o_gop, u_gop, prior_means=[], prior_logvs=[]):
+	# type: (int, Tensor, Tensor, Tensor, Tensor, Tensor, Tensor, List[Tensor], List[Tensor]) -> Tuple[Tensor, List[Tensor], List[Tensor]]
+		for ast in range(asteps):
+			prior_z, prior_mean, prior_logv = self.gop_prior(h_gop)
+
+			input_gop = torch.cat([rwn_aggr, prior_z, qry_v], dim=1)
+			h_gop, c_gop, o_gop = self.gop_state(input_gop, h_gop, c_gop, o_gop)
+			u_gop = u_gop + self.gop_delta(u_gop, h_gop)
+
+			# collect means and log variances
+			prior_means.append(prior_mean), prior_logvs.append(prior_logv)
+
+		return u_gop, prior_means, prior_logvs
 
 	def forward(self, 
 				cnd_x, cnd_m, cnd_k, cnd_v, 
@@ -159,7 +154,7 @@ class GeRN(torch.jit.ScriptModule):
 
 		# --- Rewind 
 		# 								-> (B, Tq, 256), (B, 256)
-		rwn_aggr, _ = self.rop_rewind(end_aggr, rewind_steps=rsteps)
+		rwn_aggr, _ = self.rop_rewind(end_aggr, steps=rsteps)
 		
 		# tweaking dimensionality
 		rwn_aggr = self.pack_time(rwn_aggr)[0].unsqueeze(2).unsqueeze(2).expand(-1, -1, 16, 16)
@@ -168,9 +163,10 @@ class GeRN(torch.jit.ScriptModule):
 
 		# --- Inference/generation
 		u_gop, prior_means, prior_logvs, posterior_means, posterior_logvs = self._forward_mc_loop(
-			asteps, rwn_aggr, qry_repp, 
+			asteps, rwn_aggr, qry_repp, qry_v,
 			h_iop, c_iop, o_iop, 
-			h_gop, c_gop, o_gop, u_gop)
+			h_gop, c_gop, o_gop, u_gop,
+			prior_means, prior_logvs, posterior_means, posterior_logvs)
 
 		# --- Auxiliary classification task
 		cat_dist = self.aux_class(u_gop)
@@ -265,24 +261,17 @@ class GeRN(torch.jit.ScriptModule):
 
 		# --- Rewind 
 		# 								-> (B, Tq, 256), (B, 256)
-		rwn_aggr, _ = self.rop_rewind(end_aggr, rewind_steps=rsteps)
+		rwn_aggr, _ = self.rop_rewind(end_aggr, steps=rsteps)
 		
 		# tweaking dimensionality
 		rwn_aggr = self.pack_time(rwn_aggr)[0].unsqueeze(2).unsqueeze(2).expand(-1, -1, 16, 16)
 		qry_v = self.pack_time(qry_v)[0].expand(-1, -1, 16, 16)
 
 		# --- Inference/generation
-		for ast in range(asteps):
-			prior_dist, prior_mean, prior_logv = self.gop_prior(h_gop)
-			prior_z = prior_dist.rsample()
-
-			input_gop = torch.cat([rwn_aggr, prior_z, qry_v], dim=1)
-			h_gop, c_gop, o_gop = self.gop_state(input_gop, h_gop, c_gop, o_gop)
-			u_gop = u_gop + self.gop_delta(u_gop, h_gop)
-
-			# collect means and log variances
-			prior_means.append(prior_mean), prior_logvs.append(prior_logv)
-
+		u_gop, prior_means, prior_logvs = self._predict_mc_loop(
+			asteps, rwn_aggr, qry_v,
+			h_gop, c_gop, o_gop, u_gop,
+			prior_means, prior_logvs)
 
 		# --- Auxiliary classification task
 		cat_dist = self.aux_class(u_gop)
