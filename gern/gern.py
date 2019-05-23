@@ -8,7 +8,7 @@ from .utils import count_parameters
 from .model import *
 
 
-class GeRN(nn.Module):
+class GeRN(torch.jit.ScriptModule):
 	def __init__(self):
 		super(GeRN, self).__init__()
 
@@ -54,29 +54,46 @@ class GeRN(nn.Module):
 		new_size = torch.Size([-1, t]) + size[1:]
 		return x.contiguous().view(new_size)
 
-	# @torch.jit.script_method
-	# def _igloop(self, asteps, rwn_aggr, qry_repp, 
-	# 	h_iop, c_iop, o_iop, 
-	# 	h_gop, c_gop, o_gop, u_gop,
-	# 	prior_means=[], prior_logvs=[],
-	# 	posterior_means=[], posterior_logvs=[]):
-	# 	for ast in range(int(asteps)):
-	# 		prior_dist, prior_mean, prior_logv = self.gop_prior(h_gop)
+	@torch.jit.script_method
+	def _forward_mc_loop(self, 
+		asteps, 			# type: int
+		rwn_aggr, 			# type: Tensor
+		qry_repp, 			# type: Tensor
+		h_iop, 				# type: Tensor
+		c_iop, 				# type: Tensor
+		o_iop, 				# type: Tensor
+		h_gop, 				# type: Tensor
+		c_gop, 				# type: Tensor
+		o_gop, 				# type: Tensor
+		u_gop,				# type: Tensor
+		prior_means=[], 	# type: List[Tensor]
+		prior_logvs=[],		# type: List[Tensor]
+		posterior_means=[], # type: List[Tensor]
+		posterior_logvs=[]	# type: List[Tensor]
+		):
+		# type: (...) -> Tuple[Tensor, List[Tensor], List[Tensor], List[Tensor], List[Tensor]]
 
-	# 		input_iop = torch.cat([rwn_aggr, qry_repp, h_gop], dim=1)
-	# 		h_iop, c_iop, o_iop = self.iop_state(input_iop, h_iop, c_iop, o_iop)
-	# 		posterior_dist, posterior_mean, posterior_logv = self.iop_posterior(h_iop)
-	# 		posterior_z = posterior_dist.rsample()
+		for ast in range(asteps):
+			prior_dist, prior_mean, prior_logv = self.gop_prior(h_gop)
 
-	# 		input_gop = torch.cat([rwn_aggr, posterior_z, qry_v], dim=1)
-	# 		h_gop, c_gop, o_gop = self.gop_state(input_gop, h_gop, c_gop, o_gop)
-	# 		u_gop = u_gop + self.gop_delta(u_gop, h_gop)
+			input_iop = torch.cat([rwn_aggr, qry_repp, h_gop], dim=1)
+			h_iop, c_iop, o_iop = self.iop_state(input_iop, h_iop, c_iop, o_iop)
+			posterior_dist, posterior_mean, posterior_logv = self.iop_posterior(h_iop)
+			posterior_z = posterior_dist.rsample()
 
-	# 		# collect means and log variances
-	# 		prior_means.append(prior_mean), prior_logvs.append(prior_logv)
-	# 		posterior_means.append(posterior_mean), posterior_logvs.append(posterior_logv)
+			input_gop = torch.cat([rwn_aggr, posterior_z, qry_v], dim=1)
+			h_gop, c_gop, o_gop = self.gop_state(input_gop, h_gop, c_gop, o_gop)
+			u_gop = u_gop + self.gop_delta(u_gop, h_gop)
 
-	# 	return u_gop, prior_means, prior_logvs, posterior_means, posteiror_logvs
+			# collect means and log variances
+			prior_means.append(prior_mean), prior_logvs.append(prior_logv)
+			posterior_means.append(posterior_mean), posterior_logvs.append(posterior_logv)
+
+		return u_gop, prior_means, prior_logvs, posterior_means, posteiror_logvs
+
+	@torch.jit.script_method
+	def _predict_mc_loop(self):
+		pass
 
 	def forward(self, 
 				cnd_x, cnd_m, cnd_k, cnd_v, 
@@ -150,26 +167,10 @@ class GeRN(nn.Module):
 		qry_v = self.pack_time(qry_v)[0].expand(-1, -1, 16, 16)
 
 		# --- Inference/generation
-		# u_gop, prior_means, prior_logvs, posterior_means, posterior_logvs = self._igloop(
-		# 	asteps, rwn_aggr, qry_repp, 
-		# 	h_iop, c_iop, o_iop, 
-		# 	h_gop, c_gop, o_gop, u_gop)
-		for ast in range(asteps):
-			prior_dist, prior_mean, prior_logv = self.gop_prior(h_gop)
-
-			input_iop = torch.cat([rwn_aggr, qry_repp, h_gop], dim=1)
-			h_iop, c_iop, o_iop = self.iop_state(input_iop, h_iop, c_iop, o_iop)
-			posterior_dist, posterior_mean, posterior_logv = self.iop_posterior(h_iop)
-			posterior_z = posterior_dist.rsample()
-
-			input_gop = torch.cat([rwn_aggr, posterior_z, qry_v], dim=1)
-			h_gop, c_gop, o_gop = self.gop_state(input_gop, h_gop, c_gop, o_gop)
-			u_gop = u_gop + self.gop_delta(u_gop, h_gop)
-
-			# collect means and log variances
-			prior_means.append(prior_mean), prior_logvs.append(prior_logv)
-			posterior_means.append(posterior_mean), posterior_logvs.append(posterior_logv)
-
+		u_gop, prior_means, prior_logvs, posterior_means, posterior_logvs = self._forward_mc_loop(
+			asteps, rwn_aggr, qry_repp, 
+			h_iop, c_iop, o_iop, 
+			h_gop, c_gop, o_gop, u_gop)
 
 		# --- Auxiliary classification task
 		cat_dist = self.aux_class(u_gop)
