@@ -323,8 +323,10 @@ class GaussianFactor(nn.Module):
 	def forward(self, inp):
 		mean, logv = torch.chunk(self.layer(inp), 2, dim=1)
 		scale = (0.5 * logv).exp()
-		dist = torch.distributions.Normal(mean, scale)
-		return dist, mean, logv
+		z = torch.randn(inp.size(), device=inp.device)
+		sample = z * scale + mean
+		# dist = torch.distributions.Normal(mean, scale)
+		return sample, mean, logv
 
 
 class RecurrentCell(nn.Module):

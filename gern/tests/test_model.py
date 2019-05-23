@@ -146,10 +146,10 @@ class TestGaussianFactor(unittest.TestCase):
 
 	def test_input(self):
 		x = torch.randn(3, 256, 16, 16)
-		dist, mean, logv = self.net(x)
+		z, mean, logv = self.net(x)
 		self.assertEqual(mean.size(), torch.Size([3, 256, 16, 16]))
 		self.assertEqual(logv.size(), torch.Size([3, 256, 16, 16]))
-		self.assertEqual(dist.rsample().size(), torch.Size([3, 256, 16, 16]))
+		self.assertEqual(z.size(), torch.Size([3, 256, 16, 16]))
 
 
 class TestGeneratorDelta(unittest.TestCase):
