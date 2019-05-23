@@ -1,4 +1,4 @@
-import os, argparse, json, re
+import os, argparse, json, re, pickle, shutil
 import numpy as np
 import torch
 import pandas as pd
@@ -66,15 +66,16 @@ if __name__ == '__main__':
 	col_loss = ['l-rgbv', 'l-heat', 'l-classify', 'l-aggregate', 'accuracy']
 
 	if os.path.isfile('validate.pkl'):
-		with open('validate.pkl', 'r') as pkl:
+		shutil.copyfile('validate.pkl', 'validate.pkl-bak')
+		with open('validate.pkl', 'rb') as pkl:
 			df = pickle.load(pkl)
 	else:
 		df = pd.DataFrame(columns=col_hpar + col_loss)
 
 	ckpt_rootdir = '/home/yen/data/gern/results/checkpoints'
-	ar_steps = [7, 16, 32, 64, 128]
-	subset_size = 6000
-	batch_size = 60
+	ar_steps = [64, 7]
+	subset_size = 1000
+	batch_size = 50
 	nrepeat = 1
 	nrank = 2
 	nrun = 1
@@ -99,7 +100,7 @@ if __name__ == '__main__':
 				ckptdir = os.path.join(ckpt_rootdir, rank_str, run_str)
 
 				# loop over checkpoints in order
-				for ckpt in sorted(glob(os.path.join(ckptdir, '*.pth'))):
+				for ckpt in reversed(sorted(glob(os.path.join(ckptdir, '*.pth')))):
 					logger.info('\tLoad checkpoint {ckpt}.', ckpt=ckpt)
 					network.load_state_dict(torch.load(ckpt))
 					epoch = extract_epoch(ckpt)
