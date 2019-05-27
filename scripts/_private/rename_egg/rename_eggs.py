@@ -1,11 +1,23 @@
-import re, shutil, argparse, os, csv, json, random, subprocess
+import re, shutil, argparse, os, csv, json, random, subprocess, pandas, signal, time
 from glob import glob
 from tqdm import tqdm
 from datetime import datetime
 from collections import OrderedDict
+from panda3d.core import NodePath, loadPrcFileData
+loadPrcFileData('', 'window-type offscreen')
+loadPrcFileData('', 'audio-library-name null')
+from direct.actor.Actor import Actor 
+from direct.showbase.ShowBase import ShowBase, WindowProperties, FrameBufferProperties, GraphicsPipe, GraphicsPipeSelection
 
 # Lxx.Ryyyy.egg
 # Lxx.Ryyyy.Azzzz.egg
+
+_COLUMNS_ = [
+	'group', 
+	'activity-name', 'activity-id', 'activity-descrip', 'activity-item', 
+	'rig-name', 'rig-id', 
+	'animation-name', 'animation-id', 'animation-numframe', 
+	'file-rig', 'file-animation']
 
 _LABEL_MAPPING_ = {
 		# txt_label: [num_label, 'activity', 'item']
@@ -62,13 +74,51 @@ _PATTERN_FULL_ = (
 	')').format(_PATTERN_PREFIX_, _PATTERN_SUFFIX_, _PATTERN_EXTENSION_)
 
 
+class ActorLoader(ShowBase):
+	"""The SceneManager will import two models: one for the static 
+	environment layout, the other for an animated human animation. """
+	def __init__(self, size=(256, 256), zNear=0.1, zFar=1000.0, fov=70.0, showPosition=False):
+		super().__init__()
+
+		self.__dict__.update(size=size, zNear=zNear, zFar=zFar, fov=fov, showPosition=showPosition)
+
+		self.disableMouse()
+
+		# --- Configure offsceen properties
+		flags = GraphicsPipe.BFFbPropsOptional | GraphicsPipe.BFRefuseWindow
+		wprop = WindowProperties(WindowProperties.getDefault())
+		wprop.setSize(size[0], size[1])
+		fprop = FrameBufferProperties(FrameBufferProperties.getDefault())
+		fprop.setRgbColor(1)
+		fprop.setColorBits(24)
+		fprop.setAlphaBits(8)
+		fprop.setDepthBits(1)
+		self.pipe = GraphicsPipeSelection.getGlobalPtr().makeDefaultPipe()
+		self.win = self.graphicsEngine.makeOutput(
+			pipe=self.pipe, name='RGB buffer', sort=0, 
+			fb_prop=fprop, win_prop=wprop, flags=flags)
+		self.displayRegion = self.win.makeDisplayRegion()
+		self.displayRegion.setCamera(self.cam)
+
+		self.actor = None
+
+	def swapActor(self, actor, animation):
+		if isinstance(self.actor, NodePath):
+			self.actor.detachNode()
+			self.actor.cleanup()
+		self.actor = Actor(actor, {'act': animation})
+		self.actor.reparentTo(self.render)
+
+		return self.actor.getNumFrames('act')
+	
+
 class KeyCollisionError(Exception):
 	pass
 
 
 class AnimationData(object):
 	def __init__(self, source, renamed):
-		self.source = source
+		self.source = source[1:]
 		self.renamed = int(renamed)
 
 	def __repr__(self):
@@ -77,7 +127,7 @@ class AnimationData(object):
 
 class Animation(object):
 	def __init__(self):
-		self._animation_data = dict()
+		self._animation_data = OrderedDict()
 
 	def __getitem__(self, key):
 		return self._animation_data[key]
@@ -103,7 +153,7 @@ class Animation(object):
 
 class RigData(object):
 	def __init__(self, source, renamed):
-		self.source = source
+		self.source = source[1:]
 		self.renamed = int(renamed)
 		self.animation = Animation()
 
@@ -113,7 +163,7 @@ class RigData(object):
 
 class Rig(object):
 	def __init__(self):
-		self._rig_data = dict()
+		self._rig_data = OrderedDict()
 
 	def __getitem__(self, key):
 		return self._rig_data[key]
@@ -146,12 +196,12 @@ class LabelData(object):
 		self.rig = Rig()
 
 	def __repr__(self):
-		return 'L{:02d}'.format(self.renamed)
+		return 'L{:04d}'.format(self.renamed)
 
 
 class Label(object):
 	def __init__(self):
-		self._label_data = dict()
+		self._label_data = OrderedDict()
 
 	def __iter__(self):
 		for k in self._label_data.keys():
@@ -180,7 +230,7 @@ class Label(object):
 def distill(path_pattern):
 	labels = Label()
 
-	files = glob(path_pattern)
+	files = sorted(glob(path_pattern))
 	commonpath = os.path.commonpath(files)
 
 	for file in files:
@@ -229,65 +279,39 @@ def dot_join(*args):
 	return '.'.join(map(str, args))
 
 
-def jsonify(labels, commonpath, output_name='labels.json'):
-	json_dict = {'label_size': labels.size(), 'top_path': commonpath, 'labels': {}, 'rig_count': 0, 'anim_count': 0}
-	for ld in labels:
-		ld_dict = {'rig_size': ld.rig.size(), 'rigs': {}, 'rig_count': 0, 'anim_count': 0}
+def csvify(labels, common_path, outname):
+	alo = ActorLoader()
+	df = pandas.DataFrame(columns=_COLUMNS_)
+	count = 0
+	num = 0
 
+	# signal.signal(signal.SIGALRM, handler)
+	for ld in tqdm(labels):
 		for rd in ld.rig:
-			rd_dict = {'animation_size': rd.animation.size(), 'animations': {}, 'anim_count': 0}
-			
 			for ad in rd.animation:
-				json_dict['anim_count'] += 1
-				ld_dict['anim_count'] += 1
-				rd_dict['anim_count'] += 1
-				rd_dict['animations'].update({ad.source: {'target': dot_join(ld, rd, ad, 'egg')}})
 
-			json_dict['rig_count'] += 1
-			ld_dict['rig_count'] += 1
-			ld_dict['rigs'].update({rd.source: {'target': dot_join(ld, rd, 'egg'), 'data': rd_dict}})
-		json_dict['labels'].update({ld.source: {'target': str(ld), 'data': ld_dict}})
+				if rd.source[:4] == 'man0':
+					cat = 'test'
+				else:
+					cat = 'train'
 
-		print('{}({:3s}) --- R#{}  A#{}'.format(str(ld), ld.source, ld_dict['rig_count'], ld_dict['anim_count']))
+				rf = os.path.join(common_path, rd.source)
+				af = os.path.join(common_path, ad.source)
+				print('processing... {}'.format(af))
+	
+				num = alo.swapActor(rf, af)
+				print(num)
+				df.loc[count] = [
+					cat,
+					ld.source, ld.renamed, ld.activity_string, ld.object_string,
+					rd.source, rd.renamed,
+					ad.source, ad.renamed, num,
+					dot_join(ld, rd, 'egg'), dot_join(ld, rd, ad, 'egg')
+				]
+				count += 1
 
-	with open(output_name, 'w') as jw:
-		json.dump(json_dict, jw)
 
-	return json_dict
-		
-
-def csvify(labels, output_name='labels.csv'):
-	entry = OrderedDict([
-		('label-txt', None), ('label-num', None), 
-		('rig', None), ('rig-rename', None), 
-		('anim', None), ('anim-rename', None), 
-		('category', None)	
-		])
-	count = {'L{:02d}'.format(k): 0 for k in range(13)}
-
-	with open(output_name, 'w') as cw:
-		writer = csv.DictWriter(cw, entry.keys())
-		writer.writeheader()
-
-		for ld in labels:
-			for rd in ld.rig:
-				for ad in rd.animation:
-					if count[str(ld)] >= 45:
-						cat = 'test'
-					else:
-						cat = 'train'
-					entry.update({
-						'label-txt': ld.source,
-						'label-num': str(ld),
-						'rig': rd.source,
-						'rig-rename': dot_join(ld, rd, 'egg'),
-						'anim': ad.source,
-						'anim-rename': dot_join(ld, rd, ad, 'egg'),
-						'category': cat
-						})
-					count[str(ld)] += 1
-					writer.writerow(entry)
-		print(count)
+	df.to_csv(outname, encoding='utf-8')
 
 
 def copyfile(csvfile, source_path, target_path, usebam=True):
@@ -307,11 +331,11 @@ def copyfile(csvfile, source_path, target_path, usebam=True):
 	with open(csvfile, 'r') as cr:
 		reader = csv.DictReader(cr)
 		for row in reader:
-			category = row['category']
-			source_rig_file = os.path.sep.join([source_path, row['rig']])
-			target_rig_file = os.path.join(target_path, category, row['rig-rename'])
-			source_anim_file = os.path.sep.join([source_path, row['anim']])
-			target_anim_file = os.path.join(target_path, category, row['anim-rename'])
+			category = row['group']
+			source_rig_file = os.path.sep.join([source_path, row['rig-name']])
+			target_rig_file = os.path.join(target_path, category, row['file-rig'])
+			source_anim_file = os.path.sep.join([source_path, row['animation-name']])
+			target_anim_file = os.path.join(target_path, category, row['file-animation'])
 
 			if usebam:
 				target_rig_file = target_rig_file.replace('.egg', '.bam')
@@ -336,11 +360,10 @@ def copytexture(source_path_pattern, target_path):
 
 
 if __name__ == '__main__':
+	outname = 'labels.csv'
+	labels, commonpath = distill('/home/yen/data/gern/egg_human/original/**/*.egg')
+	csvify(labels, commonpath, outname)
 
-	labels, commonpath = distill('../../../../../data/gern/egg_human/original/**/*.egg')
-	jsonify(labels, commonpath)
-	csvify(labels)
-
-	copyfile('labels.csv', commonpath, '../../../../../data/gern/egg_human')	
-	copytexture('../../../../../data/gern/egg_human/original/**/tex', '../../../../../data/gern/egg_human/train')
-	copytexture('../../../../../data/gern/egg_human/original/**/tex', '../../../../../data/gern/egg_human/test')
+	copyfile('labels.csv', commonpath, '/home/yen/data/gern/egg_human')	
+	copytexture('/home/yen/data/gern/egg_human/original/**/tex', '/home/yen/data/gern/egg_human/train')
+	copytexture('/home/yen/data/gern/egg_human/original/**/tex', '/home/yen/data/gern/egg_human/test')

@@ -1,652 +1,652 @@
-label-txt,label-num,rig,rig-rename,anim,anim-rename,category
-bt,L00,/woman1/woman12bt.egg,L00.R0004.egg,/woman1/woman12bt-bt4.egg,L00.R0004.A0001.egg,train
-bt,L00,/woman1/woman12bt.egg,L00.R0004.egg,/woman1/woman12bt-bt2.egg,L00.R0004.A0002.egg,train
-bt,L00,/woman1/woman12bt.egg,L00.R0004.egg,/woman1/woman12bt-bt3.egg,L00.R0004.A0005.egg,train
-bt,L00,/woman1/woman12bt.egg,L00.R0004.egg,/woman1/woman12bt-bt7.egg,L00.R0004.A0004.egg,train
-bt,L00,/woman1/woman12bt.egg,L00.R0004.egg,/woman1/woman12bt-bt6.egg,L00.R0004.A0008.egg,train
-bt,L00,/woman1/woman12bt.egg,L00.R0004.egg,/woman1/woman12bt-bt5.egg,L00.R0004.A0000.egg,train
-bt,L00,/woman1/woman12bt.egg,L00.R0004.egg,/woman1/woman12bt-bt9.egg,L00.R0004.A0007.egg,train
-bt,L00,/woman1/woman12bt.egg,L00.R0004.egg,/woman1/woman12bt-bt10.egg,L00.R0004.A0006.egg,train
-bt,L00,/woman1/woman12bt.egg,L00.R0004.egg,/woman1/woman12bt-bt8.egg,L00.R0004.A0003.egg,train
-bt,L00,/man0/man0bt.egg,L00.R0006.egg,/man0/man0bt-bt8.egg,L00.R0006.A0000.egg,train
-bt,L00,/man0/man0bt.egg,L00.R0006.egg,/man0/man0bt-bt6.egg,L00.R0006.A0007.egg,train
-bt,L00,/man0/man0bt.egg,L00.R0006.egg,/man0/man0bt-bt9.egg,L00.R0006.A0002.egg,train
-bt,L00,/man0/man0bt.egg,L00.R0006.egg,/man0/man0bt-bt10.egg,L00.R0006.A0004.egg,train
-bt,L00,/man0/man0bt.egg,L00.R0006.egg,/man0/man0bt-bt4.egg,L00.R0006.A0001.egg,train
-bt,L00,/man0/man0bt.egg,L00.R0006.egg,/man0/man0bt-bt1.egg,L00.R0006.A0008.egg,train
-bt,L00,/man0/man0bt.egg,L00.R0006.egg,/man0/man0bt-bt5.egg,L00.R0006.A0005.egg,train
-bt,L00,/man0/man0bt.egg,L00.R0006.egg,/man0/man0bt-bt7.egg,L00.R0006.A0003.egg,train
-bt,L00,/man0/man0bt.egg,L00.R0006.egg,/man0/man0bt-bt2.egg,L00.R0006.A0009.egg,train
-bt,L00,/man0/man0bt.egg,L00.R0006.egg,/man0/man0bt-bt3.egg,L00.R0006.A0006.egg,train
-bt,L00,/woman2/woman2bt.egg,L00.R0000.egg,/woman2/woman2bt-bt.egg,L00.R0000.A0000.egg,train
-bt,L00,/man2/man22bt.egg,L00.R0007.egg,/man2/man22bt-bt5.egg,L00.R0007.A0001.egg,train
-bt,L00,/man2/man22bt.egg,L00.R0007.egg,/man2/man22bt-bt9.egg,L00.R0007.A0005.egg,train
-bt,L00,/man2/man22bt.egg,L00.R0007.egg,/man2/man22bt-bt7.egg,L00.R0007.A0004.egg,train
-bt,L00,/man2/man22bt.egg,L00.R0007.egg,/man2/man22bt-bt10.egg,L00.R0007.A0006.egg,train
-bt,L00,/man2/man22bt.egg,L00.R0007.egg,/man2/man22bt-bt3.egg,L00.R0007.A0003.egg,train
-bt,L00,/man2/man22bt.egg,L00.R0007.egg,/man2/man22bt-bt2.egg,L00.R0007.A0007.egg,train
-bt,L00,/man2/man22bt.egg,L00.R0007.egg,/man2/man22bt-bt8.egg,L00.R0007.A0008.egg,train
-bt,L00,/man2/man22bt.egg,L00.R0007.egg,/man2/man22bt-bt4.egg,L00.R0007.A0002.egg,train
-bt,L00,/man2/man22bt.egg,L00.R0007.egg,/man2/man22bt-bt6.egg,L00.R0007.A0000.egg,train
-bt,L00,/woman2/women22bt.egg,L00.R0001.egg,/woman2/women22bt-bt5.egg,L00.R0001.A0006.egg,train
-bt,L00,/woman2/women22bt.egg,L00.R0001.egg,/woman2/women22bt-bt9.egg,L00.R0001.A0008.egg,train
-bt,L00,/woman2/women22bt.egg,L00.R0001.egg,/woman2/women22bt-bt8.egg,L00.R0001.A0002.egg,train
-bt,L00,/woman2/women22bt.egg,L00.R0001.egg,/woman2/women22bt-bt4.egg,L00.R0001.A0001.egg,train
-bt,L00,/woman2/women22bt.egg,L00.R0001.egg,/woman2/women22bt-bt10.egg,L00.R0001.A0003.egg,train
-bt,L00,/woman2/women22bt.egg,L00.R0001.egg,/woman2/women22bt-bt2.egg,L00.R0001.A0005.egg,train
-bt,L00,/woman2/women22bt.egg,L00.R0001.egg,/woman2/women22bt-bt6.egg,L00.R0001.A0004.egg,train
-bt,L00,/woman2/women22bt.egg,L00.R0001.egg,/woman2/women22bt-bt3.egg,L00.R0001.A0000.egg,train
-bt,L00,/woman2/women22bt.egg,L00.R0001.egg,/woman2/women22bt-bt7.egg,L00.R0001.A0007.egg,train
-bt,L00,/man2/man2bt.egg,L00.R0008.egg,/man2/man2bt-bt.egg,L00.R0008.A0000.egg,train
-bt,L00,/man1/man12bt.egg,L00.R0002.egg,/man1/man12bt-bt9.egg,L00.R0002.A0004.egg,train
-bt,L00,/man1/man12bt.egg,L00.R0002.egg,/man1/man12bt-bt5.egg,L00.R0002.A0001.egg,train
-bt,L00,/man1/man12bt.egg,L00.R0002.egg,/man1/man12bt-bt10.egg,L00.R0002.A0006.egg,train
-bt,L00,/man1/man12bt.egg,L00.R0002.egg,/man1/man12bt-bt3.egg,L00.R0002.A0003.egg,train
-bt,L00,/man1/man12bt.egg,L00.R0002.egg,/man1/man12bt-bt8.egg,L00.R0002.A0008.egg,train
-bt,L00,/man1/man12bt.egg,L00.R0002.egg,/man1/man12bt-bt6.egg,L00.R0002.A0000.egg,train
-bt,L00,/man1/man12bt.egg,L00.R0002.egg,/man1/man12bt-bt2.egg,L00.R0002.A0007.egg,test
-bt,L00,/man1/man12bt.egg,L00.R0002.egg,/man1/man12bt-bt4.egg,L00.R0002.A0002.egg,test
-bt,L00,/man1/man12bt.egg,L00.R0002.egg,/man1/man12bt-bt7.egg,L00.R0002.A0005.egg,test
-bt,L00,/woman1/woman1bt.egg,L00.R0005.egg,/woman1/woman1bt-bt.egg,L00.R0005.A0000.egg,test
-bt,L00,/man1/man1bt.egg,L00.R0003.egg,/man1/man1bt-bt.egg,L00.R0003.A0000.egg,test
-mt1,L03,/man1/man12mt1.egg,L03.R0003.egg,/man1/man12mt1-mt14.egg,L03.R0003.A0005.egg,train
-mt1,L03,/man1/man12mt1.egg,L03.R0003.egg,/man1/man12mt1-mt18.egg,L03.R0003.A0004.egg,train
-mt1,L03,/man1/man12mt1.egg,L03.R0003.egg,/man1/man12mt1-mt15.egg,L03.R0003.A0001.egg,train
-mt1,L03,/man1/man12mt1.egg,L03.R0003.egg,/man1/man12mt1-mt13.egg,L03.R0003.A0002.egg,train
-mt1,L03,/man1/man12mt1.egg,L03.R0003.egg,/man1/man12mt1-mt19.egg,L03.R0003.A0008.egg,train
-mt1,L03,/man1/man12mt1.egg,L03.R0003.egg,/man1/man12mt1-mt17.egg,L03.R0003.A0007.egg,train
-mt1,L03,/man1/man12mt1.egg,L03.R0003.egg,/man1/man12mt1-mt110.egg,L03.R0003.A0003.egg,train
-mt1,L03,/man1/man12mt1.egg,L03.R0003.egg,/man1/man12mt1-mt16.egg,L03.R0003.A0000.egg,train
-mt1,L03,/man1/man12mt1.egg,L03.R0003.egg,/man1/man12mt1-mt12.egg,L03.R0003.A0006.egg,train
-mt1,L03,/woman2/women22mt1.egg,L03.R0000.egg,/woman2/women22mt1-mt16.egg,L03.R0000.A0002.egg,train
-mt1,L03,/woman2/women22mt1.egg,L03.R0000.egg,/woman2/women22mt1-mt14.egg,L03.R0000.A0001.egg,train
-mt1,L03,/woman2/women22mt1.egg,L03.R0000.egg,/woman2/women22mt1-mt12.egg,L03.R0000.A0006.egg,train
-mt1,L03,/woman2/women22mt1.egg,L03.R0000.egg,/woman2/women22mt1-mt110.egg,L03.R0000.A0000.egg,train
-mt1,L03,/woman2/women22mt1.egg,L03.R0000.egg,/woman2/women22mt1-mt19.egg,L03.R0000.A0003.egg,train
-mt1,L03,/woman2/women22mt1.egg,L03.R0000.egg,/woman2/women22mt1-mt13.egg,L03.R0000.A0005.egg,train
-mt1,L03,/woman2/women22mt1.egg,L03.R0000.egg,/woman2/women22mt1-mt15.egg,L03.R0000.A0007.egg,train
-mt1,L03,/woman2/women22mt1.egg,L03.R0000.egg,/woman2/women22mt1-mt18.egg,L03.R0000.A0008.egg,train
-mt1,L03,/woman2/women22mt1.egg,L03.R0000.egg,/woman2/women22mt1-mt17.egg,L03.R0000.A0004.egg,train
-mt1,L03,/man1/man1mt1.egg,L03.R0002.egg,/man1/man1mt1-mt1.egg,L03.R0002.A0000.egg,train
-mt1,L03,/man2/man2mt1.egg,L03.R0008.egg,/man2/man2mt1-mt1.egg,L03.R0008.A0000.egg,train
-mt1,L03,/woman1/woman12mt1.egg,L03.R0004.egg,/woman1/woman12mt1-mt18.egg,L03.R0004.A0001.egg,train
-mt1,L03,/woman1/woman12mt1.egg,L03.R0004.egg,/woman1/woman12mt1-mt19.egg,L03.R0004.A0006.egg,train
-mt1,L03,/woman1/woman12mt1.egg,L03.R0004.egg,/woman1/woman12mt1-mt14.egg,L03.R0004.A0002.egg,train
-mt1,L03,/woman1/woman12mt1.egg,L03.R0004.egg,/woman1/woman12mt1-mt16.egg,L03.R0004.A0008.egg,train
-mt1,L03,/woman1/woman12mt1.egg,L03.R0004.egg,/woman1/woman12mt1-mt17.egg,L03.R0004.A0000.egg,train
-mt1,L03,/woman1/woman12mt1.egg,L03.R0004.egg,/woman1/woman12mt1-mt12.egg,L03.R0004.A0003.egg,train
-mt1,L03,/woman1/woman12mt1.egg,L03.R0004.egg,/woman1/woman12mt1-mt13.egg,L03.R0004.A0005.egg,train
-mt1,L03,/woman1/woman12mt1.egg,L03.R0004.egg,/woman1/woman12mt1-mt110.egg,L03.R0004.A0007.egg,train
-mt1,L03,/woman1/woman12mt1.egg,L03.R0004.egg,/woman1/woman12mt1-mt15.egg,L03.R0004.A0004.egg,train
-mt1,L03,/woman1/woman1mt1.egg,L03.R0005.egg,/woman1/woman1mt1-mt1.egg,L03.R0005.A0000.egg,train
-mt1,L03,/man0/man0mt1.egg,L03.R0006.egg,/man0/man0mt1-mt12.egg,L03.R0006.A0009.egg,train
-mt1,L03,/man0/man0mt1.egg,L03.R0006.egg,/man0/man0mt1-mt17.egg,L03.R0006.A0000.egg,train
-mt1,L03,/man0/man0mt1.egg,L03.R0006.egg,/man0/man0mt1-mt15.egg,L03.R0006.A0007.egg,train
-mt1,L03,/man0/man0mt1.egg,L03.R0006.egg,/man0/man0mt1-mt14.egg,L03.R0006.A0006.egg,train
-mt1,L03,/man0/man0mt1.egg,L03.R0006.egg,/man0/man0mt1-mt16.egg,L03.R0006.A0001.egg,train
-mt1,L03,/man0/man0mt1.egg,L03.R0006.egg,/man0/man0mt1-mt19.egg,L03.R0006.A0004.egg,train
-mt1,L03,/man0/man0mt1.egg,L03.R0006.egg,/man0/man0mt1-mt13.egg,L03.R0006.A0003.egg,train
-mt1,L03,/man0/man0mt1.egg,L03.R0006.egg,/man0/man0mt1-mt11.egg,L03.R0006.A0008.egg,train
-mt1,L03,/man0/man0mt1.egg,L03.R0006.egg,/man0/man0mt1-mt110.egg,L03.R0006.A0005.egg,train
-mt1,L03,/man0/man0mt1.egg,L03.R0006.egg,/man0/man0mt1-mt18.egg,L03.R0006.A0002.egg,train
-mt1,L03,/woman2/woman2mt1.egg,L03.R0001.egg,/woman2/woman2mt1-mt1.egg,L03.R0001.A0000.egg,train
-mt1,L03,/man2/man22mt1.egg,L03.R0007.egg,/man2/man22mt1-mt110.egg,L03.R0007.A0007.egg,train
-mt1,L03,/man2/man22mt1.egg,L03.R0007.egg,/man2/man22mt1-mt13.egg,L03.R0007.A0000.egg,train
-mt1,L03,/man2/man22mt1.egg,L03.R0007.egg,/man2/man22mt1-mt17.egg,L03.R0007.A0005.egg,train
-mt1,L03,/man2/man22mt1.egg,L03.R0007.egg,/man2/man22mt1-mt14.egg,L03.R0007.A0001.egg,train
-mt1,L03,/man2/man22mt1.egg,L03.R0007.egg,/man2/man22mt1-mt19.egg,L03.R0007.A0006.egg,test
-mt1,L03,/man2/man22mt1.egg,L03.R0007.egg,/man2/man22mt1-mt16.egg,L03.R0007.A0008.egg,test
-mt1,L03,/man2/man22mt1.egg,L03.R0007.egg,/man2/man22mt1-mt12.egg,L03.R0007.A0003.egg,test
-mt1,L03,/man2/man22mt1.egg,L03.R0007.egg,/man2/man22mt1-mt15.egg,L03.R0007.A0002.egg,test
-mt1,L03,/man2/man22mt1.egg,L03.R0007.egg,/man2/man22mt1-mt18.egg,L03.R0007.A0004.egg,test
-rb,L07,/man2/man22rb.egg,L07.R0007.egg,/man2/man22rb-rb2.egg,L07.R0007.A0002.egg,train
-rb,L07,/man2/man22rb.egg,L07.R0007.egg,/man2/man22rb-rb7.egg,L07.R0007.A0006.egg,train
-rb,L07,/man2/man22rb.egg,L07.R0007.egg,/man2/man22rb-rb5.egg,L07.R0007.A0001.egg,train
-rb,L07,/man2/man22rb.egg,L07.R0007.egg,/man2/man22rb-rb6.egg,L07.R0007.A0008.egg,train
-rb,L07,/man2/man22rb.egg,L07.R0007.egg,/man2/man22rb-rb10.egg,L07.R0007.A0000.egg,train
-rb,L07,/man2/man22rb.egg,L07.R0007.egg,/man2/man22rb-rb9.egg,L07.R0007.A0005.egg,train
-rb,L07,/man2/man22rb.egg,L07.R0007.egg,/man2/man22rb-rb3.egg,L07.R0007.A0007.egg,train
-rb,L07,/man2/man22rb.egg,L07.R0007.egg,/man2/man22rb-rb4.egg,L07.R0007.A0003.egg,train
-rb,L07,/man2/man22rb.egg,L07.R0007.egg,/man2/man22rb-rb8.egg,L07.R0007.A0004.egg,train
-rb,L07,/man2/man2rb.egg,L07.R0008.egg,/man2/man2rb-rb.egg,L07.R0008.A0000.egg,train
-rb,L07,/man0/man0rb.egg,L07.R0006.egg,/man0/man0rb-rb8.egg,L07.R0006.A0006.egg,train
-rb,L07,/man0/man0rb.egg,L07.R0006.egg,/man0/man0rb-rb4.egg,L07.R0006.A0009.egg,train
-rb,L07,/man0/man0rb.egg,L07.R0006.egg,/man0/man0rb-rb5.egg,L07.R0006.A0003.egg,train
-rb,L07,/man0/man0rb.egg,L07.R0006.egg,/man0/man0rb-rb7.egg,L07.R0006.A0008.egg,train
-rb,L07,/man0/man0rb.egg,L07.R0006.egg,/man0/man0rb-rb1.egg,L07.R0006.A0007.egg,train
-rb,L07,/man0/man0rb.egg,L07.R0006.egg,/man0/man0rb-rb3.egg,L07.R0006.A0000.egg,train
-rb,L07,/man0/man0rb.egg,L07.R0006.egg,/man0/man0rb-rb2.egg,L07.R0006.A0001.egg,train
-rb,L07,/man0/man0rb.egg,L07.R0006.egg,/man0/man0rb-rb9.egg,L07.R0006.A0002.egg,train
-rb,L07,/man0/man0rb.egg,L07.R0006.egg,/man0/man0rb-rb6.egg,L07.R0006.A0004.egg,train
-rb,L07,/man0/man0rb.egg,L07.R0006.egg,/man0/man0rb-rb10.egg,L07.R0006.A0005.egg,train
-rb,L07,/woman1/woman1rb.egg,L07.R0005.egg,/woman1/woman1rb-rb.egg,L07.R0005.A0000.egg,train
-rb,L07,/man1/man12rb.egg,L07.R0002.egg,/man1/man12rb-rb2.egg,L07.R0002.A0005.egg,train
-rb,L07,/man1/man12rb.egg,L07.R0002.egg,/man1/man12rb-rb7.egg,L07.R0002.A0006.egg,train
-rb,L07,/man1/man12rb.egg,L07.R0002.egg,/man1/man12rb-rb4.egg,L07.R0002.A0002.egg,train
-rb,L07,/man1/man12rb.egg,L07.R0002.egg,/man1/man12rb-rb8.egg,L07.R0002.A0003.egg,train
-rb,L07,/man1/man12rb.egg,L07.R0002.egg,/man1/man12rb-rb9.egg,L07.R0002.A0004.egg,train
-rb,L07,/man1/man12rb.egg,L07.R0002.egg,/man1/man12rb-rb10.egg,L07.R0002.A0000.egg,train
-rb,L07,/man1/man12rb.egg,L07.R0002.egg,/man1/man12rb-rb3.egg,L07.R0002.A0008.egg,train
-rb,L07,/man1/man12rb.egg,L07.R0002.egg,/man1/man12rb-rb5.egg,L07.R0002.A0007.egg,train
-rb,L07,/man1/man12rb.egg,L07.R0002.egg,/man1/man12rb-rb6.egg,L07.R0002.A0001.egg,train
-rb,L07,/woman2/woman2rb.egg,L07.R0001.egg,/woman2/woman2rb-rb.egg,L07.R0001.A0000.egg,train
-rb,L07,/woman1/woman12rb.egg,L07.R0004.egg,/woman1/woman12rb-rb9.egg,L07.R0004.A0000.egg,train
-rb,L07,/woman1/woman12rb.egg,L07.R0004.egg,/woman1/woman12rb-rb8.egg,L07.R0004.A0003.egg,train
-rb,L07,/woman1/woman12rb.egg,L07.R0004.egg,/woman1/woman12rb-rb5.egg,L07.R0004.A0002.egg,train
-rb,L07,/woman1/woman12rb.egg,L07.R0004.egg,/woman1/woman12rb-rb6.egg,L07.R0004.A0006.egg,train
-rb,L07,/woman1/woman12rb.egg,L07.R0004.egg,/woman1/woman12rb-rb10.egg,L07.R0004.A0001.egg,train
-rb,L07,/woman1/woman12rb.egg,L07.R0004.egg,/woman1/woman12rb-rb2.egg,L07.R0004.A0008.egg,train
-rb,L07,/woman1/woman12rb.egg,L07.R0004.egg,/woman1/woman12rb-rb7.egg,L07.R0004.A0005.egg,train
-rb,L07,/woman1/woman12rb.egg,L07.R0004.egg,/woman1/woman12rb-rb3.egg,L07.R0004.A0007.egg,train
-rb,L07,/woman1/woman12rb.egg,L07.R0004.egg,/woman1/woman12rb-rb4.egg,L07.R0004.A0004.egg,train
-rb,L07,/woman2/women22rb.egg,L07.R0000.egg,/woman2/women22rb-rb8.egg,L07.R0000.A0004.egg,train
-rb,L07,/woman2/women22rb.egg,L07.R0000.egg,/woman2/women22rb-rb9.egg,L07.R0000.A0001.egg,train
-rb,L07,/woman2/women22rb.egg,L07.R0000.egg,/woman2/women22rb-rb2.egg,L07.R0000.A0000.egg,train
-rb,L07,/woman2/women22rb.egg,L07.R0000.egg,/woman2/women22rb-rb5.egg,L07.R0000.A0005.egg,train
-rb,L07,/woman2/women22rb.egg,L07.R0000.egg,/woman2/women22rb-rb6.egg,L07.R0000.A0003.egg,train
-rb,L07,/woman2/women22rb.egg,L07.R0000.egg,/woman2/women22rb-rb3.egg,L07.R0000.A0008.egg,test
-rb,L07,/woman2/women22rb.egg,L07.R0000.egg,/woman2/women22rb-rb4.egg,L07.R0000.A0006.egg,test
-rb,L07,/woman2/women22rb.egg,L07.R0000.egg,/woman2/women22rb-rb10.egg,L07.R0000.A0007.egg,test
-rb,L07,/woman2/women22rb.egg,L07.R0000.egg,/woman2/women22rb-rb7.egg,L07.R0000.A0002.egg,test
-rb,L07,/man1/man1rb.egg,L07.R0003.egg,/man1/man1rb-rb.egg,L07.R0003.A0000.egg,test
-em,L01,/man2/man2em.egg,L01.R0008.egg,/man2/man2em-em.egg,L01.R0008.A0000.egg,train
-em,L01,/woman2/woman2em.egg,L01.R0000.egg,/woman2/woman2em-em.egg,L01.R0000.A0000.egg,train
-em,L01,/man2/man22em.egg,L01.R0007.egg,/man2/man22em-em7.egg,L01.R0007.A0003.egg,train
-em,L01,/man2/man22em.egg,L01.R0007.egg,/man2/man22em-em8.egg,L01.R0007.A0005.egg,train
-em,L01,/man2/man22em.egg,L01.R0007.egg,/man2/man22em-em9.egg,L01.R0007.A0006.egg,train
-em,L01,/man2/man22em.egg,L01.R0007.egg,/man2/man22em-em4.egg,L01.R0007.A0002.egg,train
-em,L01,/man2/man22em.egg,L01.R0007.egg,/man2/man22em-em2.egg,L01.R0007.A0007.egg,train
-em,L01,/man2/man22em.egg,L01.R0007.egg,/man2/man22em-em6.egg,L01.R0007.A0004.egg,train
-em,L01,/man2/man22em.egg,L01.R0007.egg,/man2/man22em-em5.egg,L01.R0007.A0001.egg,train
-em,L01,/man2/man22em.egg,L01.R0007.egg,/man2/man22em-em10.egg,L01.R0007.A0000.egg,train
-em,L01,/man2/man22em.egg,L01.R0007.egg,/man2/man22em-em3.egg,L01.R0007.A0008.egg,train
-em,L01,/woman1/woman12em.egg,L01.R0004.egg,/woman1/woman12em-em6.egg,L01.R0004.A0008.egg,train
-em,L01,/woman1/woman12em.egg,L01.R0004.egg,/woman1/woman12em-em8.egg,L01.R0004.A0007.egg,train
-em,L01,/woman1/woman12em.egg,L01.R0004.egg,/woman1/woman12em-em4.egg,L01.R0004.A0003.egg,train
-em,L01,/woman1/woman12em.egg,L01.R0004.egg,/woman1/woman12em-em7.egg,L01.R0004.A0005.egg,train
-em,L01,/woman1/woman12em.egg,L01.R0004.egg,/woman1/woman12em-em5.egg,L01.R0004.A0001.egg,train
-em,L01,/woman1/woman12em.egg,L01.R0004.egg,/woman1/woman12em-em3.egg,L01.R0004.A0000.egg,train
-em,L01,/woman1/woman12em.egg,L01.R0004.egg,/woman1/woman12em-em9.egg,L01.R0004.A0004.egg,train
-em,L01,/woman1/woman12em.egg,L01.R0004.egg,/woman1/woman12em-em2.egg,L01.R0004.A0002.egg,train
-em,L01,/woman1/woman12em.egg,L01.R0004.egg,/woman1/woman12em-em10.egg,L01.R0004.A0006.egg,train
-em,L01,/man1/man1em2.egg,L01.R0003.egg,/man1/man1em2-em2.egg,L01.R0003.A0000.egg,train
-em,L01,/woman2/women22em.egg,L01.R0001.egg,/woman2/women22em-em7.egg,L01.R0001.A0004.egg,train
-em,L01,/woman2/women22em.egg,L01.R0001.egg,/woman2/women22em-em6.egg,L01.R0001.A0006.egg,train
-em,L01,/woman2/women22em.egg,L01.R0001.egg,/woman2/women22em-em5.egg,L01.R0001.A0000.egg,train
-em,L01,/woman2/women22em.egg,L01.R0001.egg,/woman2/women22em-em3.egg,L01.R0001.A0002.egg,train
-em,L01,/woman2/women22em.egg,L01.R0001.egg,/woman2/women22em-em4.egg,L01.R0001.A0007.egg,train
-em,L01,/woman2/women22em.egg,L01.R0001.egg,/woman2/women22em-em2.egg,L01.R0001.A0003.egg,train
-em,L01,/woman2/women22em.egg,L01.R0001.egg,/woman2/women22em-em10.egg,L01.R0001.A0001.egg,train
-em,L01,/woman2/women22em.egg,L01.R0001.egg,/woman2/women22em-em8.egg,L01.R0001.A0005.egg,train
-em,L01,/woman2/women22em.egg,L01.R0001.egg,/woman2/women22em-em9.egg,L01.R0001.A0008.egg,train
-em,L01,/man1/man12em.egg,L01.R0002.egg,/man1/man12em-em7.egg,L01.R0002.A0006.egg,train
-em,L01,/man1/man12em.egg,L01.R0002.egg,/man1/man12em-em6.egg,L01.R0002.A0000.egg,train
-em,L01,/man1/man12em.egg,L01.R0002.egg,/man1/man12em-em4.egg,L01.R0002.A0004.egg,train
-em,L01,/man1/man12em.egg,L01.R0002.egg,/man1/man12em-em3.egg,L01.R0002.A0003.egg,train
-em,L01,/man1/man12em.egg,L01.R0002.egg,/man1/man12em-em10.egg,L01.R0002.A0008.egg,train
-em,L01,/man1/man12em.egg,L01.R0002.egg,/man1/man12em-em5.egg,L01.R0002.A0001.egg,train
-em,L01,/man1/man12em.egg,L01.R0002.egg,/man1/man12em-em9.egg,L01.R0002.A0002.egg,train
-em,L01,/man1/man12em.egg,L01.R0002.egg,/man1/man12em-em2.egg,L01.R0002.A0007.egg,train
-em,L01,/man1/man12em.egg,L01.R0002.egg,/man1/man12em-em8.egg,L01.R0002.A0005.egg,train
-em,L01,/woman1/woman1em.egg,L01.R0005.egg,/woman1/woman1em-em.egg,L01.R0005.A0000.egg,train
-em,L01,/man0/man0em.egg,L01.R0006.egg,/man0/man0em-em9.egg,L01.R0006.A0006.egg,train
-em,L01,/man0/man0em.egg,L01.R0006.egg,/man0/man0em-em4.egg,L01.R0006.A0002.egg,train
-em,L01,/man0/man0em.egg,L01.R0006.egg,/man0/man0em-em1.egg,L01.R0006.A0003.egg,train
-em,L01,/man0/man0em.egg,L01.R0006.egg,/man0/man0em-em3.egg,L01.R0006.A0009.egg,train
-em,L01,/man0/man0em.egg,L01.R0006.egg,/man0/man0em-em6.egg,L01.R0006.A0001.egg,train
-em,L01,/man0/man0em.egg,L01.R0006.egg,/man0/man0em-em5.egg,L01.R0006.A0005.egg,test
-em,L01,/man0/man0em.egg,L01.R0006.egg,/man0/man0em-em7.egg,L01.R0006.A0008.egg,test
-em,L01,/man0/man0em.egg,L01.R0006.egg,/man0/man0em-em10.egg,L01.R0006.A0007.egg,test
-em,L01,/man0/man0em.egg,L01.R0006.egg,/man0/man0em-em8.egg,L01.R0006.A0004.egg,test
-em,L01,/man0/man0em.egg,L01.R0006.egg,/man0/man0em-em2.egg,L01.R0006.A0000.egg,test
-us,L09,/man1/man12us.egg,L09.R0002.egg,/man1/man12us-us10.egg,L09.R0002.A0003.egg,train
-us,L09,/man1/man12us.egg,L09.R0002.egg,/man1/man12us-us7.egg,L09.R0002.A0001.egg,train
-us,L09,/man1/man12us.egg,L09.R0002.egg,/man1/man12us-us4.egg,L09.R0002.A0000.egg,train
-us,L09,/man1/man12us.egg,L09.R0002.egg,/man1/man12us-us3.egg,L09.R0002.A0007.egg,train
-us,L09,/man1/man12us.egg,L09.R0002.egg,/man1/man12us-us9.egg,L09.R0002.A0002.egg,train
-us,L09,/man1/man12us.egg,L09.R0002.egg,/man1/man12us-us5.egg,L09.R0002.A0005.egg,train
-us,L09,/man1/man12us.egg,L09.R0002.egg,/man1/man12us-us6.egg,L09.R0002.A0006.egg,train
-us,L09,/man1/man12us.egg,L09.R0002.egg,/man1/man12us-us2.egg,L09.R0002.A0004.egg,train
-us,L09,/man1/man12us.egg,L09.R0002.egg,/man1/man12us-us8.egg,L09.R0002.A0008.egg,train
-us,L09,/woman1/woman1us.egg,L09.R0005.egg,/woman1/woman1us-us.egg,L09.R0005.A0000.egg,train
-us,L09,/man2/man2us.egg,L09.R0008.egg,/man2/man2us-us.egg,L09.R0008.A0000.egg,train
-us,L09,/woman2/woman2us.egg,L09.R0001.egg,/woman2/woman2us-us.egg,L09.R0001.A0000.egg,train
-us,L09,/man0/man0us.egg,L09.R0006.egg,/man0/man0us-us10.egg,L09.R0006.A0006.egg,train
-us,L09,/man0/man0us.egg,L09.R0006.egg,/man0/man0us-us5.egg,L09.R0006.A0007.egg,train
-us,L09,/man0/man0us.egg,L09.R0006.egg,/man0/man0us-us8.egg,L09.R0006.A0002.egg,train
-us,L09,/man0/man0us.egg,L09.R0006.egg,/man0/man0us-us4.egg,L09.R0006.A0009.egg,train
-us,L09,/man0/man0us.egg,L09.R0006.egg,/man0/man0us-us7.egg,L09.R0006.A0004.egg,train
-us,L09,/man0/man0us.egg,L09.R0006.egg,/man0/man0us-us1.egg,L09.R0006.A0005.egg,train
-us,L09,/man0/man0us.egg,L09.R0006.egg,/man0/man0us-us3.egg,L09.R0006.A0000.egg,train
-us,L09,/man0/man0us.egg,L09.R0006.egg,/man0/man0us-us6.egg,L09.R0006.A0008.egg,train
-us,L09,/man0/man0us.egg,L09.R0006.egg,/man0/man0us-us2.egg,L09.R0006.A0001.egg,train
-us,L09,/man0/man0us.egg,L09.R0006.egg,/man0/man0us-us9.egg,L09.R0006.A0003.egg,train
-us,L09,/man2/man22us.egg,L09.R0007.egg,/man2/man22us-us2.egg,L09.R0007.A0006.egg,train
-us,L09,/man2/man22us.egg,L09.R0007.egg,/man2/man22us-us10.egg,L09.R0007.A0008.egg,train
-us,L09,/man2/man22us.egg,L09.R0007.egg,/man2/man22us-us3.egg,L09.R0007.A0005.egg,train
-us,L09,/man2/man22us.egg,L09.R0007.egg,/man2/man22us-us6.egg,L09.R0007.A0007.egg,train
-us,L09,/man2/man22us.egg,L09.R0007.egg,/man2/man22us-us4.egg,L09.R0007.A0000.egg,train
-us,L09,/man2/man22us.egg,L09.R0007.egg,/man2/man22us-us5.egg,L09.R0007.A0002.egg,train
-us,L09,/man2/man22us.egg,L09.R0007.egg,/man2/man22us-us8.egg,L09.R0007.A0003.egg,train
-us,L09,/man2/man22us.egg,L09.R0007.egg,/man2/man22us-us9.egg,L09.R0007.A0001.egg,train
-us,L09,/man2/man22us.egg,L09.R0007.egg,/man2/man22us-us7.egg,L09.R0007.A0004.egg,train
-us,L09,/woman1/woman12us.egg,L09.R0004.egg,/woman1/woman12us-us10.egg,L09.R0004.A0005.egg,train
-us,L09,/woman1/woman12us.egg,L09.R0004.egg,/woman1/woman12us-us6.egg,L09.R0004.A0003.egg,train
-us,L09,/woman1/woman12us.egg,L09.R0004.egg,/woman1/woman12us-us3.egg,L09.R0004.A0000.egg,train
-us,L09,/woman1/woman12us.egg,L09.R0004.egg,/woman1/woman12us-us8.egg,L09.R0004.A0008.egg,train
-us,L09,/woman1/woman12us.egg,L09.R0004.egg,/woman1/woman12us-us5.egg,L09.R0004.A0007.egg,train
-us,L09,/woman1/woman12us.egg,L09.R0004.egg,/woman1/woman12us-us2.egg,L09.R0004.A0001.egg,train
-us,L09,/woman1/woman12us.egg,L09.R0004.egg,/woman1/woman12us-us7.egg,L09.R0004.A0006.egg,train
-us,L09,/woman1/woman12us.egg,L09.R0004.egg,/woman1/woman12us-us4.egg,L09.R0004.A0004.egg,train
-us,L09,/woman1/woman12us.egg,L09.R0004.egg,/woman1/woman12us-us9.egg,L09.R0004.A0002.egg,train
-us,L09,/man1/man1us.egg,L09.R0003.egg,/man1/man1us-us.egg,L09.R0003.A0000.egg,train
-us,L09,/woman2/women22us.egg,L09.R0000.egg,/woman2/women22us-us8.egg,L09.R0000.A0007.egg,train
-us,L09,/woman2/women22us.egg,L09.R0000.egg,/woman2/women22us-us9.egg,L09.R0000.A0008.egg,train
-us,L09,/woman2/women22us.egg,L09.R0000.egg,/woman2/women22us-us5.egg,L09.R0000.A0000.egg,train
-us,L09,/woman2/women22us.egg,L09.R0000.egg,/woman2/women22us-us3.egg,L09.R0000.A0001.egg,train
-us,L09,/woman2/women22us.egg,L09.R0000.egg,/woman2/women22us-us6.egg,L09.R0000.A0005.egg,test
-us,L09,/woman2/women22us.egg,L09.R0000.egg,/woman2/women22us-us4.egg,L09.R0000.A0003.egg,test
-us,L09,/woman2/women22us.egg,L09.R0000.egg,/woman2/women22us-us10.egg,L09.R0000.A0006.egg,test
-us,L09,/woman2/women22us.egg,L09.R0000.egg,/woman2/women22us-us2.egg,L09.R0000.A0002.egg,test
-us,L09,/woman2/women22us.egg,L09.R0000.egg,/woman2/women22us-us7.egg,L09.R0000.A0004.egg,test
-wf,L11,/woman2/woman2.egg,L11.R0001.egg,/woman2/woman2-wf.egg,L11.R0001.A0000.egg,train
-wf,L11,/woman1/woman1.egg,L11.R0005.egg,/woman1/woman1-wf.egg,L11.R0005.A0000.egg,train
-wf,L11,/man1/man1.egg,L11.R0002.egg,/man1/man1-wf.egg,L11.R0002.A0000.egg,train
-wf,L11,/man2/man22.egg,L11.R0007.egg,/man2/man22-wf6.egg,L11.R0007.A0003.egg,train
-wf,L11,/man2/man22.egg,L11.R0007.egg,/man2/man22-wf9.egg,L11.R0007.A0004.egg,train
-wf,L11,/man2/man22.egg,L11.R0007.egg,/man2/man22-wf2.egg,L11.R0007.A0007.egg,train
-wf,L11,/man2/man22.egg,L11.R0007.egg,/man2/man22-wf4.egg,L11.R0007.A0000.egg,train
-wf,L11,/man2/man22.egg,L11.R0007.egg,/man2/man22-wf5.egg,L11.R0007.A0006.egg,train
-wf,L11,/man2/man22.egg,L11.R0007.egg,/man2/man22-wf3.egg,L11.R0007.A0002.egg,train
-wf,L11,/man2/man22.egg,L11.R0007.egg,/man2/man22-wf7.egg,L11.R0007.A0001.egg,train
-wf,L11,/man2/man22.egg,L11.R0007.egg,/man2/man22-wf8.egg,L11.R0007.A0005.egg,train
-wf,L11,/man2/man22.egg,L11.R0007.egg,/man2/man22-wf10.egg,L11.R0007.A0008.egg,train
-wf,L11,/man2/man2.egg,L11.R0008.egg,/man2/man2-wf.egg,L11.R0008.A0000.egg,train
-wf,L11,/man1/man12.egg,L11.R0003.egg,/man1/man12-wf8.egg,L11.R0003.A0003.egg,train
-wf,L11,/man1/man12.egg,L11.R0003.egg,/man1/man12-wf5.egg,L11.R0003.A0000.egg,train
-wf,L11,/man1/man12.egg,L11.R0003.egg,/man1/man12-wf10.egg,L11.R0003.A0001.egg,train
-wf,L11,/man1/man12.egg,L11.R0003.egg,/man1/man12-wf9.egg,L11.R0003.A0007.egg,train
-wf,L11,/man1/man12.egg,L11.R0003.egg,/man1/man12-wf6.egg,L11.R0003.A0005.egg,train
-wf,L11,/man1/man12.egg,L11.R0003.egg,/man1/man12-wf4.egg,L11.R0003.A0006.egg,train
-wf,L11,/man1/man12.egg,L11.R0003.egg,/man1/man12-wf3.egg,L11.R0003.A0004.egg,train
-wf,L11,/man1/man12.egg,L11.R0003.egg,/man1/man12-wf2.egg,L11.R0003.A0008.egg,train
-wf,L11,/man1/man12.egg,L11.R0003.egg,/man1/man12-wf7.egg,L11.R0003.A0002.egg,train
-wf,L11,/man0/man0.egg,L11.R0006.egg,/man0/man0-wf2.egg,L11.R0006.A0006.egg,train
-wf,L11,/man0/man0.egg,L11.R0006.egg,/man0/man0-wf6.egg,L11.R0006.A0009.egg,train
-wf,L11,/man0/man0.egg,L11.R0006.egg,/man0/man0-wf8.egg,L11.R0006.A0007.egg,train
-wf,L11,/man0/man0.egg,L11.R0006.egg,/man0/man0-wf4.egg,L11.R0006.A0004.egg,train
-wf,L11,/man0/man0.egg,L11.R0006.egg,/man0/man0-wf7.egg,L11.R0006.A0003.egg,train
-wf,L11,/man0/man0.egg,L11.R0006.egg,/man0/man0-wf5.egg,L11.R0006.A0002.egg,train
-wf,L11,/man0/man0.egg,L11.R0006.egg,/man0/man0-wf.egg,L11.R0006.A0008.egg,train
-wf,L11,/man0/man0.egg,L11.R0006.egg,/man0/man0-wf9.egg,L11.R0006.A0005.egg,train
-wf,L11,/man0/man0.egg,L11.R0006.egg,/man0/man0-wf10.egg,L11.R0006.A0000.egg,train
-wf,L11,/man0/man0.egg,L11.R0006.egg,/man0/man0-wf3.egg,L11.R0006.A0001.egg,train
-wf,L11,/woman2/women22.egg,L11.R0000.egg,/woman2/women22-wf7.egg,L11.R0000.A0007.egg,train
-wf,L11,/woman2/women22.egg,L11.R0000.egg,/woman2/women22-wf4.egg,L11.R0000.A0000.egg,train
-wf,L11,/woman2/women22.egg,L11.R0000.egg,/woman2/women22-wf10.egg,L11.R0000.A0005.egg,train
-wf,L11,/woman2/women22.egg,L11.R0000.egg,/woman2/women22-wf8.egg,L11.R0000.A0003.egg,train
-wf,L11,/woman2/women22.egg,L11.R0000.egg,/woman2/women22-wf9.egg,L11.R0000.A0008.egg,train
-wf,L11,/woman2/women22.egg,L11.R0000.egg,/woman2/women22-wf6.egg,L11.R0000.A0001.egg,train
-wf,L11,/woman2/women22.egg,L11.R0000.egg,/woman2/women22-wf5.egg,L11.R0000.A0002.egg,train
-wf,L11,/woman2/women22.egg,L11.R0000.egg,/woman2/women22-wf2.egg,L11.R0000.A0004.egg,train
-wf,L11,/woman2/women22.egg,L11.R0000.egg,/woman2/women22-wf3.egg,L11.R0000.A0006.egg,train
-wf,L11,/woman1/woman12.egg,L11.R0004.egg,/woman1/woman12-wf8.egg,L11.R0004.A0000.egg,train
-wf,L11,/woman1/woman12.egg,L11.R0004.egg,/woman1/woman12-wf2.egg,L11.R0004.A0002.egg,train
-wf,L11,/woman1/woman12.egg,L11.R0004.egg,/woman1/woman12-wf5.egg,L11.R0004.A0008.egg,train
-wf,L11,/woman1/woman12.egg,L11.R0004.egg,/woman1/woman12-wf10.egg,L11.R0004.A0001.egg,train
-wf,L11,/woman1/woman12.egg,L11.R0004.egg,/woman1/woman12-wf3.egg,L11.R0004.A0005.egg,test
-wf,L11,/woman1/woman12.egg,L11.R0004.egg,/woman1/woman12-wf4.egg,L11.R0004.A0006.egg,test
-wf,L11,/woman1/woman12.egg,L11.R0004.egg,/woman1/woman12-wf7.egg,L11.R0004.A0003.egg,test
-wf,L11,/woman1/woman12.egg,L11.R0004.egg,/woman1/woman12-wf6.egg,L11.R0004.A0004.egg,test
-wf,L11,/woman1/woman12.egg,L11.R0004.egg,/woman1/woman12-wf9.egg,L11.R0004.A0007.egg,test
-ts2,L08,/woman1/woman1ts2.egg,L08.R0004.egg,/woman1/woman1ts2-ts2.egg,L08.R0004.A0000.egg,train
-ts2,L08,/man2/man2ts2.egg,L08.R0008.egg,/man2/man2ts2-ts2.egg,L08.R0008.A0000.egg,train
-ts2,L08,/woman2/women22ts2.egg,L08.R0000.egg,/woman2/women22ts2-ts26.egg,L08.R0000.A0000.egg,train
-ts2,L08,/woman2/women22ts2.egg,L08.R0000.egg,/woman2/women22ts2-ts27.egg,L08.R0000.A0002.egg,train
-ts2,L08,/woman2/women22ts2.egg,L08.R0000.egg,/woman2/women22ts2-ts210.egg,L08.R0000.A0004.egg,train
-ts2,L08,/woman2/women22ts2.egg,L08.R0000.egg,/woman2/women22ts2-ts29.egg,L08.R0000.A0003.egg,train
-ts2,L08,/woman2/women22ts2.egg,L08.R0000.egg,/woman2/women22ts2-ts28.egg,L08.R0000.A0001.egg,train
-ts2,L08,/man1/man12ts2.egg,L08.R0002.egg,/man1/man12ts2-ts29.egg,L08.R0002.A0004.egg,train
-ts2,L08,/man1/man12ts2.egg,L08.R0002.egg,/man1/man12ts2-ts210.egg,L08.R0002.A0000.egg,train
-ts2,L08,/man1/man12ts2.egg,L08.R0002.egg,/man1/man12ts2-ts26.egg,L08.R0002.A0001.egg,train
-ts2,L08,/man1/man12ts2.egg,L08.R0002.egg,/man1/man12ts2-ts27.egg,L08.R0002.A0002.egg,train
-ts2,L08,/man1/man12ts2.egg,L08.R0002.egg,/man1/man12ts2-ts28.egg,L08.R0002.A0003.egg,train
-ts2,L08,/woman1/woman12ts2.egg,L08.R0005.egg,/woman1/woman12ts2-ts210.egg,L08.R0005.A0001.egg,train
-ts2,L08,/woman1/woman12ts2.egg,L08.R0005.egg,/woman1/woman12ts2-ts28.egg,L08.R0005.A0000.egg,train
-ts2,L08,/woman1/woman12ts2.egg,L08.R0005.egg,/woman1/woman12ts2-ts27.egg,L08.R0005.A0003.egg,train
-ts2,L08,/woman1/woman12ts2.egg,L08.R0005.egg,/woman1/woman12ts2-ts29.egg,L08.R0005.A0002.egg,train
-ts2,L08,/man1/man1ts2.egg,L08.R0003.egg,/man1/man1ts2-ts2.egg,L08.R0003.A0000.egg,train
-ts2,L08,/woman2/woman2ts2.egg,L08.R0001.egg,/woman2/woman2ts2-ts2.egg,L08.R0001.A0000.egg,train
-ts2,L08,/man0/man0ts2.egg,L08.R0006.egg,/man0/man0ts2-ts27.egg,L08.R0006.A0000.egg,train
-ts2,L08,/man0/man0ts2.egg,L08.R0006.egg,/man0/man0ts2-ts210.egg,L08.R0006.A0002.egg,train
-ts2,L08,/man0/man0ts2.egg,L08.R0006.egg,/man0/man0ts2-ts28.egg,L08.R0006.A0003.egg,train
-ts2,L08,/man0/man0ts2.egg,L08.R0006.egg,/man0/man0ts2-ts29.egg,L08.R0006.A0001.egg,train
-ts2,L08,/man2/man22ts2.egg,L08.R0007.egg,/man2/man22ts2-ts28.egg,L08.R0007.A0004.egg,train
-ts2,L08,/man2/man22ts2.egg,L08.R0007.egg,/man2/man22ts2-ts26.egg,L08.R0007.A0002.egg,train
-ts2,L08,/man2/man22ts2.egg,L08.R0007.egg,/man2/man22ts2-ts210.egg,L08.R0007.A0001.egg,train
-ts2,L08,/man2/man22ts2.egg,L08.R0007.egg,/man2/man22ts2-ts27.egg,L08.R0007.A0003.egg,train
-ts2,L08,/man2/man22ts2.egg,L08.R0007.egg,/man2/man22ts2-ts29.egg,L08.R0007.A0000.egg,train
-pm1,L05,/man1/man12pm1.egg,L05.R0002.egg,/man1/man12pm1-pm14.egg,L05.R0002.A0000.egg,train
-pm1,L05,/man1/man12pm1.egg,L05.R0002.egg,/man1/man12pm1-pm12.egg,L05.R0002.A0005.egg,train
-pm1,L05,/man1/man12pm1.egg,L05.R0002.egg,/man1/man12pm1-pm13.egg,L05.R0002.A0002.egg,train
-pm1,L05,/man1/man12pm1.egg,L05.R0002.egg,/man1/man12pm1-pm18.egg,L05.R0002.A0003.egg,train
-pm1,L05,/man1/man12pm1.egg,L05.R0002.egg,/man1/man12pm1-pm15.egg,L05.R0002.A0004.egg,train
-pm1,L05,/man1/man12pm1.egg,L05.R0002.egg,/man1/man12pm1-pm17.egg,L05.R0002.A0001.egg,train
-pm1,L05,/man1/man12pm1.egg,L05.R0002.egg,/man1/man12pm1-pm16.egg,L05.R0002.A0006.egg,train
-pm1,L05,/woman2/woman2pm1.egg,L05.R0001.egg,/woman2/woman2pm1-pm1.egg,L05.R0001.A0000.egg,train
-pm1,L05,/woman1/woman12pm1.egg,L05.R0005.egg,/woman1/woman12pm1-pm16.egg,L05.R0005.A0002.egg,train
-pm1,L05,/woman1/woman12pm1.egg,L05.R0005.egg,/woman1/woman12pm1-pm15.egg,L05.R0005.A0000.egg,train
-pm1,L05,/woman1/woman12pm1.egg,L05.R0005.egg,/woman1/woman12pm1-pm19.egg,L05.R0005.A0004.egg,train
-pm1,L05,/woman1/woman12pm1.egg,L05.R0005.egg,/woman1/woman12pm1-pm14.egg,L05.R0005.A0006.egg,train
-pm1,L05,/woman1/woman12pm1.egg,L05.R0005.egg,/woman1/woman12pm1-pm18.egg,L05.R0005.A0001.egg,train
-pm1,L05,/woman1/woman12pm1.egg,L05.R0005.egg,/woman1/woman12pm1-pm12.egg,L05.R0005.A0007.egg,train
-pm1,L05,/woman1/woman12pm1.egg,L05.R0005.egg,/woman1/woman12pm1-pm17.egg,L05.R0005.A0008.egg,train
-pm1,L05,/woman1/woman12pm1.egg,L05.R0005.egg,/woman1/woman12pm1-pm13.egg,L05.R0005.A0003.egg,train
-pm1,L05,/woman1/woman12pm1.egg,L05.R0005.egg,/woman1/woman12pm1-pm110.egg,L05.R0005.A0005.egg,train
-pm1,L05,/woman1/woman1pm1.egg,L05.R0006.egg,/woman1/woman1pm1-pm1.egg,L05.R0006.A0000.egg,train
-pm1,L05,/man2/man22pm1.egg,L05.R0008.egg,/man2/man22pm1-pm18.egg,L05.R0008.A0000.egg,train
-pm1,L05,/man2/man22pm1.egg,L05.R0008.egg,/man2/man22pm1-pm19.egg,L05.R0008.A0004.egg,train
-pm1,L05,/man2/man22pm1.egg,L05.R0008.egg,/man2/man22pm1-pm12.egg,L05.R0008.A0001.egg,train
-pm1,L05,/man2/man22pm1.egg,L05.R0008.egg,/man2/man22pm1-pm17.egg,L05.R0008.A0006.egg,train
-pm1,L05,/man2/man22pm1.egg,L05.R0008.egg,/man2/man22pm1-pm16.egg,L05.R0008.A0007.egg,train
-pm1,L05,/man2/man22pm1.egg,L05.R0008.egg,/man2/man22pm1-pm14.egg,L05.R0008.A0002.egg,train
-pm1,L05,/man2/man22pm1.egg,L05.R0008.egg,/man2/man22pm1-pm13.egg,L05.R0008.A0005.egg,train
-pm1,L05,/man2/man22pm1.egg,L05.R0008.egg,/man2/man22pm1-pm15.egg,L05.R0008.A0003.egg,train
-pm1,L05,/man0/man0pm1.egg,L05.R0007.egg,/man0/man0pm1-pm17.egg,L05.R0007.A0005.egg,train
-pm1,L05,/man0/man0pm1.egg,L05.R0007.egg,/man0/man0pm1-pm110.egg,L05.R0007.A0007.egg,train
-pm1,L05,/man0/man0pm1.egg,L05.R0007.egg,/man0/man0pm1-pm13.egg,L05.R0007.A0000.egg,train
-pm1,L05,/man0/man0pm1.egg,L05.R0007.egg,/man0/man0pm1-pm16.egg,L05.R0007.A0009.egg,train
-pm1,L05,/man0/man0pm1.egg,L05.R0007.egg,/man0/man0pm1-pm12.egg,L05.R0007.A0003.egg,train
-pm1,L05,/man0/man0pm1.egg,L05.R0007.egg,/man0/man0pm1-pm15.egg,L05.R0007.A0002.egg,train
-pm1,L05,/man0/man0pm1.egg,L05.R0007.egg,/man0/man0pm1-pm19.egg,L05.R0007.A0008.egg,train
-pm1,L05,/man0/man0pm1.egg,L05.R0007.egg,/man0/man0pm1-pm11.egg,L05.R0007.A0004.egg,train
-pm1,L05,/man0/man0pm1.egg,L05.R0007.egg,/man0/man0pm1-pm18.egg,L05.R0007.A0006.egg,train
-pm1,L05,/man0/man0pm1.egg,L05.R0007.egg,/man0/man0pm1-pm14.egg,L05.R0007.A0001.egg,train
-pm1,L05,/man1/man1pm1.egg,L05.R0004.egg,/man1/man1pm1-pm1.egg,L05.R0004.A0000.egg,train
-pm1,L05,/man2/man2pm1.egg,L05.R0009.egg,/man2/man2pm1-pm1.egg,L05.R0009.A0000.egg,train
-pm1,L05,/man1/man13pm1.egg,L05.R0003.egg,/man1/man13pm1-pm110.egg,L05.R0003.A0001.egg,train
-pm1,L05,/man1/man13pm1.egg,L05.R0003.egg,/man1/man13pm1-pm19.egg,L05.R0003.A0000.egg,train
-pm1,L05,/woman2/women22pm1.egg,L05.R0000.egg,/woman2/women22pm1-pm14.egg,L05.R0000.A0007.egg,train
-pm1,L05,/woman2/women22pm1.egg,L05.R0000.egg,/woman2/women22pm1-pm17.egg,L05.R0000.A0005.egg,train
-pm1,L05,/woman2/women22pm1.egg,L05.R0000.egg,/woman2/women22pm1-pm16.egg,L05.R0000.A0000.egg,train
-pm1,L05,/woman2/women22pm1.egg,L05.R0000.egg,/woman2/women22pm1-pm19.egg,L05.R0000.A0001.egg,train
-pm1,L05,/woman2/women22pm1.egg,L05.R0000.egg,/woman2/women22pm1-pm18.egg,L05.R0000.A0008.egg,train
-pm1,L05,/woman2/women22pm1.egg,L05.R0000.egg,/woman2/women22pm1-pm110.egg,L05.R0000.A0002.egg,test
-pm1,L05,/woman2/women22pm1.egg,L05.R0000.egg,/woman2/women22pm1-pm15.egg,L05.R0000.A0004.egg,test
-pm1,L05,/woman2/women22pm1.egg,L05.R0000.egg,/woman2/women22pm1-pm13.egg,L05.R0000.A0006.egg,test
-pm1,L05,/woman2/women22pm1.egg,L05.R0000.egg,/woman2/women22pm1-pm12.egg,L05.R0000.A0003.egg,test
-mt2,L04,/man0/man0mt2.egg,L04.R0006.egg,/man0/man0mt2-mt24.egg,L04.R0006.A0002.egg,train
-mt2,L04,/man0/man0mt2.egg,L04.R0006.egg,/man0/man0mt2-mt28.egg,L04.R0006.A0009.egg,train
-mt2,L04,/man0/man0mt2.egg,L04.R0006.egg,/man0/man0mt2-mt27.egg,L04.R0006.A0008.egg,train
-mt2,L04,/man0/man0mt2.egg,L04.R0006.egg,/man0/man0mt2-mt26.egg,L04.R0006.A0001.egg,train
-mt2,L04,/man0/man0mt2.egg,L04.R0006.egg,/man0/man0mt2-mt21.egg,L04.R0006.A0000.egg,train
-mt2,L04,/man0/man0mt2.egg,L04.R0006.egg,/man0/man0mt2-mt22.egg,L04.R0006.A0007.egg,train
-mt2,L04,/man0/man0mt2.egg,L04.R0006.egg,/man0/man0mt2-mt210.egg,L04.R0006.A0006.egg,train
-mt2,L04,/man0/man0mt2.egg,L04.R0006.egg,/man0/man0mt2-mt25.egg,L04.R0006.A0005.egg,train
-mt2,L04,/man0/man0mt2.egg,L04.R0006.egg,/man0/man0mt2-mt29.egg,L04.R0006.A0004.egg,train
-mt2,L04,/man0/man0mt2.egg,L04.R0006.egg,/man0/man0mt2-mt23.egg,L04.R0006.A0003.egg,train
-mt2,L04,/man2/man2mt2.egg,L04.R0008.egg,/man2/man2mt2-mt2.egg,L04.R0008.A0000.egg,train
-mt2,L04,/woman1/woman12mt2.egg,L04.R0004.egg,/woman1/woman12mt2-mt26.egg,L04.R0004.A0003.egg,train
-mt2,L04,/woman1/woman12mt2.egg,L04.R0004.egg,/woman1/woman12mt2-mt210.egg,L04.R0004.A0001.egg,train
-mt2,L04,/woman1/woman12mt2.egg,L04.R0004.egg,/woman1/woman12mt2-mt25.egg,L04.R0004.A0000.egg,train
-mt2,L04,/woman1/woman12mt2.egg,L04.R0004.egg,/woman1/woman12mt2-mt29.egg,L04.R0004.A0004.egg,train
-mt2,L04,/woman1/woman12mt2.egg,L04.R0004.egg,/woman1/woman12mt2-mt24.egg,L04.R0004.A0006.egg,train
-mt2,L04,/woman1/woman12mt2.egg,L04.R0004.egg,/woman1/woman12mt2-mt23.egg,L04.R0004.A0008.egg,train
-mt2,L04,/woman1/woman12mt2.egg,L04.R0004.egg,/woman1/woman12mt2-mt27.egg,L04.R0004.A0005.egg,train
-mt2,L04,/woman1/woman12mt2.egg,L04.R0004.egg,/woman1/woman12mt2-mt22.egg,L04.R0004.A0007.egg,train
-mt2,L04,/woman1/woman12mt2.egg,L04.R0004.egg,/woman1/woman12mt2-mt28.egg,L04.R0004.A0002.egg,train
-mt2,L04,/woman2/women22mt2.egg,L04.R0000.egg,/woman2/women22mt2-mt25.egg,L04.R0000.A0005.egg,train
-mt2,L04,/woman2/women22mt2.egg,L04.R0000.egg,/woman2/women22mt2-mt26.egg,L04.R0000.A0006.egg,train
-mt2,L04,/woman2/women22mt2.egg,L04.R0000.egg,/woman2/women22mt2-mt22.egg,L04.R0000.A0008.egg,train
-mt2,L04,/woman2/women22mt2.egg,L04.R0000.egg,/woman2/women22mt2-mt210.egg,L04.R0000.A0003.egg,train
-mt2,L04,/woman2/women22mt2.egg,L04.R0000.egg,/woman2/women22mt2-mt24.egg,L04.R0000.A0001.egg,train
-mt2,L04,/woman2/women22mt2.egg,L04.R0000.egg,/woman2/women22mt2-mt29.egg,L04.R0000.A0004.egg,train
-mt2,L04,/woman2/women22mt2.egg,L04.R0000.egg,/woman2/women22mt2-mt28.egg,L04.R0000.A0002.egg,train
-mt2,L04,/woman2/women22mt2.egg,L04.R0000.egg,/woman2/women22mt2-mt27.egg,L04.R0000.A0007.egg,train
-mt2,L04,/woman2/women22mt2.egg,L04.R0000.egg,/woman2/women22mt2-mt23.egg,L04.R0000.A0000.egg,train
-mt2,L04,/man1/man12mt2.egg,L04.R0002.egg,/man1/man12mt2-mt25.egg,L04.R0002.A0003.egg,train
-mt2,L04,/man1/man12mt2.egg,L04.R0002.egg,/man1/man12mt2-mt26.egg,L04.R0002.A0007.egg,train
-mt2,L04,/man1/man12mt2.egg,L04.R0002.egg,/man1/man12mt2-mt23.egg,L04.R0002.A0005.egg,train
-mt2,L04,/man1/man12mt2.egg,L04.R0002.egg,/man1/man12mt2-mt24.egg,L04.R0002.A0006.egg,train
-mt2,L04,/man1/man12mt2.egg,L04.R0002.egg,/man1/man12mt2-mt27.egg,L04.R0002.A0002.egg,train
-mt2,L04,/man1/man12mt2.egg,L04.R0002.egg,/man1/man12mt2-mt28.egg,L04.R0002.A0000.egg,train
-mt2,L04,/man1/man12mt2.egg,L04.R0002.egg,/man1/man12mt2-mt29.egg,L04.R0002.A0004.egg,train
-mt2,L04,/man1/man12mt2.egg,L04.R0002.egg,/man1/man12mt2-mt210.egg,L04.R0002.A0008.egg,train
-mt2,L04,/man1/man12mt2.egg,L04.R0002.egg,/man1/man12mt2-mt22.egg,L04.R0002.A0001.egg,train
-mt2,L04,/woman1/woman1mt2.egg,L04.R0005.egg,/woman1/woman1mt2-mt2.egg,L04.R0005.A0000.egg,train
-mt2,L04,/woman2/woman2mt2.egg,L04.R0001.egg,/woman2/woman2mt2-mt2.egg,L04.R0001.A0000.egg,train
-mt2,L04,/man1/man1mt2.egg,L04.R0003.egg,/man1/man1mt2-mt2.egg,L04.R0003.A0000.egg,train
-mt2,L04,/man2/man22mt2.egg,L04.R0007.egg,/man2/man22mt2-mt26.egg,L04.R0007.A0004.egg,train
-mt2,L04,/man2/man22mt2.egg,L04.R0007.egg,/man2/man22mt2-mt28.egg,L04.R0007.A0006.egg,train
-mt2,L04,/man2/man22mt2.egg,L04.R0007.egg,/man2/man22mt2-mt24.egg,L04.R0007.A0003.egg,train
-mt2,L04,/man2/man22mt2.egg,L04.R0007.egg,/man2/man22mt2-mt22.egg,L04.R0007.A0001.egg,train
-mt2,L04,/man2/man22mt2.egg,L04.R0007.egg,/man2/man22mt2-mt27.egg,L04.R0007.A0007.egg,test
-mt2,L04,/man2/man22mt2.egg,L04.R0007.egg,/man2/man22mt2-mt29.egg,L04.R0007.A0008.egg,test
-mt2,L04,/man2/man22mt2.egg,L04.R0007.egg,/man2/man22mt2-mt23.egg,L04.R0007.A0000.egg,test
-mt2,L04,/man2/man22mt2.egg,L04.R0007.egg,/man2/man22mt2-mt210.egg,L04.R0007.A0005.egg,test
-mt2,L04,/man2/man22mt2.egg,L04.R0007.egg,/man2/man22mt2-mt25.egg,L04.R0007.A0002.egg,test
-wd,L10,/man1/man13wd.egg,L10.R0003.egg,/man1/man13wd-wd10.egg,L10.R0003.A0001.egg,train
-wd,L10,/man1/man13wd.egg,L10.R0003.egg,/man1/man13wd-wd9.egg,L10.R0003.A0000.egg,train
-wd,L10,/woman1/woman1wd.egg,L10.R0006.egg,/woman1/woman1wd-wd.egg,L10.R0006.A0000.egg,train
-wd,L10,/woman2/women22wd.egg,L10.R0000.egg,/woman2/women22wd-wd10.egg,L10.R0000.A0001.egg,train
-wd,L10,/woman2/women22wd.egg,L10.R0000.egg,/woman2/women22wd-wd9.egg,L10.R0000.A0000.egg,train
-wd,L10,/woman2/women22wd.egg,L10.R0000.egg,/woman2/women22wd-wd4.egg,L10.R0000.A0002.egg,train
-wd,L10,/woman2/women22wd.egg,L10.R0000.egg,/woman2/women22wd-wd6.egg,L10.R0000.A0003.egg,train
-wd,L10,/woman2/women22wd.egg,L10.R0000.egg,/woman2/women22wd-wd3.egg,L10.R0000.A0008.egg,train
-wd,L10,/woman2/women22wd.egg,L10.R0000.egg,/woman2/women22wd-wd8.egg,L10.R0000.A0007.egg,train
-wd,L10,/woman2/women22wd.egg,L10.R0000.egg,/woman2/women22wd-wd7.egg,L10.R0000.A0005.egg,train
-wd,L10,/woman2/women22wd.egg,L10.R0000.egg,/woman2/women22wd-wd5.egg,L10.R0000.A0004.egg,train
-wd,L10,/woman2/women22wd.egg,L10.R0000.egg,/woman2/women22wd-wd2.egg,L10.R0000.A0006.egg,train
-wd,L10,/man1/man1wd.egg,L10.R0004.egg,/man1/man1wd-wd.egg,L10.R0004.A0000.egg,train
-wd,L10,/man2/man2wd.egg,L10.R0009.egg,/man2/man2wd-wd.egg,L10.R0009.A0000.egg,train
-wd,L10,/woman2/woman2wd.egg,L10.R0001.egg,/woman2/woman2wd-wd.egg,L10.R0001.A0000.egg,train
-wd,L10,/man0/man0wd.egg,L10.R0007.egg,/man0/man0wd-wd8.egg,L10.R0007.A0006.egg,train
-wd,L10,/man0/man0wd.egg,L10.R0007.egg,/man0/man0wd-wd10.egg,L10.R0007.A0002.egg,train
-wd,L10,/man0/man0wd.egg,L10.R0007.egg,/man0/man0wd-wd9.egg,L10.R0007.A0007.egg,train
-wd,L10,/man0/man0wd.egg,L10.R0007.egg,/man0/man0wd-wd5.egg,L10.R0007.A0004.egg,train
-wd,L10,/man0/man0wd.egg,L10.R0007.egg,/man0/man0wd-wd6.egg,L10.R0007.A0001.egg,train
-wd,L10,/man0/man0wd.egg,L10.R0007.egg,/man0/man0wd-wd7.egg,L10.R0007.A0005.egg,train
-wd,L10,/man0/man0wd.egg,L10.R0007.egg,/man0/man0wd-wd1.egg,L10.R0007.A0000.egg,train
-wd,L10,/man0/man0wd.egg,L10.R0007.egg,/man0/man0wd-wd2.egg,L10.R0007.A0009.egg,train
-wd,L10,/man0/man0wd.egg,L10.R0007.egg,/man0/man0wd-wd3.egg,L10.R0007.A0003.egg,train
-wd,L10,/man0/man0wd.egg,L10.R0007.egg,/man0/man0wd-wd4.egg,L10.R0007.A0008.egg,train
-wd,L10,/woman1/woman12wd.egg,L10.R0005.egg,/woman1/woman12wd-wd8.egg,L10.R0005.A0004.egg,train
-wd,L10,/woman1/woman12wd.egg,L10.R0005.egg,/woman1/woman12wd-wd10.egg,L10.R0005.A0001.egg,train
-wd,L10,/woman1/woman12wd.egg,L10.R0005.egg,/woman1/woman12wd-wd9.egg,L10.R0005.A0007.egg,train
-wd,L10,/woman1/woman12wd.egg,L10.R0005.egg,/woman1/woman12wd-wd2.egg,L10.R0005.A0008.egg,train
-wd,L10,/woman1/woman12wd.egg,L10.R0005.egg,/woman1/woman12wd-wd6.egg,L10.R0005.A0006.egg,train
-wd,L10,/woman1/woman12wd.egg,L10.R0005.egg,/woman1/woman12wd-wd4.egg,L10.R0005.A0005.egg,train
-wd,L10,/woman1/woman12wd.egg,L10.R0005.egg,/woman1/woman12wd-wd3.egg,L10.R0005.A0003.egg,train
-wd,L10,/woman1/woman12wd.egg,L10.R0005.egg,/woman1/woman12wd-wd5.egg,L10.R0005.A0000.egg,train
-wd,L10,/woman1/woman12wd.egg,L10.R0005.egg,/woman1/woman12wd-wd7.egg,L10.R0005.A0002.egg,train
-wd,L10,/man1/man12wd.egg,L10.R0002.egg,/man1/man12wd-wd6.egg,L10.R0002.A0005.egg,train
-wd,L10,/man1/man12wd.egg,L10.R0002.egg,/man1/man12wd-wd3.egg,L10.R0002.A0000.egg,train
-wd,L10,/man1/man12wd.egg,L10.R0002.egg,/man1/man12wd-wd8.egg,L10.R0002.A0004.egg,train
-wd,L10,/man1/man12wd.egg,L10.R0002.egg,/man1/man12wd-wd7.egg,L10.R0002.A0002.egg,train
-wd,L10,/man1/man12wd.egg,L10.R0002.egg,/man1/man12wd-wd2.egg,L10.R0002.A0003.egg,train
-wd,L10,/man1/man12wd.egg,L10.R0002.egg,/man1/man12wd-wd4.egg,L10.R0002.A0001.egg,train
-wd,L10,/man1/man12wd.egg,L10.R0002.egg,/man1/man12wd-wd5.egg,L10.R0002.A0006.egg,train
-wd,L10,/man2/man22wd.egg,L10.R0008.egg,/man2/man22wd-wd2.egg,L10.R0008.A0008.egg,train
-wd,L10,/man2/man22wd.egg,L10.R0008.egg,/man2/man22wd-wd9.egg,L10.R0008.A0007.egg,train
-wd,L10,/man2/man22wd.egg,L10.R0008.egg,/man2/man22wd-wd5.egg,L10.R0008.A0006.egg,train
-wd,L10,/man2/man22wd.egg,L10.R0008.egg,/man2/man22wd-wd7.egg,L10.R0008.A0004.egg,train
-wd,L10,/man2/man22wd.egg,L10.R0008.egg,/man2/man22wd-wd4.egg,L10.R0008.A0000.egg,test
-wd,L10,/man2/man22wd.egg,L10.R0008.egg,/man2/man22wd-wd6.egg,L10.R0008.A0005.egg,test
-wd,L10,/man2/man22wd.egg,L10.R0008.egg,/man2/man22wd-wd10.egg,L10.R0008.A0002.egg,test
-wd,L10,/man2/man22wd.egg,L10.R0008.egg,/man2/man22wd-wd8.egg,L10.R0008.A0003.egg,test
-wd,L10,/man2/man22wd.egg,L10.R0008.egg,/man2/man22wd-wd3.egg,L10.R0008.A0001.egg,test
-ts1,L08,/man2/man22ts1.egg,L08.R0007.egg,/man2/man22ts1-ts14.egg,L08.R0007.A0000.egg,train
-ts1,L08,/man2/man22ts1.egg,L08.R0007.egg,/man2/man22ts1-ts15.egg,L08.R0007.A0003.egg,train
-ts1,L08,/man2/man22ts1.egg,L08.R0007.egg,/man2/man22ts1-ts12.egg,L08.R0007.A0001.egg,train
-ts1,L08,/man2/man22ts1.egg,L08.R0007.egg,/man2/man22ts1-ts13.egg,L08.R0007.A0002.egg,train
-ts1,L08,/man0/man0ts1.egg,L08.R0006.egg,/man0/man0ts1-ts15.egg,L08.R0006.A0005.egg,train
-ts1,L08,/man0/man0ts1.egg,L08.R0006.egg,/man0/man0ts1-ts14.egg,L08.R0006.A0004.egg,train
-ts1,L08,/man0/man0ts1.egg,L08.R0006.egg,/man0/man0ts1-ts13.egg,L08.R0006.A0003.egg,train
-ts1,L08,/man0/man0ts1.egg,L08.R0006.egg,/man0/man0ts1-ts12.egg,L08.R0006.A0001.egg,train
-ts1,L08,/man0/man0ts1.egg,L08.R0006.egg,/man0/man0ts1-ts16.egg,L08.R0006.A0000.egg,train
-ts1,L08,/man0/man0ts1.egg,L08.R0006.egg,/man0/man0ts1-ts11.egg,L08.R0006.A0002.egg,train
-ts1,L08,/woman1/woman12ts1.egg,L08.R0004.egg,/woman1/woman12ts1-ts12.egg,L08.R0004.A0004.egg,train
-ts1,L08,/woman1/woman12ts1.egg,L08.R0004.egg,/woman1/woman12ts1-ts16.egg,L08.R0004.A0000.egg,train
-ts1,L08,/woman1/woman12ts1.egg,L08.R0004.egg,/woman1/woman12ts1-ts14.egg,L08.R0004.A0002.egg,train
-ts1,L08,/woman1/woman12ts1.egg,L08.R0004.egg,/woman1/woman12ts1-ts15.egg,L08.R0004.A0003.egg,train
-ts1,L08,/woman1/woman12ts1.egg,L08.R0004.egg,/woman1/woman12ts1-ts13.egg,L08.R0004.A0001.egg,train
-ts1,L08,/man1/man12ts1.egg,L08.R0002.egg,/man1/man12ts1-ts12.egg,L08.R0002.A0000.egg,train
-ts1,L08,/man1/man12ts1.egg,L08.R0002.egg,/man1/man12ts1-ts14.egg,L08.R0002.A0001.egg,train
-ts1,L08,/man1/man12ts1.egg,L08.R0002.egg,/man1/man12ts1-ts13.egg,L08.R0002.A0002.egg,train
-ts1,L08,/woman2/women22ts1.egg,L08.R0000.egg,/woman2/women22ts1-ts15.egg,L08.R0000.A0002.egg,test
-ts1,L08,/woman2/women22ts1.egg,L08.R0000.egg,/woman2/women22ts1-ts14.egg,L08.R0000.A0001.egg,test
-ts1,L08,/woman2/women22ts1.egg,L08.R0000.egg,/woman2/women22ts1-ts13.egg,L08.R0000.A0000.egg,test
-ts1,L08,/woman2/women22ts1.egg,L08.R0000.egg,/woman2/women22ts1-ts12.egg,L08.R0000.A0003.egg,test
-ts1,L08,/man2/man2ts1.egg,L08.R0008.egg,/man2/man2ts1-ts1.egg,L08.R0008.A0000.egg,test
-ts1,L08,/man1/man1ts1.egg,L08.R0003.egg,/man1/man1ts1-ts1.egg,L08.R0003.A0000.egg,test
-ts1,L08,/woman2/woman2ts1.egg,L08.R0001.egg,/woman2/woman2ts1-ts1.egg,L08.R0001.A0000.egg,test
-ts1,L08,/woman1/woman1ts1.egg,L08.R0005.egg,/woman1/woman1ts1-ts1.egg,L08.R0005.A0000.egg,test
-wtv,L12,/man2/man22wtv.egg,L12.R0007.egg,/man2/man22wtv-wtv5.egg,L12.R0007.A0006.egg,train
-wtv,L12,/man2/man22wtv.egg,L12.R0007.egg,/man2/man22wtv-wtv10.egg,L12.R0007.A0005.egg,train
-wtv,L12,/man2/man22wtv.egg,L12.R0007.egg,/man2/man22wtv-wtv8.egg,L12.R0007.A0001.egg,train
-wtv,L12,/man2/man22wtv.egg,L12.R0007.egg,/man2/man22wtv-wtv2.egg,L12.R0007.A0004.egg,train
-wtv,L12,/man2/man22wtv.egg,L12.R0007.egg,/man2/man22wtv-wtv9.egg,L12.R0007.A0003.egg,train
-wtv,L12,/man2/man22wtv.egg,L12.R0007.egg,/man2/man22wtv-wtv3.egg,L12.R0007.A0008.egg,train
-wtv,L12,/man2/man22wtv.egg,L12.R0007.egg,/man2/man22wtv-wtv7.egg,L12.R0007.A0007.egg,train
-wtv,L12,/man2/man22wtv.egg,L12.R0007.egg,/man2/man22wtv-wtv6.egg,L12.R0007.A0002.egg,train
-wtv,L12,/man2/man22wtv.egg,L12.R0007.egg,/man2/man22wtv-wtv4.egg,L12.R0007.A0000.egg,train
-wtv,L12,/woman1/woman12wtv.egg,L12.R0004.egg,/woman1/woman12wtv-wtv2.egg,L12.R0004.A0008.egg,train
-wtv,L12,/woman1/woman12wtv.egg,L12.R0004.egg,/woman1/woman12wtv-wtv6.egg,L12.R0004.A0006.egg,train
-wtv,L12,/woman1/woman12wtv.egg,L12.R0004.egg,/woman1/woman12wtv-wtv3.egg,L12.R0004.A0000.egg,train
-wtv,L12,/woman1/woman12wtv.egg,L12.R0004.egg,/woman1/woman12wtv-wtv5.egg,L12.R0004.A0002.egg,train
-wtv,L12,/woman1/woman12wtv.egg,L12.R0004.egg,/woman1/woman12wtv-wtv10.egg,L12.R0004.A0003.egg,train
-wtv,L12,/woman1/woman12wtv.egg,L12.R0004.egg,/woman1/woman12wtv-wtv9.egg,L12.R0004.A0007.egg,train
-wtv,L12,/woman1/woman12wtv.egg,L12.R0004.egg,/woman1/woman12wtv-wtv7.egg,L12.R0004.A0005.egg,train
-wtv,L12,/woman1/woman12wtv.egg,L12.R0004.egg,/woman1/woman12wtv-wtv4.egg,L12.R0004.A0004.egg,train
-wtv,L12,/woman1/woman12wtv.egg,L12.R0004.egg,/woman1/woman12wtv-wtv8.egg,L12.R0004.A0001.egg,train
-wtv,L12,/man1/man1wtv.egg,L12.R0003.egg,/man1/man1wtv-wtv.egg,L12.R0003.A0000.egg,train
-wtv,L12,/woman2/women22wtv.egg,L12.R0000.egg,/woman2/women22wtv-wtv2.egg,L12.R0000.A0003.egg,train
-wtv,L12,/woman2/women22wtv.egg,L12.R0000.egg,/woman2/women22wtv-wtv6.egg,L12.R0000.A0006.egg,train
-wtv,L12,/woman2/women22wtv.egg,L12.R0000.egg,/woman2/women22wtv-wtv5.egg,L12.R0000.A0004.egg,train
-wtv,L12,/woman2/women22wtv.egg,L12.R0000.egg,/woman2/women22wtv-wtv10.egg,L12.R0000.A0008.egg,train
-wtv,L12,/woman2/women22wtv.egg,L12.R0000.egg,/woman2/women22wtv-wtv9.egg,L12.R0000.A0005.egg,train
-wtv,L12,/woman2/women22wtv.egg,L12.R0000.egg,/woman2/women22wtv-wtv4.egg,L12.R0000.A0007.egg,train
-wtv,L12,/woman2/women22wtv.egg,L12.R0000.egg,/woman2/women22wtv-wtv7.egg,L12.R0000.A0000.egg,train
-wtv,L12,/woman2/women22wtv.egg,L12.R0000.egg,/woman2/women22wtv-wtv8.egg,L12.R0000.A0002.egg,train
-wtv,L12,/woman2/women22wtv.egg,L12.R0000.egg,/woman2/women22wtv-wtv3.egg,L12.R0000.A0001.egg,train
-wtv,L12,/woman1/woman1wtv.egg,L12.R0005.egg,/woman1/woman1wtv-wtv.egg,L12.R0005.A0000.egg,train
-wtv,L12,/man0/man0wtv.egg,L12.R0006.egg,/man0/man0wtv-wtv2.egg,L12.R0006.A0002.egg,train
-wtv,L12,/man0/man0wtv.egg,L12.R0006.egg,/man0/man0wtv-wtv8.egg,L12.R0006.A0004.egg,train
-wtv,L12,/man0/man0wtv.egg,L12.R0006.egg,/man0/man0wtv-wtv5.egg,L12.R0006.A0006.egg,train
-wtv,L12,/man0/man0wtv.egg,L12.R0006.egg,/man0/man0wtv-wtv9.egg,L12.R0006.A0000.egg,train
-wtv,L12,/man0/man0wtv.egg,L12.R0006.egg,/man0/man0wtv-wtv7.egg,L12.R0006.A0003.egg,train
-wtv,L12,/man0/man0wtv.egg,L12.R0006.egg,/man0/man0wtv-wtv6.egg,L12.R0006.A0008.egg,train
-wtv,L12,/man0/man0wtv.egg,L12.R0006.egg,/man0/man0wtv-wtv3.egg,L12.R0006.A0005.egg,train
-wtv,L12,/man0/man0wtv.egg,L12.R0006.egg,/man0/man0wtv-wtv10.egg,L12.R0006.A0001.egg,train
-wtv,L12,/man0/man0wtv.egg,L12.R0006.egg,/man0/man0wtv-wtv1.egg,L12.R0006.A0009.egg,train
-wtv,L12,/man0/man0wtv.egg,L12.R0006.egg,/man0/man0wtv-wtv4.egg,L12.R0006.A0007.egg,train
-wtv,L12,/man2/man2wtv.egg,L12.R0008.egg,/man2/man2wtv-wtv.egg,L12.R0008.A0000.egg,train
-wtv,L12,/woman2/woman2wtv.egg,L12.R0001.egg,/woman2/woman2wtv-wtv.egg,L12.R0001.A0000.egg,train
-wtv,L12,/man1/man12wtv.egg,L12.R0002.egg,/man1/man12wtv-wtv3.egg,L12.R0002.A0002.egg,train
-wtv,L12,/man1/man12wtv.egg,L12.R0002.egg,/man1/man12wtv-wtv8.egg,L12.R0002.A0007.egg,train
-wtv,L12,/man1/man12wtv.egg,L12.R0002.egg,/man1/man12wtv-wtv9.egg,L12.R0002.A0003.egg,train
-wtv,L12,/man1/man12wtv.egg,L12.R0002.egg,/man1/man12wtv-wtv6.egg,L12.R0002.A0005.egg,train
-wtv,L12,/man1/man12wtv.egg,L12.R0002.egg,/man1/man12wtv-wtv4.egg,L12.R0002.A0000.egg,test
-wtv,L12,/man1/man12wtv.egg,L12.R0002.egg,/man1/man12wtv-wtv2.egg,L12.R0002.A0008.egg,test
-wtv,L12,/man1/man12wtv.egg,L12.R0002.egg,/man1/man12wtv-wtv10.egg,L12.R0002.A0004.egg,test
-wtv,L12,/man1/man12wtv.egg,L12.R0002.egg,/man1/man12wtv-wtv7.egg,L12.R0002.A0001.egg,test
-wtv,L12,/man1/man12wtv.egg,L12.R0002.egg,/man1/man12wtv-wtv5.egg,L12.R0002.A0006.egg,test
-mj,L02,/woman1/woman1mj1.egg,L02.R0004.egg,/woman1/woman1mj1-mj1.egg,L02.R0004.A0000.egg,train
-mj,L02,/man2/man2mj1.egg,L02.R0008.egg,/man2/man2mj1-mj1.egg,L02.R0008.A0000.egg,train
-mj,L02,/man0/man0mj.egg,L02.R0006.egg,/man0/man0mj-mj4.egg,L02.R0006.A0005.egg,train
-mj,L02,/man0/man0mj.egg,L02.R0006.egg,/man0/man0mj-mj10.egg,L02.R0006.A0003.egg,train
-mj,L02,/man0/man0mj.egg,L02.R0006.egg,/man0/man0mj-mj3.egg,L02.R0006.A0002.egg,train
-mj,L02,/man0/man0mj.egg,L02.R0006.egg,/man0/man0mj-mj2.egg,L02.R0006.A0006.egg,train
-mj,L02,/man0/man0mj.egg,L02.R0006.egg,/man0/man0mj-mj5.egg,L02.R0006.A0007.egg,train
-mj,L02,/man0/man0mj.egg,L02.R0006.egg,/man0/man0mj-mj8.egg,L02.R0006.A0004.egg,train
-mj,L02,/man0/man0mj.egg,L02.R0006.egg,/man0/man0mj-mj9.egg,L02.R0006.A0000.egg,train
-mj,L02,/man0/man0mj.egg,L02.R0006.egg,/man0/man0mj-mj7.egg,L02.R0006.A0001.egg,train
-mj,L02,/man0/man0mj.egg,L02.R0006.egg,/man0/man0mj-mj6.egg,L02.R0006.A0008.egg,train
-mj,L02,/woman2/women22mj.egg,L02.R0000.egg,/woman2/women22mj-mj3.egg,L02.R0000.A0007.egg,train
-mj,L02,/woman2/women22mj.egg,L02.R0000.egg,/woman2/women22mj-mj5.egg,L02.R0000.A0008.egg,train
-mj,L02,/woman2/women22mj.egg,L02.R0000.egg,/woman2/women22mj-mj2.egg,L02.R0000.A0001.egg,train
-mj,L02,/woman2/women22mj.egg,L02.R0000.egg,/woman2/women22mj-mj10.egg,L02.R0000.A0004.egg,train
-mj,L02,/woman2/women22mj.egg,L02.R0000.egg,/woman2/women22mj-mj8.egg,L02.R0000.A0006.egg,train
-mj,L02,/woman2/women22mj.egg,L02.R0000.egg,/woman2/women22mj-mj6.egg,L02.R0000.A0000.egg,train
-mj,L02,/woman2/women22mj.egg,L02.R0000.egg,/woman2/women22mj-mj7.egg,L02.R0000.A0002.egg,train
-mj,L02,/woman2/women22mj.egg,L02.R0000.egg,/woman2/women22mj-mj4.egg,L02.R0000.A0005.egg,train
-mj,L02,/woman2/women22mj.egg,L02.R0000.egg,/woman2/women22mj-mj9.egg,L02.R0000.A0003.egg,train
-mj,L02,/man2/man23mj.egg,L02.R0007.egg,/man2/man23mj-mj6.egg,L02.R0007.A0006.egg,train
-mj,L02,/man2/man23mj.egg,L02.R0007.egg,/man2/man23mj-mj8.egg,L02.R0007.A0003.egg,train
-mj,L02,/man2/man23mj.egg,L02.R0007.egg,/man2/man23mj-mj4.egg,L02.R0007.A0005.egg,train
-mj,L02,/man2/man23mj.egg,L02.R0007.egg,/man2/man23mj-mj7.egg,L02.R0007.A0002.egg,train
-mj,L02,/man2/man23mj.egg,L02.R0007.egg,/man2/man23mj-mj10.egg,L02.R0007.A0007.egg,train
-mj,L02,/man2/man23mj.egg,L02.R0007.egg,/man2/man23mj-mj9.egg,L02.R0007.A0000.egg,train
-mj,L02,/man2/man23mj.egg,L02.R0007.egg,/man2/man23mj-mj5.egg,L02.R0007.A0001.egg,train
-mj,L02,/man2/man23mj.egg,L02.R0007.egg,/man2/man23mj-mj3.egg,L02.R0007.A0004.egg,train
-mj,L02,/woman2/woman2mj1.egg,L02.R0001.egg,/woman2/woman2mj1-mj1.egg,L02.R0001.A0000.egg,train
-mj,L02,/man1/man12mj.egg,L02.R0002.egg,/man1/man12mj-mj10.egg,L02.R0002.A0008.egg,train
-mj,L02,/man1/man12mj.egg,L02.R0002.egg,/man1/man12mj-mj4.egg,L02.R0002.A0002.egg,train
-mj,L02,/man1/man12mj.egg,L02.R0002.egg,/man1/man12mj-mj2.egg,L02.R0002.A0004.egg,train
-mj,L02,/man1/man12mj.egg,L02.R0002.egg,/man1/man12mj-mj7.egg,L02.R0002.A0000.egg,train
-mj,L02,/man1/man12mj.egg,L02.R0002.egg,/man1/man12mj-mj3.egg,L02.R0002.A0005.egg,train
-mj,L02,/man1/man12mj.egg,L02.R0002.egg,/man1/man12mj-mj5.egg,L02.R0002.A0001.egg,train
-mj,L02,/man1/man12mj.egg,L02.R0002.egg,/man1/man12mj-mj9.egg,L02.R0002.A0007.egg,train
-mj,L02,/man1/man12mj.egg,L02.R0002.egg,/man1/man12mj-mj8.egg,L02.R0002.A0006.egg,train
-mj,L02,/man1/man12mj.egg,L02.R0002.egg,/man1/man12mj-mj6.egg,L02.R0002.A0003.egg,train
-mj,L02,/man1/man1mj1.egg,L02.R0003.egg,/man1/man1mj1-mj1.egg,L02.R0003.A0000.egg,train
-mj,L02,/man2/man22mj.egg,L02.R0009.egg,/man2/man22mj-mj2.egg,L02.R0009.A0000.egg,train
-mj,L02,/woman1/woman12mj.egg,L02.R0005.egg,/woman1/woman12mj-mj9.egg,L02.R0005.A0007.egg,train
-mj,L02,/woman1/woman12mj.egg,L02.R0005.egg,/woman1/woman12mj-mj4.egg,L02.R0005.A0005.egg,train
-mj,L02,/woman1/woman12mj.egg,L02.R0005.egg,/woman1/woman12mj-mj3.egg,L02.R0005.A0001.egg,train
-mj,L02,/woman1/woman12mj.egg,L02.R0005.egg,/woman1/woman12mj-mj7.egg,L02.R0005.A0003.egg,train
-mj,L02,/woman1/woman12mj.egg,L02.R0005.egg,/woman1/woman12mj-mj2.egg,L02.R0005.A0006.egg,train
-mj,L02,/woman1/woman12mj.egg,L02.R0005.egg,/woman1/woman12mj-mj8.egg,L02.R0005.A0004.egg,test
-mj,L02,/woman1/woman12mj.egg,L02.R0005.egg,/woman1/woman12mj-mj5.egg,L02.R0005.A0002.egg,test
-mj,L02,/woman1/woman12mj.egg,L02.R0005.egg,/woman1/woman12mj-mj6.egg,L02.R0005.A0000.egg,test
-mj,L02,/woman1/woman12mj.egg,L02.R0005.egg,/woman1/woman12mj-mj10.egg,L02.R0005.A0008.egg,test
-pm2,L06,/man1/man1pm2.egg,L06.R0003.egg,/man1/man1pm2-pm2.egg,L06.R0003.A0000.egg,train
-pm2,L06,/woman2/women22pm2.egg,L06.R0000.egg,/woman2/women22pm2-pm25.egg,L06.R0000.A0001.egg,train
-pm2,L06,/woman2/women22pm2.egg,L06.R0000.egg,/woman2/women22pm2-pm23.egg,L06.R0000.A0002.egg,train
-pm2,L06,/woman2/women22pm2.egg,L06.R0000.egg,/woman2/women22pm2-pm28.egg,L06.R0000.A0007.egg,train
-pm2,L06,/woman2/women22pm2.egg,L06.R0000.egg,/woman2/women22pm2-pm210.egg,L06.R0000.A0000.egg,train
-pm2,L06,/woman2/women22pm2.egg,L06.R0000.egg,/woman2/women22pm2-pm22.egg,L06.R0000.A0005.egg,train
-pm2,L06,/woman2/women22pm2.egg,L06.R0000.egg,/woman2/women22pm2-pm26.egg,L06.R0000.A0008.egg,train
-pm2,L06,/woman2/women22pm2.egg,L06.R0000.egg,/woman2/women22pm2-pm29.egg,L06.R0000.A0003.egg,train
-pm2,L06,/woman2/women22pm2.egg,L06.R0000.egg,/woman2/women22pm2-pm27.egg,L06.R0000.A0006.egg,train
-pm2,L06,/woman2/women22pm2.egg,L06.R0000.egg,/woman2/women22pm2-pm24.egg,L06.R0000.A0004.egg,train
-pm2,L06,/woman1/woman1pm2.egg,L06.R0007.egg,/woman1/woman1pm2-pm2.egg,L06.R0007.A0000.egg,train
-pm2,L06,/woman1/woman13pm2.egg,L06.R0006.egg,/woman1/woman13pm2-pm29.egg,L06.R0006.A0003.egg,train
-pm2,L06,/woman1/woman13pm2.egg,L06.R0006.egg,/woman1/woman13pm2-pm210.egg,L06.R0006.A0001.egg,train
-pm2,L06,/woman1/woman13pm2.egg,L06.R0006.egg,/woman1/woman13pm2-pm27.egg,L06.R0006.A0000.egg,train
-pm2,L06,/woman1/woman13pm2.egg,L06.R0006.egg,/woman1/woman13pm2-pm28.egg,L06.R0006.A0002.egg,train
-pm2,L06,/man0/man0pm2.egg,L06.R0008.egg,/man0/man0pm2-pm210.egg,L06.R0008.A0007.egg,train
-pm2,L06,/man0/man0pm2.egg,L06.R0008.egg,/man0/man0pm2-pm21.egg,L06.R0008.A0008.egg,train
-pm2,L06,/man0/man0pm2.egg,L06.R0008.egg,/man0/man0pm2-pm23.egg,L06.R0008.A0003.egg,train
-pm2,L06,/man0/man0pm2.egg,L06.R0008.egg,/man0/man0pm2-pm22.egg,L06.R0008.A0005.egg,train
-pm2,L06,/man0/man0pm2.egg,L06.R0008.egg,/man0/man0pm2-pm25.egg,L06.R0008.A0001.egg,train
-pm2,L06,/man0/man0pm2.egg,L06.R0008.egg,/man0/man0pm2-pm29.egg,L06.R0008.A0004.egg,train
-pm2,L06,/man0/man0pm2.egg,L06.R0008.egg,/man0/man0pm2-pm27.egg,L06.R0008.A0009.egg,train
-pm2,L06,/man0/man0pm2.egg,L06.R0008.egg,/man0/man0pm2-pm26.egg,L06.R0008.A0006.egg,train
-pm2,L06,/man0/man0pm2.egg,L06.R0008.egg,/man0/man0pm2-pm24.egg,L06.R0008.A0000.egg,train
-pm2,L06,/man0/man0pm2.egg,L06.R0008.egg,/man0/man0pm2-pm28.egg,L06.R0008.A0002.egg,train
-pm2,L06,/woman2/woman2pm2.egg,L06.R0001.egg,/woman2/woman2pm2-pm2.egg,L06.R0001.A0000.egg,train
-pm2,L06,/man1/man12pm2.egg,L06.R0002.egg,/man1/man12pm2-pm23.egg,L06.R0002.A0007.egg,train
-pm2,L06,/man1/man12pm2.egg,L06.R0002.egg,/man1/man12pm2-pm28.egg,L06.R0002.A0002.egg,train
-pm2,L06,/man1/man12pm2.egg,L06.R0002.egg,/man1/man12pm2-pm27.egg,L06.R0002.A0003.egg,train
-pm2,L06,/man1/man12pm2.egg,L06.R0002.egg,/man1/man12pm2-pm24.egg,L06.R0002.A0001.egg,train
-pm2,L06,/man1/man12pm2.egg,L06.R0002.egg,/man1/man12pm2-pm22.egg,L06.R0002.A0004.egg,train
-pm2,L06,/man1/man12pm2.egg,L06.R0002.egg,/man1/man12pm2-pm26.egg,L06.R0002.A0005.egg,train
-pm2,L06,/man1/man12pm2.egg,L06.R0002.egg,/man1/man12pm2-pm29.egg,L06.R0002.A0006.egg,train
-pm2,L06,/man1/man12pm2.egg,L06.R0002.egg,/man1/man12pm2-pm25.egg,L06.R0002.A0000.egg,train
-pm2,L06,/man2/man22pm2.egg,L06.R0009.egg,/man2/man22pm2-pm25.egg,L06.R0009.A0001.egg,train
-pm2,L06,/man2/man22pm2.egg,L06.R0009.egg,/man2/man22pm2-pm27.egg,L06.R0009.A0005.egg,train
-pm2,L06,/man2/man22pm2.egg,L06.R0009.egg,/man2/man22pm2-pm23.egg,L06.R0009.A0006.egg,train
-pm2,L06,/man2/man22pm2.egg,L06.R0009.egg,/man2/man22pm2-pm22.egg,L06.R0009.A0004.egg,train
-pm2,L06,/man2/man22pm2.egg,L06.R0009.egg,/man2/man22pm2-pm29.egg,L06.R0009.A0003.egg,train
-pm2,L06,/man2/man22pm2.egg,L06.R0009.egg,/man2/man22pm2-pm210.egg,L06.R0009.A0002.egg,train
-pm2,L06,/man2/man22pm2.egg,L06.R0009.egg,/man2/man22pm2-pm24.egg,L06.R0009.A0007.egg,train
-pm2,L06,/man2/man22pm2.egg,L06.R0009.egg,/man2/man22pm2-pm28.egg,L06.R0009.A0008.egg,train
-pm2,L06,/man2/man22pm2.egg,L06.R0009.egg,/man2/man22pm2-pm26.egg,L06.R0009.A0000.egg,train
-pm2,L06,/man2/man2pm2.egg,L06.R0010.egg,/man2/man2pm2-pm2.egg,L06.R0010.A0000.egg,train
-pm2,L06,/man1/man13pm2.egg,L06.R0004.egg,/man1/man13pm2-pm210.egg,L06.R0004.A0000.egg,train
-pm2,L06,/woman1/woman12pm2.egg,L06.R0005.egg,/woman1/woman12pm2-pm24.egg,L06.R0005.A0000.egg,test
-pm2,L06,/woman1/woman12pm2.egg,L06.R0005.egg,/woman1/woman12pm2-pm22.egg,L06.R0005.A0002.egg,test
-pm2,L06,/woman1/woman12pm2.egg,L06.R0005.egg,/woman1/woman12pm2-pm25.egg,L06.R0005.A0003.egg,test
-pm2,L06,/woman1/woman12pm2.egg,L06.R0005.egg,/woman1/woman12pm2-pm23.egg,L06.R0005.A0004.egg,test
-pm2,L06,/woman1/woman12pm2.egg,L06.R0005.egg,/woman1/woman12pm2-pm26.egg,L06.R0005.A0001.egg,test
+,group,activity-name,activity-id,activity-descrip,activity-item,rig-name,rig-id,animation-name,animation-id,animation-numframe,file-rig,file-animation
+0,test,wf,11,Washing face,None,man0/man0.egg,0,man0/man0-wf.egg,0,599,L0011.R0000.egg,L0011.R0000.A0000.egg
+1,test,wf,11,Washing face,None,man0/man0.egg,0,man0/man0-wf10.egg,1,650,L0011.R0000.egg,L0011.R0000.A0001.egg
+2,test,wf,11,Washing face,None,man0/man0.egg,0,man0/man0-wf2.egg,2,620,L0011.R0000.egg,L0011.R0000.A0002.egg
+3,test,wf,11,Washing face,None,man0/man0.egg,0,man0/man0-wf3.egg,3,750,L0011.R0000.egg,L0011.R0000.A0003.egg
+4,test,wf,11,Washing face,None,man0/man0.egg,0,man0/man0-wf4.egg,4,550,L0011.R0000.egg,L0011.R0000.A0004.egg
+5,test,wf,11,Washing face,None,man0/man0.egg,0,man0/man0-wf5.egg,5,650,L0011.R0000.egg,L0011.R0000.A0005.egg
+6,test,wf,11,Washing face,None,man0/man0.egg,0,man0/man0-wf6.egg,6,620,L0011.R0000.egg,L0011.R0000.A0006.egg
+7,test,wf,11,Washing face,None,man0/man0.egg,0,man0/man0-wf7.egg,7,650,L0011.R0000.egg,L0011.R0000.A0007.egg
+8,test,wf,11,Washing face,None,man0/man0.egg,0,man0/man0-wf8.egg,8,650,L0011.R0000.egg,L0011.R0000.A0008.egg
+9,test,wf,11,Washing face,None,man0/man0.egg,0,man0/man0-wf9.egg,9,600,L0011.R0000.egg,L0011.R0000.A0009.egg
+10,train,wf,11,Washing face,None,man1/man1.egg,1,man1/man1-wf.egg,0,1250,L0011.R0001.egg,L0011.R0001.A0000.egg
+11,train,wf,11,Washing face,None,man1/man12.egg,2,man1/man12-wf10.egg,0,700,L0011.R0002.egg,L0011.R0002.A0000.egg
+12,train,wf,11,Washing face,None,man1/man12.egg,2,man1/man12-wf2.egg,1,800,L0011.R0002.egg,L0011.R0002.A0001.egg
+13,train,wf,11,Washing face,None,man1/man12.egg,2,man1/man12-wf3.egg,2,700,L0011.R0002.egg,L0011.R0002.A0002.egg
+14,train,wf,11,Washing face,None,man1/man12.egg,2,man1/man12-wf4.egg,3,700,L0011.R0002.egg,L0011.R0002.A0003.egg
+15,train,wf,11,Washing face,None,man1/man12.egg,2,man1/man12-wf5.egg,4,700,L0011.R0002.egg,L0011.R0002.A0004.egg
+16,train,wf,11,Washing face,None,man1/man12.egg,2,man1/man12-wf6.egg,5,700,L0011.R0002.egg,L0011.R0002.A0005.egg
+17,train,wf,11,Washing face,None,man1/man12.egg,2,man1/man12-wf7.egg,6,700,L0011.R0002.egg,L0011.R0002.A0006.egg
+18,train,wf,11,Washing face,None,man1/man12.egg,2,man1/man12-wf8.egg,7,700,L0011.R0002.egg,L0011.R0002.A0007.egg
+19,train,wf,11,Washing face,None,man1/man12.egg,2,man1/man12-wf9.egg,8,700,L0011.R0002.egg,L0011.R0002.A0008.egg
+20,train,wf,11,Washing face,None,man2/man2.egg,3,man2/man2-wf.egg,0,1250,L0011.R0003.egg,L0011.R0003.A0000.egg
+21,train,wf,11,Washing face,None,man2/man22.egg,4,man2/man22-wf10.egg,0,700,L0011.R0004.egg,L0011.R0004.A0000.egg
+22,train,wf,11,Washing face,None,man2/man22.egg,4,man2/man22-wf2.egg,1,600,L0011.R0004.egg,L0011.R0004.A0001.egg
+23,train,wf,11,Washing face,None,man2/man22.egg,4,man2/man22-wf3.egg,2,700,L0011.R0004.egg,L0011.R0004.A0002.egg
+24,train,wf,11,Washing face,None,man2/man22.egg,4,man2/man22-wf4.egg,3,700,L0011.R0004.egg,L0011.R0004.A0003.egg
+25,train,wf,11,Washing face,None,man2/man22.egg,4,man2/man22-wf5.egg,4,700,L0011.R0004.egg,L0011.R0004.A0004.egg
+26,train,wf,11,Washing face,None,man2/man22.egg,4,man2/man22-wf6.egg,5,700,L0011.R0004.egg,L0011.R0004.A0005.egg
+27,train,wf,11,Washing face,None,man2/man22.egg,4,man2/man22-wf7.egg,6,700,L0011.R0004.egg,L0011.R0004.A0006.egg
+28,train,wf,11,Washing face,None,man2/man22.egg,4,man2/man22-wf8.egg,7,700,L0011.R0004.egg,L0011.R0004.A0007.egg
+29,train,wf,11,Washing face,None,man2/man22.egg,4,man2/man22-wf9.egg,8,700,L0011.R0004.egg,L0011.R0004.A0008.egg
+30,train,wf,11,Washing face,None,woman1/woman1.egg,5,woman1/woman1-wf.egg,0,760,L0011.R0005.egg,L0011.R0005.A0000.egg
+31,train,wf,11,Washing face,None,woman1/woman12.egg,6,woman1/woman12-wf10.egg,0,750,L0011.R0006.egg,L0011.R0006.A0000.egg
+32,train,wf,11,Washing face,None,woman1/woman12.egg,6,woman1/woman12-wf2.egg,1,700,L0011.R0006.egg,L0011.R0006.A0001.egg
+33,train,wf,11,Washing face,None,woman1/woman12.egg,6,woman1/woman12-wf3.egg,2,700,L0011.R0006.egg,L0011.R0006.A0002.egg
+34,train,wf,11,Washing face,None,woman1/woman12.egg,6,woman1/woman12-wf4.egg,3,700,L0011.R0006.egg,L0011.R0006.A0003.egg
+35,train,wf,11,Washing face,None,woman1/woman12.egg,6,woman1/woman12-wf5.egg,4,700,L0011.R0006.egg,L0011.R0006.A0004.egg
+36,train,wf,11,Washing face,None,woman1/woman12.egg,6,woman1/woman12-wf6.egg,5,700,L0011.R0006.egg,L0011.R0006.A0005.egg
+37,train,wf,11,Washing face,None,woman1/woman12.egg,6,woman1/woman12-wf7.egg,6,700,L0011.R0006.egg,L0011.R0006.A0006.egg
+38,train,wf,11,Washing face,None,woman1/woman12.egg,6,woman1/woman12-wf8.egg,7,800,L0011.R0006.egg,L0011.R0006.A0007.egg
+39,train,wf,11,Washing face,None,woman1/woman12.egg,6,woman1/woman12-wf9.egg,8,800,L0011.R0006.egg,L0011.R0006.A0008.egg
+40,train,wf,11,Washing face,None,woman2/woman2.egg,7,woman2/woman2-wf.egg,0,850,L0011.R0007.egg,L0011.R0007.A0000.egg
+41,train,wf,11,Washing face,None,woman2/women22.egg,8,woman2/women22-wf10.egg,0,600,L0011.R0008.egg,L0011.R0008.A0000.egg
+42,train,wf,11,Washing face,None,woman2/women22.egg,8,woman2/women22-wf2.egg,1,600,L0011.R0008.egg,L0011.R0008.A0001.egg
+43,train,wf,11,Washing face,None,woman2/women22.egg,8,woman2/women22-wf3.egg,2,600,L0011.R0008.egg,L0011.R0008.A0002.egg
+44,train,wf,11,Washing face,None,woman2/women22.egg,8,woman2/women22-wf4.egg,3,700,L0011.R0008.egg,L0011.R0008.A0003.egg
+45,train,wf,11,Washing face,None,woman2/women22.egg,8,woman2/women22-wf5.egg,4,600,L0011.R0008.egg,L0011.R0008.A0004.egg
+46,train,wf,11,Washing face,None,woman2/women22.egg,8,woman2/women22-wf6.egg,5,600,L0011.R0008.egg,L0011.R0008.A0005.egg
+47,train,wf,11,Washing face,None,woman2/women22.egg,8,woman2/women22-wf7.egg,6,600,L0011.R0008.egg,L0011.R0008.A0006.egg
+48,train,wf,11,Washing face,None,woman2/women22.egg,8,woman2/women22-wf8.egg,7,600,L0011.R0008.egg,L0011.R0008.A0007.egg
+49,train,wf,11,Washing face,None,woman2/women22.egg,8,woman2/women22-wf9.egg,8,700,L0011.R0008.egg,L0011.R0008.A0008.egg
+50,test,bt,0,Brushing teeth,Toothbrush,man0/man0bt.egg,0,man0/man0bt-bt1.egg,0,999,L0000.R0000.egg,L0000.R0000.A0000.egg
+51,test,bt,0,Brushing teeth,Toothbrush,man0/man0bt.egg,0,man0/man0bt-bt10.egg,1,550,L0000.R0000.egg,L0000.R0000.A0001.egg
+52,test,bt,0,Brushing teeth,Toothbrush,man0/man0bt.egg,0,man0/man0bt-bt2.egg,2,580,L0000.R0000.egg,L0000.R0000.A0002.egg
+53,test,bt,0,Brushing teeth,Toothbrush,man0/man0bt.egg,0,man0/man0bt-bt3.egg,3,600,L0000.R0000.egg,L0000.R0000.A0003.egg
+54,test,bt,0,Brushing teeth,Toothbrush,man0/man0bt.egg,0,man0/man0bt-bt4.egg,4,500,L0000.R0000.egg,L0000.R0000.A0004.egg
+55,test,bt,0,Brushing teeth,Toothbrush,man0/man0bt.egg,0,man0/man0bt-bt5.egg,5,600,L0000.R0000.egg,L0000.R0000.A0005.egg
+56,test,bt,0,Brushing teeth,Toothbrush,man0/man0bt.egg,0,man0/man0bt-bt6.egg,6,600,L0000.R0000.egg,L0000.R0000.A0006.egg
+57,test,bt,0,Brushing teeth,Toothbrush,man0/man0bt.egg,0,man0/man0bt-bt7.egg,7,500,L0000.R0000.egg,L0000.R0000.A0007.egg
+58,test,bt,0,Brushing teeth,Toothbrush,man0/man0bt.egg,0,man0/man0bt-bt8.egg,8,500,L0000.R0000.egg,L0000.R0000.A0008.egg
+59,test,bt,0,Brushing teeth,Toothbrush,man0/man0bt.egg,0,man0/man0bt-bt9.egg,9,600,L0000.R0000.egg,L0000.R0000.A0009.egg
+60,train,bt,0,Brushing teeth,Toothbrush,man1/man12bt.egg,1,man1/man12bt-bt10.egg,0,600,L0000.R0001.egg,L0000.R0001.A0000.egg
+61,train,bt,0,Brushing teeth,Toothbrush,man1/man12bt.egg,1,man1/man12bt-bt2.egg,1,700,L0000.R0001.egg,L0000.R0001.A0001.egg
+62,train,bt,0,Brushing teeth,Toothbrush,man1/man12bt.egg,1,man1/man12bt-bt3.egg,2,700,L0000.R0001.egg,L0000.R0001.A0002.egg
+63,train,bt,0,Brushing teeth,Toothbrush,man1/man12bt.egg,1,man1/man12bt-bt4.egg,3,600,L0000.R0001.egg,L0000.R0001.A0003.egg
+64,train,bt,0,Brushing teeth,Toothbrush,man1/man12bt.egg,1,man1/man12bt-bt5.egg,4,600,L0000.R0001.egg,L0000.R0001.A0004.egg
+65,train,bt,0,Brushing teeth,Toothbrush,man1/man12bt.egg,1,man1/man12bt-bt6.egg,5,700,L0000.R0001.egg,L0000.R0001.A0005.egg
+66,train,bt,0,Brushing teeth,Toothbrush,man1/man12bt.egg,1,man1/man12bt-bt7.egg,6,700,L0000.R0001.egg,L0000.R0001.A0006.egg
+67,train,bt,0,Brushing teeth,Toothbrush,man1/man12bt.egg,1,man1/man12bt-bt8.egg,7,700,L0000.R0001.egg,L0000.R0001.A0007.egg
+68,train,bt,0,Brushing teeth,Toothbrush,man1/man12bt.egg,1,man1/man12bt-bt9.egg,8,700,L0000.R0001.egg,L0000.R0001.A0008.egg
+69,train,bt,0,Brushing teeth,Toothbrush,man1/man1bt.egg,2,man1/man1bt-bt.egg,0,1250,L0000.R0002.egg,L0000.R0002.A0000.egg
+70,train,bt,0,Brushing teeth,Toothbrush,man2/man22bt.egg,3,man2/man22bt-bt10.egg,0,600,L0000.R0003.egg,L0000.R0003.A0000.egg
+71,train,bt,0,Brushing teeth,Toothbrush,man2/man22bt.egg,3,man2/man22bt-bt2.egg,1,600,L0000.R0003.egg,L0000.R0003.A0001.egg
+72,train,bt,0,Brushing teeth,Toothbrush,man2/man22bt.egg,3,man2/man22bt-bt3.egg,2,600,L0000.R0003.egg,L0000.R0003.A0002.egg
+73,train,bt,0,Brushing teeth,Toothbrush,man2/man22bt.egg,3,man2/man22bt-bt4.egg,3,600,L0000.R0003.egg,L0000.R0003.A0003.egg
+74,train,bt,0,Brushing teeth,Toothbrush,man2/man22bt.egg,3,man2/man22bt-bt5.egg,4,600,L0000.R0003.egg,L0000.R0003.A0004.egg
+75,train,bt,0,Brushing teeth,Toothbrush,man2/man22bt.egg,3,man2/man22bt-bt6.egg,5,600,L0000.R0003.egg,L0000.R0003.A0005.egg
+76,train,bt,0,Brushing teeth,Toothbrush,man2/man22bt.egg,3,man2/man22bt-bt7.egg,6,600,L0000.R0003.egg,L0000.R0003.A0006.egg
+77,train,bt,0,Brushing teeth,Toothbrush,man2/man22bt.egg,3,man2/man22bt-bt8.egg,7,600,L0000.R0003.egg,L0000.R0003.A0007.egg
+78,train,bt,0,Brushing teeth,Toothbrush,man2/man22bt.egg,3,man2/man22bt-bt9.egg,8,600,L0000.R0003.egg,L0000.R0003.A0008.egg
+79,train,bt,0,Brushing teeth,Toothbrush,man2/man2bt.egg,4,man2/man2bt-bt.egg,0,1300,L0000.R0004.egg,L0000.R0004.A0000.egg
+80,train,bt,0,Brushing teeth,Toothbrush,woman1/woman12bt.egg,5,woman1/woman12bt-bt10.egg,0,700,L0000.R0005.egg,L0000.R0005.A0000.egg
+81,train,bt,0,Brushing teeth,Toothbrush,woman1/woman12bt.egg,5,woman1/woman12bt-bt2.egg,1,600,L0000.R0005.egg,L0000.R0005.A0001.egg
+82,train,bt,0,Brushing teeth,Toothbrush,woman1/woman12bt.egg,5,woman1/woman12bt-bt3.egg,2,700,L0000.R0005.egg,L0000.R0005.A0002.egg
+83,train,bt,0,Brushing teeth,Toothbrush,woman1/woman12bt.egg,5,woman1/woman12bt-bt4.egg,3,600,L0000.R0005.egg,L0000.R0005.A0003.egg
+84,train,bt,0,Brushing teeth,Toothbrush,woman1/woman12bt.egg,5,woman1/woman12bt-bt5.egg,4,700,L0000.R0005.egg,L0000.R0005.A0004.egg
+85,train,bt,0,Brushing teeth,Toothbrush,woman1/woman12bt.egg,5,woman1/woman12bt-bt6.egg,5,600,L0000.R0005.egg,L0000.R0005.A0005.egg
+86,train,bt,0,Brushing teeth,Toothbrush,woman1/woman12bt.egg,5,woman1/woman12bt-bt7.egg,6,700,L0000.R0005.egg,L0000.R0005.A0006.egg
+87,train,bt,0,Brushing teeth,Toothbrush,woman1/woman12bt.egg,5,woman1/woman12bt-bt8.egg,7,600,L0000.R0005.egg,L0000.R0005.A0007.egg
+88,train,bt,0,Brushing teeth,Toothbrush,woman1/woman12bt.egg,5,woman1/woman12bt-bt9.egg,8,700,L0000.R0005.egg,L0000.R0005.A0008.egg
+89,train,bt,0,Brushing teeth,Toothbrush,woman1/woman1bt.egg,6,woman1/woman1bt-bt.egg,0,860,L0000.R0006.egg,L0000.R0006.A0000.egg
+90,train,bt,0,Brushing teeth,Toothbrush,woman2/woman2bt.egg,7,woman2/woman2bt-bt.egg,0,800,L0000.R0007.egg,L0000.R0007.A0000.egg
+91,train,bt,0,Brushing teeth,Toothbrush,woman2/women22bt.egg,8,woman2/women22bt-bt10.egg,0,700,L0000.R0008.egg,L0000.R0008.A0000.egg
+92,train,bt,0,Brushing teeth,Toothbrush,woman2/women22bt.egg,8,woman2/women22bt-bt2.egg,1,800,L0000.R0008.egg,L0000.R0008.A0001.egg
+93,train,bt,0,Brushing teeth,Toothbrush,woman2/women22bt.egg,8,woman2/women22bt-bt3.egg,2,700,L0000.R0008.egg,L0000.R0008.A0002.egg
+94,train,bt,0,Brushing teeth,Toothbrush,woman2/women22bt.egg,8,woman2/women22bt-bt4.egg,3,700,L0000.R0008.egg,L0000.R0008.A0003.egg
+95,train,bt,0,Brushing teeth,Toothbrush,woman2/women22bt.egg,8,woman2/women22bt-bt5.egg,4,700,L0000.R0008.egg,L0000.R0008.A0004.egg
+96,train,bt,0,Brushing teeth,Toothbrush,woman2/women22bt.egg,8,woman2/women22bt-bt6.egg,5,700,L0000.R0008.egg,L0000.R0008.A0005.egg
+97,train,bt,0,Brushing teeth,Toothbrush,woman2/women22bt.egg,8,woman2/women22bt-bt7.egg,6,700,L0000.R0008.egg,L0000.R0008.A0006.egg
+98,train,bt,0,Brushing teeth,Toothbrush,woman2/women22bt.egg,8,woman2/women22bt-bt8.egg,7,700,L0000.R0008.egg,L0000.R0008.A0007.egg
+99,train,bt,0,Brushing teeth,Toothbrush,woman2/women22bt.egg,8,woman2/women22bt-bt9.egg,8,700,L0000.R0008.egg,L0000.R0008.A0008.egg
+100,test,em,1,Eating meal,Knife and fork,man0/man0em.egg,0,man0/man0em-em1.egg,0,1299,L0001.R0000.egg,L0001.R0000.A0000.egg
+101,test,em,1,Eating meal,Knife and fork,man0/man0em.egg,0,man0/man0em-em10.egg,1,1400,L0001.R0000.egg,L0001.R0000.A0001.egg
+102,test,em,1,Eating meal,Knife and fork,man0/man0em.egg,0,man0/man0em-em2.egg,2,1130,L0001.R0000.egg,L0001.R0000.A0002.egg
+103,test,em,1,Eating meal,Knife and fork,man0/man0em.egg,0,man0/man0em-em3.egg,3,1230,L0001.R0000.egg,L0001.R0000.A0003.egg
+104,test,em,1,Eating meal,Knife and fork,man0/man0em.egg,0,man0/man0em-em4.egg,4,1250,L0001.R0000.egg,L0001.R0000.A0004.egg
+105,test,em,1,Eating meal,Knife and fork,man0/man0em.egg,0,man0/man0em-em5.egg,5,1350,L0001.R0000.egg,L0001.R0000.A0005.egg
+106,test,em,1,Eating meal,Knife and fork,man0/man0em.egg,0,man0/man0em-em6.egg,6,350,L0001.R0000.egg,L0001.R0000.A0006.egg
+107,test,em,1,Eating meal,Knife and fork,man0/man0em.egg,0,man0/man0em-em7.egg,7,1350,L0001.R0000.egg,L0001.R0000.A0007.egg
+108,test,em,1,Eating meal,Knife and fork,man0/man0em.egg,0,man0/man0em-em8.egg,8,1350,L0001.R0000.egg,L0001.R0000.A0008.egg
+109,test,em,1,Eating meal,Knife and fork,man0/man0em.egg,0,man0/man0em-em9.egg,9,1300,L0001.R0000.egg,L0001.R0000.A0009.egg
+110,train,em,1,Eating meal,Knife and fork,man1/man12em.egg,1,man1/man12em-em10.egg,0,1000,L0001.R0001.egg,L0001.R0001.A0000.egg
+111,train,em,1,Eating meal,Knife and fork,man1/man12em.egg,1,man1/man12em-em2.egg,1,900,L0001.R0001.egg,L0001.R0001.A0001.egg
+112,train,em,1,Eating meal,Knife and fork,man1/man12em.egg,1,man1/man12em-em3.egg,2,900,L0001.R0001.egg,L0001.R0001.A0002.egg
+113,train,em,1,Eating meal,Knife and fork,man1/man12em.egg,1,man1/man12em-em4.egg,3,1000,L0001.R0001.egg,L0001.R0001.A0003.egg
+114,train,em,1,Eating meal,Knife and fork,man1/man12em.egg,1,man1/man12em-em5.egg,4,1000,L0001.R0001.egg,L0001.R0001.A0004.egg
+115,train,em,1,Eating meal,Knife and fork,man1/man12em.egg,1,man1/man12em-em6.egg,5,1000,L0001.R0001.egg,L0001.R0001.A0005.egg
+116,train,em,1,Eating meal,Knife and fork,man1/man12em.egg,1,man1/man12em-em7.egg,6,1000,L0001.R0001.egg,L0001.R0001.A0006.egg
+117,train,em,1,Eating meal,Knife and fork,man1/man12em.egg,1,man1/man12em-em8.egg,7,1000,L0001.R0001.egg,L0001.R0001.A0007.egg
+118,train,em,1,Eating meal,Knife and fork,man1/man12em.egg,1,man1/man12em-em9.egg,8,900,L0001.R0001.egg,L0001.R0001.A0008.egg
+119,train,em,1,Eating meal,Knife and fork,man1/man1em2.egg,2,man1/man1em2-em2.egg,0,1560,L0001.R0002.egg,L0001.R0002.A0000.egg
+120,train,em,1,Eating meal,Knife and fork,man2/man22em.egg,3,man2/man22em-em10.egg,0,1000,L0001.R0003.egg,L0001.R0003.A0000.egg
+121,train,em,1,Eating meal,Knife and fork,man2/man22em.egg,3,man2/man22em-em2.egg,1,1100,L0001.R0003.egg,L0001.R0003.A0001.egg
+122,train,em,1,Eating meal,Knife and fork,man2/man22em.egg,3,man2/man22em-em3.egg,2,1100,L0001.R0003.egg,L0001.R0003.A0002.egg
+123,train,em,1,Eating meal,Knife and fork,man2/man22em.egg,3,man2/man22em-em4.egg,3,1100,L0001.R0003.egg,L0001.R0003.A0003.egg
+124,train,em,1,Eating meal,Knife and fork,man2/man22em.egg,3,man2/man22em-em5.egg,4,1100,L0001.R0003.egg,L0001.R0003.A0004.egg
+125,train,em,1,Eating meal,Knife and fork,man2/man22em.egg,3,man2/man22em-em6.egg,5,1100,L0001.R0003.egg,L0001.R0003.A0005.egg
+126,train,em,1,Eating meal,Knife and fork,man2/man22em.egg,3,man2/man22em-em7.egg,6,1100,L0001.R0003.egg,L0001.R0003.A0006.egg
+127,train,em,1,Eating meal,Knife and fork,man2/man22em.egg,3,man2/man22em-em8.egg,7,1000,L0001.R0003.egg,L0001.R0003.A0007.egg
+128,train,em,1,Eating meal,Knife and fork,man2/man22em.egg,3,man2/man22em-em9.egg,8,1000,L0001.R0003.egg,L0001.R0003.A0008.egg
+129,train,em,1,Eating meal,Knife and fork,man2/man2em.egg,4,man2/man2em-em.egg,0,1400,L0001.R0004.egg,L0001.R0004.A0000.egg
+130,train,em,1,Eating meal,Knife and fork,woman1/woman12em.egg,5,woman1/woman12em-em10.egg,0,1000,L0001.R0005.egg,L0001.R0005.A0000.egg
+131,train,em,1,Eating meal,Knife and fork,woman1/woman12em.egg,5,woman1/woman12em-em2.egg,1,1000,L0001.R0005.egg,L0001.R0005.A0001.egg
+132,train,em,1,Eating meal,Knife and fork,woman1/woman12em.egg,5,woman1/woman12em-em3.egg,2,900,L0001.R0005.egg,L0001.R0005.A0002.egg
+133,train,em,1,Eating meal,Knife and fork,woman1/woman12em.egg,5,woman1/woman12em-em4.egg,3,1000,L0001.R0005.egg,L0001.R0005.A0003.egg
+134,train,em,1,Eating meal,Knife and fork,woman1/woman12em.egg,5,woman1/woman12em-em5.egg,4,1000,L0001.R0005.egg,L0001.R0005.A0004.egg
+135,train,em,1,Eating meal,Knife and fork,woman1/woman12em.egg,5,woman1/woman12em-em6.egg,5,1000,L0001.R0005.egg,L0001.R0005.A0005.egg
+136,train,em,1,Eating meal,Knife and fork,woman1/woman12em.egg,5,woman1/woman12em-em7.egg,6,1000,L0001.R0005.egg,L0001.R0005.A0006.egg
+137,train,em,1,Eating meal,Knife and fork,woman1/woman12em.egg,5,woman1/woman12em-em8.egg,7,1000,L0001.R0005.egg,L0001.R0005.A0007.egg
+138,train,em,1,Eating meal,Knife and fork,woman1/woman12em.egg,5,woman1/woman12em-em9.egg,8,900,L0001.R0005.egg,L0001.R0005.A0008.egg
+139,train,em,1,Eating meal,Knife and fork,woman1/woman1em.egg,6,woman1/woman1em-em.egg,0,830,L0001.R0006.egg,L0001.R0006.A0000.egg
+140,train,em,1,Eating meal,Knife and fork,woman2/woman2em.egg,7,woman2/woman2em-em.egg,0,820,L0001.R0007.egg,L0001.R0007.A0000.egg
+141,train,em,1,Eating meal,Knife and fork,woman2/women22em.egg,8,woman2/women22em-em10.egg,0,1000,L0001.R0008.egg,L0001.R0008.A0000.egg
+142,train,em,1,Eating meal,Knife and fork,woman2/women22em.egg,8,woman2/women22em-em2.egg,1,1000,L0001.R0008.egg,L0001.R0008.A0001.egg
+143,train,em,1,Eating meal,Knife and fork,woman2/women22em.egg,8,woman2/women22em-em3.egg,2,900,L0001.R0008.egg,L0001.R0008.A0002.egg
+144,train,em,1,Eating meal,Knife and fork,woman2/women22em.egg,8,woman2/women22em-em4.egg,3,1000,L0001.R0008.egg,L0001.R0008.A0003.egg
+145,train,em,1,Eating meal,Knife and fork,woman2/women22em.egg,8,woman2/women22em-em5.egg,4,1000,L0001.R0008.egg,L0001.R0008.A0004.egg
+146,train,em,1,Eating meal,Knife and fork,woman2/women22em.egg,8,woman2/women22em-em6.egg,5,1000,L0001.R0008.egg,L0001.R0008.A0005.egg
+147,train,em,1,Eating meal,Knife and fork,woman2/women22em.egg,8,woman2/women22em-em7.egg,6,1000,L0001.R0008.egg,L0001.R0008.A0006.egg
+148,train,em,1,Eating meal,Knife and fork,woman2/women22em.egg,8,woman2/women22em-em8.egg,7,1000,L0001.R0008.egg,L0001.R0008.A0007.egg
+149,train,em,1,Eating meal,Knife and fork,woman2/women22em.egg,8,woman2/women22em-em9.egg,8,1000,L0001.R0008.egg,L0001.R0008.A0008.egg
+150,test,mj,2,Making juice,Blender,man0/man0mj.egg,0,man0/man0mj-mj10.egg,0,600,L0002.R0000.egg,L0002.R0000.A0000.egg
+151,test,mj,2,Making juice,Blender,man0/man0mj.egg,0,man0/man0mj-mj2.egg,1,660,L0002.R0000.egg,L0002.R0000.A0001.egg
+152,test,mj,2,Making juice,Blender,man0/man0mj.egg,0,man0/man0mj-mj3.egg,2,650,L0002.R0000.egg,L0002.R0000.A0002.egg
+153,test,mj,2,Making juice,Blender,man0/man0mj.egg,0,man0/man0mj-mj4.egg,3,700,L0002.R0000.egg,L0002.R0000.A0003.egg
+154,test,mj,2,Making juice,Blender,man0/man0mj.egg,0,man0/man0mj-mj5.egg,4,750,L0002.R0000.egg,L0002.R0000.A0004.egg
+155,test,mj,2,Making juice,Blender,man0/man0mj.egg,0,man0/man0mj-mj6.egg,5,700,L0002.R0000.egg,L0002.R0000.A0005.egg
+156,test,mj,2,Making juice,Blender,man0/man0mj.egg,0,man0/man0mj-mj7.egg,6,750,L0002.R0000.egg,L0002.R0000.A0006.egg
+157,test,mj,2,Making juice,Blender,man0/man0mj.egg,0,man0/man0mj-mj8.egg,7,750,L0002.R0000.egg,L0002.R0000.A0007.egg
+158,test,mj,2,Making juice,Blender,man0/man0mj.egg,0,man0/man0mj-mj9.egg,8,650,L0002.R0000.egg,L0002.R0000.A0008.egg
+159,train,mj,2,Making juice,Blender,man1/man12mj.egg,1,man1/man12mj-mj10.egg,0,800,L0002.R0001.egg,L0002.R0001.A0000.egg
+160,train,mj,2,Making juice,Blender,man1/man12mj.egg,1,man1/man12mj-mj2.egg,1,800,L0002.R0001.egg,L0002.R0001.A0001.egg
+161,train,mj,2,Making juice,Blender,man1/man12mj.egg,1,man1/man12mj-mj3.egg,2,800,L0002.R0001.egg,L0002.R0001.A0002.egg
+162,train,mj,2,Making juice,Blender,man1/man12mj.egg,1,man1/man12mj-mj4.egg,3,800,L0002.R0001.egg,L0002.R0001.A0003.egg
+163,train,mj,2,Making juice,Blender,man1/man12mj.egg,1,man1/man12mj-mj5.egg,4,800,L0002.R0001.egg,L0002.R0001.A0004.egg
+164,train,mj,2,Making juice,Blender,man1/man12mj.egg,1,man1/man12mj-mj6.egg,5,800,L0002.R0001.egg,L0002.R0001.A0005.egg
+165,train,mj,2,Making juice,Blender,man1/man12mj.egg,1,man1/man12mj-mj7.egg,6,750,L0002.R0001.egg,L0002.R0001.A0006.egg
+166,train,mj,2,Making juice,Blender,man1/man12mj.egg,1,man1/man12mj-mj8.egg,7,900,L0002.R0001.egg,L0002.R0001.A0007.egg
+167,train,mj,2,Making juice,Blender,man1/man12mj.egg,1,man1/man12mj-mj9.egg,8,800,L0002.R0001.egg,L0002.R0001.A0008.egg
+168,train,mj,2,Making juice,Blender,man1/man1mj1.egg,2,man1/man1mj1-mj1.egg,0,725,L0002.R0002.egg,L0002.R0002.A0000.egg
+169,train,mj,2,Making juice,Blender,man2/man22mj.egg,3,man2/man22mj-mj2.egg,0,700,L0002.R0003.egg,L0002.R0003.A0000.egg
+170,train,mj,2,Making juice,Blender,man2/man23mj.egg,4,man2/man23mj-mj10.egg,0,700,L0002.R0004.egg,L0002.R0004.A0000.egg
+171,train,mj,2,Making juice,Blender,man2/man23mj.egg,4,man2/man23mj-mj3.egg,1,700,L0002.R0004.egg,L0002.R0004.A0001.egg
+172,train,mj,2,Making juice,Blender,man2/man23mj.egg,4,man2/man23mj-mj4.egg,2,700,L0002.R0004.egg,L0002.R0004.A0002.egg
+173,train,mj,2,Making juice,Blender,man2/man23mj.egg,4,man2/man23mj-mj5.egg,3,700,L0002.R0004.egg,L0002.R0004.A0003.egg
+174,train,mj,2,Making juice,Blender,man2/man23mj.egg,4,man2/man23mj-mj6.egg,4,700,L0002.R0004.egg,L0002.R0004.A0004.egg
+175,train,mj,2,Making juice,Blender,man2/man23mj.egg,4,man2/man23mj-mj7.egg,5,700,L0002.R0004.egg,L0002.R0004.A0005.egg
+176,train,mj,2,Making juice,Blender,man2/man23mj.egg,4,man2/man23mj-mj8.egg,6,700,L0002.R0004.egg,L0002.R0004.A0006.egg
+177,train,mj,2,Making juice,Blender,man2/man23mj.egg,4,man2/man23mj-mj9.egg,7,700,L0002.R0004.egg,L0002.R0004.A0007.egg
+178,train,mj,2,Making juice,Blender,man2/man2mj1.egg,5,man2/man2mj1-mj1.egg,0,600,L0002.R0005.egg,L0002.R0005.A0000.egg
+179,train,mj,2,Making juice,Blender,woman1/woman12mj.egg,6,woman1/woman12mj-mj10.egg,0,800,L0002.R0006.egg,L0002.R0006.A0000.egg
+180,train,mj,2,Making juice,Blender,woman1/woman12mj.egg,6,woman1/woman12mj-mj2.egg,1,800,L0002.R0006.egg,L0002.R0006.A0001.egg
+181,train,mj,2,Making juice,Blender,woman1/woman12mj.egg,6,woman1/woman12mj-mj3.egg,2,700,L0002.R0006.egg,L0002.R0006.A0002.egg
+182,train,mj,2,Making juice,Blender,woman1/woman12mj.egg,6,woman1/woman12mj-mj4.egg,3,700,L0002.R0006.egg,L0002.R0006.A0003.egg
+183,train,mj,2,Making juice,Blender,woman1/woman12mj.egg,6,woman1/woman12mj-mj5.egg,4,700,L0002.R0006.egg,L0002.R0006.A0004.egg
+184,train,mj,2,Making juice,Blender,woman1/woman12mj.egg,6,woman1/woman12mj-mj6.egg,5,700,L0002.R0006.egg,L0002.R0006.A0005.egg
+185,train,mj,2,Making juice,Blender,woman1/woman12mj.egg,6,woman1/woman12mj-mj7.egg,6,700,L0002.R0006.egg,L0002.R0006.A0006.egg
+186,train,mj,2,Making juice,Blender,woman1/woman12mj.egg,6,woman1/woman12mj-mj8.egg,7,700,L0002.R0006.egg,L0002.R0006.A0007.egg
+187,train,mj,2,Making juice,Blender,woman1/woman12mj.egg,6,woman1/woman12mj-mj9.egg,8,700,L0002.R0006.egg,L0002.R0006.A0008.egg
+188,train,mj,2,Making juice,Blender,woman1/woman1mj1.egg,7,woman1/woman1mj1-mj1.egg,0,450,L0002.R0007.egg,L0002.R0007.A0000.egg
+189,train,mj,2,Making juice,Blender,woman2/woman2mj1.egg,8,woman2/woman2mj1-mj1.egg,0,550,L0002.R0008.egg,L0002.R0008.A0000.egg
+190,train,mj,2,Making juice,Blender,woman2/women22mj.egg,9,woman2/women22mj-mj10.egg,0,600,L0002.R0009.egg,L0002.R0009.A0000.egg
+191,train,mj,2,Making juice,Blender,woman2/women22mj.egg,9,woman2/women22mj-mj2.egg,1,600,L0002.R0009.egg,L0002.R0009.A0001.egg
+192,train,mj,2,Making juice,Blender,woman2/women22mj.egg,9,woman2/women22mj-mj3.egg,2,600,L0002.R0009.egg,L0002.R0009.A0002.egg
+193,train,mj,2,Making juice,Blender,woman2/women22mj.egg,9,woman2/women22mj-mj4.egg,3,600,L0002.R0009.egg,L0002.R0009.A0003.egg
+194,train,mj,2,Making juice,Blender,woman2/women22mj.egg,9,woman2/women22mj-mj5.egg,4,600,L0002.R0009.egg,L0002.R0009.A0004.egg
+195,train,mj,2,Making juice,Blender,woman2/women22mj.egg,9,woman2/women22mj-mj6.egg,5,600,L0002.R0009.egg,L0002.R0009.A0005.egg
+196,train,mj,2,Making juice,Blender,woman2/women22mj.egg,9,woman2/women22mj-mj7.egg,6,600,L0002.R0009.egg,L0002.R0009.A0006.egg
+197,train,mj,2,Making juice,Blender,woman2/women22mj.egg,9,woman2/women22mj-mj8.egg,7,600,L0002.R0009.egg,L0002.R0009.A0007.egg
+198,train,mj,2,Making juice,Blender,woman2/women22mj.egg,9,woman2/women22mj-mj9.egg,8,600,L0002.R0009.egg,L0002.R0009.A0008.egg
+199,test,mt1,3,Making tea,Tea caddy,man0/man0mt1.egg,0,man0/man0mt1-mt11.egg,0,399,L0003.R0000.egg,L0003.R0000.A0000.egg
+200,test,mt1,3,Making tea,Tea caddy,man0/man0mt1.egg,0,man0/man0mt1-mt110.egg,1,600,L0003.R0000.egg,L0003.R0000.A0001.egg
+201,test,mt1,3,Making tea,Tea caddy,man0/man0mt1.egg,0,man0/man0mt1-mt12.egg,2,450,L0003.R0000.egg,L0003.R0000.A0002.egg
+202,test,mt1,3,Making tea,Tea caddy,man0/man0mt1.egg,0,man0/man0mt1-mt13.egg,3,400,L0003.R0000.egg,L0003.R0000.A0003.egg
+203,test,mt1,3,Making tea,Tea caddy,man0/man0mt1.egg,0,man0/man0mt1-mt14.egg,4,400,L0003.R0000.egg,L0003.R0000.A0004.egg
+204,test,mt1,3,Making tea,Tea caddy,man0/man0mt1.egg,0,man0/man0mt1-mt15.egg,5,400,L0003.R0000.egg,L0003.R0000.A0005.egg
+205,test,mt1,3,Making tea,Tea caddy,man0/man0mt1.egg,0,man0/man0mt1-mt16.egg,6,500,L0003.R0000.egg,L0003.R0000.A0006.egg
+206,test,mt1,3,Making tea,Tea caddy,man0/man0mt1.egg,0,man0/man0mt1-mt17.egg,7,400,L0003.R0000.egg,L0003.R0000.A0007.egg
+207,test,mt1,3,Making tea,Tea caddy,man0/man0mt1.egg,0,man0/man0mt1-mt18.egg,8,500,L0003.R0000.egg,L0003.R0000.A0008.egg
+208,test,mt1,3,Making tea,Tea caddy,man0/man0mt1.egg,0,man0/man0mt1-mt19.egg,9,400,L0003.R0000.egg,L0003.R0000.A0009.egg
+209,train,mt1,3,Making tea,Tea caddy,man1/man12mt1.egg,1,man1/man12mt1-mt110.egg,0,800,L0003.R0001.egg,L0003.R0001.A0000.egg
+210,train,mt1,3,Making tea,Tea caddy,man1/man12mt1.egg,1,man1/man12mt1-mt12.egg,1,800,L0003.R0001.egg,L0003.R0001.A0001.egg
+211,train,mt1,3,Making tea,Tea caddy,man1/man12mt1.egg,1,man1/man12mt1-mt13.egg,2,800,L0003.R0001.egg,L0003.R0001.A0002.egg
+212,train,mt1,3,Making tea,Tea caddy,man1/man12mt1.egg,1,man1/man12mt1-mt14.egg,3,800,L0003.R0001.egg,L0003.R0001.A0003.egg
+213,train,mt1,3,Making tea,Tea caddy,man1/man12mt1.egg,1,man1/man12mt1-mt15.egg,4,800,L0003.R0001.egg,L0003.R0001.A0004.egg
+214,train,mt1,3,Making tea,Tea caddy,man1/man12mt1.egg,1,man1/man12mt1-mt16.egg,5,800,L0003.R0001.egg,L0003.R0001.A0005.egg
+215,train,mt1,3,Making tea,Tea caddy,man1/man12mt1.egg,1,man1/man12mt1-mt17.egg,6,800,L0003.R0001.egg,L0003.R0001.A0006.egg
+216,train,mt1,3,Making tea,Tea caddy,man1/man12mt1.egg,1,man1/man12mt1-mt18.egg,7,700,L0003.R0001.egg,L0003.R0001.A0007.egg
+217,train,mt1,3,Making tea,Tea caddy,man1/man12mt1.egg,1,man1/man12mt1-mt19.egg,8,800,L0003.R0001.egg,L0003.R0001.A0008.egg
+218,train,mt1,3,Making tea,Tea caddy,man1/man1mt1.egg,2,man1/man1mt1-mt1.egg,0,650,L0003.R0002.egg,L0003.R0002.A0000.egg
+219,train,mt1,3,Making tea,Tea caddy,man2/man22mt1.egg,3,man2/man22mt1-mt110.egg,0,700,L0003.R0003.egg,L0003.R0003.A0000.egg
+220,train,mt1,3,Making tea,Tea caddy,man2/man22mt1.egg,3,man2/man22mt1-mt12.egg,1,700,L0003.R0003.egg,L0003.R0003.A0001.egg
+221,train,mt1,3,Making tea,Tea caddy,man2/man22mt1.egg,3,man2/man22mt1-mt13.egg,2,700,L0003.R0003.egg,L0003.R0003.A0002.egg
+222,train,mt1,3,Making tea,Tea caddy,man2/man22mt1.egg,3,man2/man22mt1-mt14.egg,3,700,L0003.R0003.egg,L0003.R0003.A0003.egg
+223,train,mt1,3,Making tea,Tea caddy,man2/man22mt1.egg,3,man2/man22mt1-mt15.egg,4,700,L0003.R0003.egg,L0003.R0003.A0004.egg
+224,train,mt1,3,Making tea,Tea caddy,man2/man22mt1.egg,3,man2/man22mt1-mt16.egg,5,700,L0003.R0003.egg,L0003.R0003.A0005.egg
+225,train,mt1,3,Making tea,Tea caddy,man2/man22mt1.egg,3,man2/man22mt1-mt17.egg,6,700,L0003.R0003.egg,L0003.R0003.A0006.egg
+226,train,mt1,3,Making tea,Tea caddy,man2/man22mt1.egg,3,man2/man22mt1-mt18.egg,7,800,L0003.R0003.egg,L0003.R0003.A0007.egg
+227,train,mt1,3,Making tea,Tea caddy,man2/man22mt1.egg,3,man2/man22mt1-mt19.egg,8,700,L0003.R0003.egg,L0003.R0003.A0008.egg
+228,train,mt1,3,Making tea,Tea caddy,man2/man2mt1.egg,4,man2/man2mt1-mt1.egg,0,730,L0003.R0004.egg,L0003.R0004.A0000.egg
+229,train,mt1,3,Making tea,Tea caddy,woman1/woman12mt1.egg,5,woman1/woman12mt1-mt110.egg,0,800,L0003.R0005.egg,L0003.R0005.A0000.egg
+230,train,mt1,3,Making tea,Tea caddy,woman1/woman12mt1.egg,5,woman1/woman12mt1-mt12.egg,1,800,L0003.R0005.egg,L0003.R0005.A0001.egg
+231,train,mt1,3,Making tea,Tea caddy,woman1/woman12mt1.egg,5,woman1/woman12mt1-mt13.egg,2,800,L0003.R0005.egg,L0003.R0005.A0002.egg
+232,train,mt1,3,Making tea,Tea caddy,woman1/woman12mt1.egg,5,woman1/woman12mt1-mt14.egg,3,800,L0003.R0005.egg,L0003.R0005.A0003.egg
+233,train,mt1,3,Making tea,Tea caddy,woman1/woman12mt1.egg,5,woman1/woman12mt1-mt15.egg,4,800,L0003.R0005.egg,L0003.R0005.A0004.egg
+234,train,mt1,3,Making tea,Tea caddy,woman1/woman12mt1.egg,5,woman1/woman12mt1-mt16.egg,5,800,L0003.R0005.egg,L0003.R0005.A0005.egg
+235,train,mt1,3,Making tea,Tea caddy,woman1/woman12mt1.egg,5,woman1/woman12mt1-mt17.egg,6,800,L0003.R0005.egg,L0003.R0005.A0006.egg
+236,train,mt1,3,Making tea,Tea caddy,woman1/woman12mt1.egg,5,woman1/woman12mt1-mt18.egg,7,800,L0003.R0005.egg,L0003.R0005.A0007.egg
+237,train,mt1,3,Making tea,Tea caddy,woman1/woman12mt1.egg,5,woman1/woman12mt1-mt19.egg,8,800,L0003.R0005.egg,L0003.R0005.A0008.egg
+238,train,mt1,3,Making tea,Tea caddy,woman1/woman1mt1.egg,6,woman1/woman1mt1-mt1.egg,0,460,L0003.R0006.egg,L0003.R0006.A0000.egg
+239,train,mt1,3,Making tea,Tea caddy,woman2/woman2mt1.egg,7,woman2/woman2mt1-mt1.egg,0,480,L0003.R0007.egg,L0003.R0007.A0000.egg
+240,train,mt1,3,Making tea,Tea caddy,woman2/women22mt1.egg,8,woman2/women22mt1-mt110.egg,0,800,L0003.R0008.egg,L0003.R0008.A0000.egg
+241,train,mt1,3,Making tea,Tea caddy,woman2/women22mt1.egg,8,woman2/women22mt1-mt12.egg,1,700,L0003.R0008.egg,L0003.R0008.A0001.egg
+242,train,mt1,3,Making tea,Tea caddy,woman2/women22mt1.egg,8,woman2/women22mt1-mt13.egg,2,700,L0003.R0008.egg,L0003.R0008.A0002.egg
+243,train,mt1,3,Making tea,Tea caddy,woman2/women22mt1.egg,8,woman2/women22mt1-mt14.egg,3,700,L0003.R0008.egg,L0003.R0008.A0003.egg
+244,train,mt1,3,Making tea,Tea caddy,woman2/women22mt1.egg,8,woman2/women22mt1-mt15.egg,4,700,L0003.R0008.egg,L0003.R0008.A0004.egg
+245,train,mt1,3,Making tea,Tea caddy,woman2/women22mt1.egg,8,woman2/women22mt1-mt16.egg,5,700,L0003.R0008.egg,L0003.R0008.A0005.egg
+246,train,mt1,3,Making tea,Tea caddy,woman2/women22mt1.egg,8,woman2/women22mt1-mt17.egg,6,700,L0003.R0008.egg,L0003.R0008.A0006.egg
+247,train,mt1,3,Making tea,Tea caddy,woman2/women22mt1.egg,8,woman2/women22mt1-mt18.egg,7,800,L0003.R0008.egg,L0003.R0008.A0007.egg
+248,train,mt1,3,Making tea,Tea caddy,woman2/women22mt1.egg,8,woman2/women22mt1-mt19.egg,8,700,L0003.R0008.egg,L0003.R0008.A0008.egg
+249,test,mt2,4,Making tea,Kettle,man0/man0mt2.egg,0,man0/man0mt2-mt21.egg,0,259,L0004.R0000.egg,L0004.R0000.A0000.egg
+250,test,mt2,4,Making tea,Kettle,man0/man0mt2.egg,0,man0/man0mt2-mt210.egg,1,470,L0004.R0000.egg,L0004.R0000.A0001.egg
+251,test,mt2,4,Making tea,Kettle,man0/man0mt2.egg,0,man0/man0mt2-mt22.egg,2,350,L0004.R0000.egg,L0004.R0000.A0002.egg
+252,test,mt2,4,Making tea,Kettle,man0/man0mt2.egg,0,man0/man0mt2-mt23.egg,3,250,L0004.R0000.egg,L0004.R0000.A0003.egg
+253,test,mt2,4,Making tea,Kettle,man0/man0mt2.egg,0,man0/man0mt2-mt24.egg,4,330,L0004.R0000.egg,L0004.R0000.A0004.egg
+254,test,mt2,4,Making tea,Kettle,man0/man0mt2.egg,0,man0/man0mt2-mt25.egg,5,350,L0004.R0000.egg,L0004.R0000.A0005.egg
+255,test,mt2,4,Making tea,Kettle,man0/man0mt2.egg,0,man0/man0mt2-mt26.egg,6,250,L0004.R0000.egg,L0004.R0000.A0006.egg
+256,test,mt2,4,Making tea,Kettle,man0/man0mt2.egg,0,man0/man0mt2-mt27.egg,7,350,L0004.R0000.egg,L0004.R0000.A0007.egg
+257,test,mt2,4,Making tea,Kettle,man0/man0mt2.egg,0,man0/man0mt2-mt28.egg,8,400,L0004.R0000.egg,L0004.R0000.A0008.egg
+258,test,mt2,4,Making tea,Kettle,man0/man0mt2.egg,0,man0/man0mt2-mt29.egg,9,450,L0004.R0000.egg,L0004.R0000.A0009.egg
+259,train,mt2,4,Making tea,Kettle,man1/man12mt2.egg,1,man1/man12mt2-mt210.egg,0,400,L0004.R0001.egg,L0004.R0001.A0000.egg
+260,train,mt2,4,Making tea,Kettle,man1/man12mt2.egg,1,man1/man12mt2-mt22.egg,1,400,L0004.R0001.egg,L0004.R0001.A0001.egg
+261,train,mt2,4,Making tea,Kettle,man1/man12mt2.egg,1,man1/man12mt2-mt23.egg,2,400,L0004.R0001.egg,L0004.R0001.A0002.egg
+262,train,mt2,4,Making tea,Kettle,man1/man12mt2.egg,1,man1/man12mt2-mt24.egg,3,300,L0004.R0001.egg,L0004.R0001.A0003.egg
+263,train,mt2,4,Making tea,Kettle,man1/man12mt2.egg,1,man1/man12mt2-mt25.egg,4,300,L0004.R0001.egg,L0004.R0001.A0004.egg
+264,train,mt2,4,Making tea,Kettle,man1/man12mt2.egg,1,man1/man12mt2-mt26.egg,5,400,L0004.R0001.egg,L0004.R0001.A0005.egg
+265,train,mt2,4,Making tea,Kettle,man1/man12mt2.egg,1,man1/man12mt2-mt27.egg,6,400,L0004.R0001.egg,L0004.R0001.A0006.egg
+266,train,mt2,4,Making tea,Kettle,man1/man12mt2.egg,1,man1/man12mt2-mt28.egg,7,400,L0004.R0001.egg,L0004.R0001.A0007.egg
+267,train,mt2,4,Making tea,Kettle,man1/man12mt2.egg,1,man1/man12mt2-mt29.egg,8,300,L0004.R0001.egg,L0004.R0001.A0008.egg
+268,train,mt2,4,Making tea,Kettle,man1/man1mt2.egg,2,man1/man1mt2-mt2.egg,0,250,L0004.R0002.egg,L0004.R0002.A0000.egg
+269,train,mt2,4,Making tea,Kettle,man2/man22mt2.egg,3,man2/man22mt2-mt210.egg,0,300,L0004.R0003.egg,L0004.R0003.A0000.egg
+270,train,mt2,4,Making tea,Kettle,man2/man22mt2.egg,3,man2/man22mt2-mt22.egg,1,400,L0004.R0003.egg,L0004.R0003.A0001.egg
+271,train,mt2,4,Making tea,Kettle,man2/man22mt2.egg,3,man2/man22mt2-mt23.egg,2,300,L0004.R0003.egg,L0004.R0003.A0002.egg
+272,train,mt2,4,Making tea,Kettle,man2/man22mt2.egg,3,man2/man22mt2-mt24.egg,3,300,L0004.R0003.egg,L0004.R0003.A0003.egg
+273,train,mt2,4,Making tea,Kettle,man2/man22mt2.egg,3,man2/man22mt2-mt25.egg,4,400,L0004.R0003.egg,L0004.R0003.A0004.egg
+274,train,mt2,4,Making tea,Kettle,man2/man22mt2.egg,3,man2/man22mt2-mt26.egg,5,400,L0004.R0003.egg,L0004.R0003.A0005.egg
+275,train,mt2,4,Making tea,Kettle,man2/man22mt2.egg,3,man2/man22mt2-mt27.egg,6,400,L0004.R0003.egg,L0004.R0003.A0006.egg
+276,train,mt2,4,Making tea,Kettle,man2/man22mt2.egg,3,man2/man22mt2-mt28.egg,7,400,L0004.R0003.egg,L0004.R0003.A0007.egg
+277,train,mt2,4,Making tea,Kettle,man2/man22mt2.egg,3,man2/man22mt2-mt29.egg,8,400,L0004.R0003.egg,L0004.R0003.A0008.egg
+278,train,mt2,4,Making tea,Kettle,man2/man2mt2.egg,4,man2/man2mt2-mt2.egg,0,450,L0004.R0004.egg,L0004.R0004.A0000.egg
+279,train,mt2,4,Making tea,Kettle,woman1/woman12mt2.egg,5,woman1/woman12mt2-mt210.egg,0,400,L0004.R0005.egg,L0004.R0005.A0000.egg
+280,train,mt2,4,Making tea,Kettle,woman1/woman12mt2.egg,5,woman1/woman12mt2-mt22.egg,1,400,L0004.R0005.egg,L0004.R0005.A0001.egg
+281,train,mt2,4,Making tea,Kettle,woman1/woman12mt2.egg,5,woman1/woman12mt2-mt23.egg,2,400,L0004.R0005.egg,L0004.R0005.A0002.egg
+282,train,mt2,4,Making tea,Kettle,woman1/woman12mt2.egg,5,woman1/woman12mt2-mt24.egg,3,300,L0004.R0005.egg,L0004.R0005.A0003.egg
+283,train,mt2,4,Making tea,Kettle,woman1/woman12mt2.egg,5,woman1/woman12mt2-mt25.egg,4,400,L0004.R0005.egg,L0004.R0005.A0004.egg
+284,train,mt2,4,Making tea,Kettle,woman1/woman12mt2.egg,5,woman1/woman12mt2-mt26.egg,5,400,L0004.R0005.egg,L0004.R0005.A0005.egg
+285,train,mt2,4,Making tea,Kettle,woman1/woman12mt2.egg,5,woman1/woman12mt2-mt27.egg,6,400,L0004.R0005.egg,L0004.R0005.A0006.egg
+286,train,mt2,4,Making tea,Kettle,woman1/woman12mt2.egg,5,woman1/woman12mt2-mt28.egg,7,400,L0004.R0005.egg,L0004.R0005.A0007.egg
+287,train,mt2,4,Making tea,Kettle,woman1/woman12mt2.egg,5,woman1/woman12mt2-mt29.egg,8,400,L0004.R0005.egg,L0004.R0005.A0008.egg
+288,train,mt2,4,Making tea,Kettle,woman1/woman1mt2.egg,6,woman1/woman1mt2-mt2.egg,0,300,L0004.R0006.egg,L0004.R0006.A0000.egg
+289,train,mt2,4,Making tea,Kettle,woman2/woman2mt2.egg,7,woman2/woman2mt2-mt2.egg,0,450,L0004.R0007.egg,L0004.R0007.A0000.egg
+290,train,mt2,4,Making tea,Kettle,woman2/women22mt2.egg,8,woman2/women22mt2-mt210.egg,0,400,L0004.R0008.egg,L0004.R0008.A0000.egg
+291,train,mt2,4,Making tea,Kettle,woman2/women22mt2.egg,8,woman2/women22mt2-mt22.egg,1,400,L0004.R0008.egg,L0004.R0008.A0001.egg
+292,train,mt2,4,Making tea,Kettle,woman2/women22mt2.egg,8,woman2/women22mt2-mt23.egg,2,400,L0004.R0008.egg,L0004.R0008.A0002.egg
+293,train,mt2,4,Making tea,Kettle,woman2/women22mt2.egg,8,woman2/women22mt2-mt24.egg,3,400,L0004.R0008.egg,L0004.R0008.A0003.egg
+294,train,mt2,4,Making tea,Kettle,woman2/women22mt2.egg,8,woman2/women22mt2-mt25.egg,4,400,L0004.R0008.egg,L0004.R0008.A0004.egg
+295,train,mt2,4,Making tea,Kettle,woman2/women22mt2.egg,8,woman2/women22mt2-mt26.egg,5,400,L0004.R0008.egg,L0004.R0008.A0005.egg
+296,train,mt2,4,Making tea,Kettle,woman2/women22mt2.egg,8,woman2/women22mt2-mt27.egg,6,400,L0004.R0008.egg,L0004.R0008.A0006.egg
+297,train,mt2,4,Making tea,Kettle,woman2/women22mt2.egg,8,woman2/women22mt2-mt28.egg,7,400,L0004.R0008.egg,L0004.R0008.A0007.egg
+298,train,mt2,4,Making tea,Kettle,woman2/women22mt2.egg,8,woman2/women22mt2-mt29.egg,8,400,L0004.R0008.egg,L0004.R0008.A0008.egg
+299,test,pm1,5,Preparing meal,Knife and vegetable,man0/man0pm1.egg,0,man0/man0pm1-pm11.egg,0,1249,L0005.R0000.egg,L0005.R0000.A0000.egg
+300,test,pm1,5,Preparing meal,Knife and vegetable,man0/man0pm1.egg,0,man0/man0pm1-pm110.egg,1,800,L0005.R0000.egg,L0005.R0000.A0001.egg
+301,test,pm1,5,Preparing meal,Knife and vegetable,man0/man0pm1.egg,0,man0/man0pm1-pm12.egg,2,780,L0005.R0000.egg,L0005.R0000.A0002.egg
+302,test,pm1,5,Preparing meal,Knife and vegetable,man0/man0pm1.egg,0,man0/man0pm1-pm13.egg,3,850,L0005.R0000.egg,L0005.R0000.A0003.egg
+303,test,pm1,5,Preparing meal,Knife and vegetable,man0/man0pm1.egg,0,man0/man0pm1-pm14.egg,4,800,L0005.R0000.egg,L0005.R0000.A0004.egg
+304,test,pm1,5,Preparing meal,Knife and vegetable,man0/man0pm1.egg,0,man0/man0pm1-pm15.egg,5,800,L0005.R0000.egg,L0005.R0000.A0005.egg
+305,test,pm1,5,Preparing meal,Knife and vegetable,man0/man0pm1.egg,0,man0/man0pm1-pm16.egg,6,800,L0005.R0000.egg,L0005.R0000.A0006.egg
+306,test,pm1,5,Preparing meal,Knife and vegetable,man0/man0pm1.egg,0,man0/man0pm1-pm17.egg,7,800,L0005.R0000.egg,L0005.R0000.A0007.egg
+307,test,pm1,5,Preparing meal,Knife and vegetable,man0/man0pm1.egg,0,man0/man0pm1-pm18.egg,8,800,L0005.R0000.egg,L0005.R0000.A0008.egg
+308,test,pm1,5,Preparing meal,Knife and vegetable,man0/man0pm1.egg,0,man0/man0pm1-pm19.egg,9,800,L0005.R0000.egg,L0005.R0000.A0009.egg
+309,train,pm1,5,Preparing meal,Knife and vegetable,man1/man12pm1.egg,1,man1/man12pm1-pm12.egg,0,900,L0005.R0001.egg,L0005.R0001.A0000.egg
+310,train,pm1,5,Preparing meal,Knife and vegetable,man1/man12pm1.egg,1,man1/man12pm1-pm13.egg,1,900,L0005.R0001.egg,L0005.R0001.A0001.egg
+311,train,pm1,5,Preparing meal,Knife and vegetable,man1/man12pm1.egg,1,man1/man12pm1-pm14.egg,2,900,L0005.R0001.egg,L0005.R0001.A0002.egg
+312,train,pm1,5,Preparing meal,Knife and vegetable,man1/man12pm1.egg,1,man1/man12pm1-pm15.egg,3,900,L0005.R0001.egg,L0005.R0001.A0003.egg
+313,train,pm1,5,Preparing meal,Knife and vegetable,man1/man12pm1.egg,1,man1/man12pm1-pm16.egg,4,800,L0005.R0001.egg,L0005.R0001.A0004.egg
+314,train,pm1,5,Preparing meal,Knife and vegetable,man1/man12pm1.egg,1,man1/man12pm1-pm17.egg,5,800,L0005.R0001.egg,L0005.R0001.A0005.egg
+315,train,pm1,5,Preparing meal,Knife and vegetable,man1/man12pm1.egg,1,man1/man12pm1-pm18.egg,6,900,L0005.R0001.egg,L0005.R0001.A0006.egg
+316,train,pm1,5,Preparing meal,Knife and vegetable,man1/man13pm1.egg,2,man1/man13pm1-pm110.egg,0,800,L0005.R0002.egg,L0005.R0002.A0000.egg
+317,train,pm1,5,Preparing meal,Knife and vegetable,man1/man13pm1.egg,2,man1/man13pm1-pm19.egg,1,900,L0005.R0002.egg,L0005.R0002.A0001.egg
+318,train,pm1,5,Preparing meal,Knife and vegetable,man1/man1pm1.egg,3,man1/man1pm1-pm1.egg,0,650,L0005.R0003.egg,L0005.R0003.A0000.egg
+319,train,pm1,5,Preparing meal,Knife and vegetable,man2/man22pm1.egg,4,man2/man22pm1-pm12.egg,0,800,L0005.R0004.egg,L0005.R0004.A0000.egg
+320,train,pm1,5,Preparing meal,Knife and vegetable,man2/man22pm1.egg,4,man2/man22pm1-pm13.egg,1,800,L0005.R0004.egg,L0005.R0004.A0001.egg
+321,train,pm1,5,Preparing meal,Knife and vegetable,man2/man22pm1.egg,4,man2/man22pm1-pm14.egg,2,800,L0005.R0004.egg,L0005.R0004.A0002.egg
+322,train,pm1,5,Preparing meal,Knife and vegetable,man2/man22pm1.egg,4,man2/man22pm1-pm15.egg,3,800,L0005.R0004.egg,L0005.R0004.A0003.egg
+323,train,pm1,5,Preparing meal,Knife and vegetable,man2/man22pm1.egg,4,man2/man22pm1-pm16.egg,4,800,L0005.R0004.egg,L0005.R0004.A0004.egg
+324,train,pm1,5,Preparing meal,Knife and vegetable,man2/man22pm1.egg,4,man2/man22pm1-pm17.egg,5,800,L0005.R0004.egg,L0005.R0004.A0005.egg
+325,train,pm1,5,Preparing meal,Knife and vegetable,man2/man22pm1.egg,4,man2/man22pm1-pm18.egg,6,800,L0005.R0004.egg,L0005.R0004.A0006.egg
+326,train,pm1,5,Preparing meal,Knife and vegetable,man2/man22pm1.egg,4,man2/man22pm1-pm19.egg,7,800,L0005.R0004.egg,L0005.R0004.A0007.egg
+327,train,pm1,5,Preparing meal,Knife and vegetable,man2/man2pm1.egg,5,man2/man2pm1-pm1.egg,0,670,L0005.R0005.egg,L0005.R0005.A0000.egg
+328,train,pm1,5,Preparing meal,Knife and vegetable,woman1/woman12pm1.egg,6,woman1/woman12pm1-pm110.egg,0,850,L0005.R0006.egg,L0005.R0006.A0000.egg
+329,train,pm1,5,Preparing meal,Knife and vegetable,woman1/woman12pm1.egg,6,woman1/woman12pm1-pm12.egg,1,800,L0005.R0006.egg,L0005.R0006.A0001.egg
+330,train,pm1,5,Preparing meal,Knife and vegetable,woman1/woman12pm1.egg,6,woman1/woman12pm1-pm13.egg,2,800,L0005.R0006.egg,L0005.R0006.A0002.egg
+331,train,pm1,5,Preparing meal,Knife and vegetable,woman1/woman12pm1.egg,6,woman1/woman12pm1-pm14.egg,3,800,L0005.R0006.egg,L0005.R0006.A0003.egg
+332,train,pm1,5,Preparing meal,Knife and vegetable,woman1/woman12pm1.egg,6,woman1/woman12pm1-pm15.egg,4,800,L0005.R0006.egg,L0005.R0006.A0004.egg
+333,train,pm1,5,Preparing meal,Knife and vegetable,woman1/woman12pm1.egg,6,woman1/woman12pm1-pm16.egg,5,800,L0005.R0006.egg,L0005.R0006.A0005.egg
+334,train,pm1,5,Preparing meal,Knife and vegetable,woman1/woman12pm1.egg,6,woman1/woman12pm1-pm17.egg,6,850,L0005.R0006.egg,L0005.R0006.A0006.egg
+335,train,pm1,5,Preparing meal,Knife and vegetable,woman1/woman12pm1.egg,6,woman1/woman12pm1-pm18.egg,7,850,L0005.R0006.egg,L0005.R0006.A0007.egg
+336,train,pm1,5,Preparing meal,Knife and vegetable,woman1/woman12pm1.egg,6,woman1/woman12pm1-pm19.egg,8,800,L0005.R0006.egg,L0005.R0006.A0008.egg
+337,train,pm1,5,Preparing meal,Knife and vegetable,woman1/woman1pm1.egg,7,woman1/woman1pm1-pm1.egg,0,520,L0005.R0007.egg,L0005.R0007.A0000.egg
+338,train,pm1,5,Preparing meal,Knife and vegetable,woman2/woman2pm1.egg,8,woman2/woman2pm1-pm1.egg,0,650,L0005.R0008.egg,L0005.R0008.A0000.egg
+339,train,pm1,5,Preparing meal,Knife and vegetable,woman2/women22pm1.egg,9,woman2/women22pm1-pm110.egg,0,800,L0005.R0009.egg,L0005.R0009.A0000.egg
+340,train,pm1,5,Preparing meal,Knife and vegetable,woman2/women22pm1.egg,9,woman2/women22pm1-pm12.egg,1,900,L0005.R0009.egg,L0005.R0009.A0001.egg
+341,train,pm1,5,Preparing meal,Knife and vegetable,woman2/women22pm1.egg,9,woman2/women22pm1-pm13.egg,2,800,L0005.R0009.egg,L0005.R0009.A0002.egg
+342,train,pm1,5,Preparing meal,Knife and vegetable,woman2/women22pm1.egg,9,woman2/women22pm1-pm14.egg,3,800,L0005.R0009.egg,L0005.R0009.A0003.egg
+343,train,pm1,5,Preparing meal,Knife and vegetable,woman2/women22pm1.egg,9,woman2/women22pm1-pm15.egg,4,900,L0005.R0009.egg,L0005.R0009.A0004.egg
+344,train,pm1,5,Preparing meal,Knife and vegetable,woman2/women22pm1.egg,9,woman2/women22pm1-pm16.egg,5,800,L0005.R0009.egg,L0005.R0009.A0005.egg
+345,train,pm1,5,Preparing meal,Knife and vegetable,woman2/women22pm1.egg,9,woman2/women22pm1-pm17.egg,6,800,L0005.R0009.egg,L0005.R0009.A0006.egg
+346,train,pm1,5,Preparing meal,Knife and vegetable,woman2/women22pm1.egg,9,woman2/women22pm1-pm18.egg,7,800,L0005.R0009.egg,L0005.R0009.A0007.egg
+347,train,pm1,5,Preparing meal,Knife and vegetable,woman2/women22pm1.egg,9,woman2/women22pm1-pm19.egg,8,800,L0005.R0009.egg,L0005.R0009.A0008.egg
+348,test,pm2,6,Preparing meal,Frying pan,man0/man0pm2.egg,0,man0/man0pm2-pm21.egg,0,1099,L0006.R0000.egg,L0006.R0000.A0000.egg
+349,test,pm2,6,Preparing meal,Frying pan,man0/man0pm2.egg,0,man0/man0pm2-pm210.egg,1,850,L0006.R0000.egg,L0006.R0000.A0001.egg
+350,test,pm2,6,Preparing meal,Frying pan,man0/man0pm2.egg,0,man0/man0pm2-pm22.egg,2,800,L0006.R0000.egg,L0006.R0000.A0002.egg
+351,test,pm2,6,Preparing meal,Frying pan,man0/man0pm2.egg,0,man0/man0pm2-pm23.egg,3,700,L0006.R0000.egg,L0006.R0000.A0003.egg
+352,test,pm2,6,Preparing meal,Frying pan,man0/man0pm2.egg,0,man0/man0pm2-pm24.egg,4,900,L0006.R0000.egg,L0006.R0000.A0004.egg
+353,test,pm2,6,Preparing meal,Frying pan,man0/man0pm2.egg,0,man0/man0pm2-pm25.egg,5,800,L0006.R0000.egg,L0006.R0000.A0005.egg
+354,test,pm2,6,Preparing meal,Frying pan,man0/man0pm2.egg,0,man0/man0pm2-pm26.egg,6,800,L0006.R0000.egg,L0006.R0000.A0006.egg
+355,test,pm2,6,Preparing meal,Frying pan,man0/man0pm2.egg,0,man0/man0pm2-pm27.egg,7,800,L0006.R0000.egg,L0006.R0000.A0007.egg
+356,test,pm2,6,Preparing meal,Frying pan,man0/man0pm2.egg,0,man0/man0pm2-pm28.egg,8,900,L0006.R0000.egg,L0006.R0000.A0008.egg
+357,test,pm2,6,Preparing meal,Frying pan,man0/man0pm2.egg,0,man0/man0pm2-pm29.egg,9,850,L0006.R0000.egg,L0006.R0000.A0009.egg
+358,train,pm2,6,Preparing meal,Frying pan,man1/man12pm2.egg,1,man1/man12pm2-pm22.egg,0,900,L0006.R0001.egg,L0006.R0001.A0000.egg
+359,train,pm2,6,Preparing meal,Frying pan,man1/man12pm2.egg,1,man1/man12pm2-pm23.egg,1,800,L0006.R0001.egg,L0006.R0001.A0001.egg
+360,train,pm2,6,Preparing meal,Frying pan,man1/man12pm2.egg,1,man1/man12pm2-pm24.egg,2,800,L0006.R0001.egg,L0006.R0001.A0002.egg
+361,train,pm2,6,Preparing meal,Frying pan,man1/man12pm2.egg,1,man1/man12pm2-pm25.egg,3,900,L0006.R0001.egg,L0006.R0001.A0003.egg
+362,train,pm2,6,Preparing meal,Frying pan,man1/man12pm2.egg,1,man1/man12pm2-pm26.egg,4,800,L0006.R0001.egg,L0006.R0001.A0004.egg
+363,train,pm2,6,Preparing meal,Frying pan,man1/man12pm2.egg,1,man1/man12pm2-pm27.egg,5,1100,L0006.R0001.egg,L0006.R0001.A0005.egg
+364,train,pm2,6,Preparing meal,Frying pan,man1/man12pm2.egg,1,man1/man12pm2-pm28.egg,6,900,L0006.R0001.egg,L0006.R0001.A0006.egg
+365,train,pm2,6,Preparing meal,Frying pan,man1/man12pm2.egg,1,man1/man12pm2-pm29.egg,7,850,L0006.R0001.egg,L0006.R0001.A0007.egg
+366,train,pm2,6,Preparing meal,Frying pan,man1/man13pm2.egg,2,man1/man13pm2-pm210.egg,0,500,L0006.R0002.egg,L0006.R0002.A0000.egg
+367,train,pm2,6,Preparing meal,Frying pan,man1/man1pm2.egg,3,man1/man1pm2-pm2.egg,0,650,L0006.R0003.egg,L0006.R0003.A0000.egg
+368,train,pm2,6,Preparing meal,Frying pan,man2/man22pm2.egg,4,man2/man22pm2-pm210.egg,0,850,L0006.R0004.egg,L0006.R0004.A0000.egg
+369,train,pm2,6,Preparing meal,Frying pan,man2/man22pm2.egg,4,man2/man22pm2-pm22.egg,1,800,L0006.R0004.egg,L0006.R0004.A0001.egg
+370,train,pm2,6,Preparing meal,Frying pan,man2/man22pm2.egg,4,man2/man22pm2-pm23.egg,2,800,L0006.R0004.egg,L0006.R0004.A0002.egg
+371,train,pm2,6,Preparing meal,Frying pan,man2/man22pm2.egg,4,man2/man22pm2-pm24.egg,3,800,L0006.R0004.egg,L0006.R0004.A0003.egg
+372,train,pm2,6,Preparing meal,Frying pan,man2/man22pm2.egg,4,man2/man22pm2-pm25.egg,4,800,L0006.R0004.egg,L0006.R0004.A0004.egg
+373,train,pm2,6,Preparing meal,Frying pan,man2/man22pm2.egg,4,man2/man22pm2-pm26.egg,5,900,L0006.R0004.egg,L0006.R0004.A0005.egg
+374,train,pm2,6,Preparing meal,Frying pan,man2/man22pm2.egg,4,man2/man22pm2-pm27.egg,6,800,L0006.R0004.egg,L0006.R0004.A0006.egg
+375,train,pm2,6,Preparing meal,Frying pan,man2/man22pm2.egg,4,man2/man22pm2-pm28.egg,7,800,L0006.R0004.egg,L0006.R0004.A0007.egg
+376,train,pm2,6,Preparing meal,Frying pan,man2/man22pm2.egg,4,man2/man22pm2-pm29.egg,8,800,L0006.R0004.egg,L0006.R0004.A0008.egg
+377,train,pm2,6,Preparing meal,Frying pan,man2/man2pm2.egg,5,man2/man2pm2-pm2.egg,0,820,L0006.R0005.egg,L0006.R0005.A0000.egg
+378,train,pm2,6,Preparing meal,Frying pan,woman1/woman12pm2.egg,6,woman1/woman12pm2-pm22.egg,0,1000,L0006.R0006.egg,L0006.R0006.A0000.egg
+379,train,pm2,6,Preparing meal,Frying pan,woman1/woman12pm2.egg,6,woman1/woman12pm2-pm23.egg,1,900,L0006.R0006.egg,L0006.R0006.A0001.egg
+380,train,pm2,6,Preparing meal,Frying pan,woman1/woman12pm2.egg,6,woman1/woman12pm2-pm24.egg,2,800,L0006.R0006.egg,L0006.R0006.A0002.egg
+381,train,pm2,6,Preparing meal,Frying pan,woman1/woman12pm2.egg,6,woman1/woman12pm2-pm25.egg,3,800,L0006.R0006.egg,L0006.R0006.A0003.egg
+382,train,pm2,6,Preparing meal,Frying pan,woman1/woman12pm2.egg,6,woman1/woman12pm2-pm26.egg,4,900,L0006.R0006.egg,L0006.R0006.A0004.egg
+383,train,pm2,6,Preparing meal,Frying pan,woman1/woman13pm2.egg,7,woman1/woman13pm2-pm210.egg,0,800,L0006.R0007.egg,L0006.R0007.A0000.egg
+384,train,pm2,6,Preparing meal,Frying pan,woman1/woman13pm2.egg,7,woman1/woman13pm2-pm27.egg,1,800,L0006.R0007.egg,L0006.R0007.A0001.egg
+385,train,pm2,6,Preparing meal,Frying pan,woman1/woman13pm2.egg,7,woman1/woman13pm2-pm28.egg,2,800,L0006.R0007.egg,L0006.R0007.A0002.egg
+386,train,pm2,6,Preparing meal,Frying pan,woman1/woman13pm2.egg,7,woman1/woman13pm2-pm29.egg,3,800,L0006.R0007.egg,L0006.R0007.A0003.egg
+387,train,pm2,6,Preparing meal,Frying pan,woman1/woman1pm2.egg,8,woman1/woman1pm2-pm2.egg,0,450,L0006.R0008.egg,L0006.R0008.A0000.egg
+388,train,pm2,6,Preparing meal,Frying pan,woman2/woman2pm2.egg,9,woman2/woman2pm2-pm2.egg,0,520,L0006.R0009.egg,L0006.R0009.A0000.egg
+389,train,pm2,6,Preparing meal,Frying pan,woman2/women22pm2.egg,10,woman2/women22pm2-pm210.egg,0,800,L0006.R0010.egg,L0006.R0010.A0000.egg
+390,train,pm2,6,Preparing meal,Frying pan,woman2/women22pm2.egg,10,woman2/women22pm2-pm22.egg,1,900,L0006.R0010.egg,L0006.R0010.A0001.egg
+391,train,pm2,6,Preparing meal,Frying pan,woman2/women22pm2.egg,10,woman2/women22pm2-pm23.egg,2,800,L0006.R0010.egg,L0006.R0010.A0002.egg
+392,train,pm2,6,Preparing meal,Frying pan,woman2/women22pm2.egg,10,woman2/women22pm2-pm24.egg,3,800,L0006.R0010.egg,L0006.R0010.A0003.egg
+393,train,pm2,6,Preparing meal,Frying pan,woman2/women22pm2.egg,10,woman2/women22pm2-pm25.egg,4,800,L0006.R0010.egg,L0006.R0010.A0004.egg
+394,train,pm2,6,Preparing meal,Frying pan,woman2/women22pm2.egg,10,woman2/women22pm2-pm26.egg,5,800,L0006.R0010.egg,L0006.R0010.A0005.egg
+395,train,pm2,6,Preparing meal,Frying pan,woman2/women22pm2.egg,10,woman2/women22pm2-pm27.egg,6,800,L0006.R0010.egg,L0006.R0010.A0006.egg
+396,train,pm2,6,Preparing meal,Frying pan,woman2/women22pm2.egg,10,woman2/women22pm2-pm28.egg,7,900,L0006.R0010.egg,L0006.R0010.A0007.egg
+397,train,pm2,6,Preparing meal,Frying pan,woman2/women22pm2.egg,10,woman2/women22pm2-pm29.egg,8,900,L0006.R0010.egg,L0006.R0010.A0008.egg
+398,test,rb,7,Reading book,Book,man0/man0rb.egg,0,man0/man0rb-rb1.egg,0,1339,L0007.R0000.egg,L0007.R0000.A0000.egg
+399,test,rb,7,Reading book,Book,man0/man0rb.egg,0,man0/man0rb-rb10.egg,1,600,L0007.R0000.egg,L0007.R0000.A0001.egg
+400,test,rb,7,Reading book,Book,man0/man0rb.egg,0,man0/man0rb-rb2.egg,2,1300,L0007.R0000.egg,L0007.R0000.A0002.egg
+401,test,rb,7,Reading book,Book,man0/man0rb.egg,0,man0/man0rb-rb3.egg,3,1300,L0007.R0000.egg,L0007.R0000.A0003.egg
+402,test,rb,7,Reading book,Book,man0/man0rb.egg,0,man0/man0rb-rb4.egg,4,1300,L0007.R0000.egg,L0007.R0000.A0004.egg
+403,test,rb,7,Reading book,Book,man0/man0rb.egg,0,man0/man0rb-rb5.egg,5,1360,L0007.R0000.egg,L0007.R0000.A0005.egg
+404,test,rb,7,Reading book,Book,man0/man0rb.egg,0,man0/man0rb-rb6.egg,6,1400,L0007.R0000.egg,L0007.R0000.A0006.egg
+405,test,rb,7,Reading book,Book,man0/man0rb.egg,0,man0/man0rb-rb7.egg,7,1300,L0007.R0000.egg,L0007.R0000.A0007.egg
+406,test,rb,7,Reading book,Book,man0/man0rb.egg,0,man0/man0rb-rb8.egg,8,1300,L0007.R0000.egg,L0007.R0000.A0008.egg
+407,test,rb,7,Reading book,Book,man0/man0rb.egg,0,man0/man0rb-rb9.egg,9,750,L0007.R0000.egg,L0007.R0000.A0009.egg
+408,train,rb,7,Reading book,Book,man1/man12rb.egg,1,man1/man12rb-rb10.egg,0,1000,L0007.R0001.egg,L0007.R0001.A0000.egg
+409,train,rb,7,Reading book,Book,man1/man12rb.egg,1,man1/man12rb-rb2.egg,1,1000,L0007.R0001.egg,L0007.R0001.A0001.egg
+410,train,rb,7,Reading book,Book,man1/man12rb.egg,1,man1/man12rb-rb3.egg,2,1000,L0007.R0001.egg,L0007.R0001.A0002.egg
+411,train,rb,7,Reading book,Book,man1/man12rb.egg,1,man1/man12rb-rb4.egg,3,1000,L0007.R0001.egg,L0007.R0001.A0003.egg
+412,train,rb,7,Reading book,Book,man1/man12rb.egg,1,man1/man12rb-rb5.egg,4,900,L0007.R0001.egg,L0007.R0001.A0004.egg
+413,train,rb,7,Reading book,Book,man1/man12rb.egg,1,man1/man12rb-rb6.egg,5,1000,L0007.R0001.egg,L0007.R0001.A0005.egg
+414,train,rb,7,Reading book,Book,man1/man12rb.egg,1,man1/man12rb-rb7.egg,6,900,L0007.R0001.egg,L0007.R0001.A0006.egg
+415,train,rb,7,Reading book,Book,man1/man12rb.egg,1,man1/man12rb-rb8.egg,7,1000,L0007.R0001.egg,L0007.R0001.A0007.egg
+416,train,rb,7,Reading book,Book,man1/man12rb.egg,1,man1/man12rb-rb9.egg,8,900,L0007.R0001.egg,L0007.R0001.A0008.egg
+417,train,rb,7,Reading book,Book,man1/man1rb.egg,2,man1/man1rb-rb.egg,0,250,L0007.R0002.egg,L0007.R0002.A0000.egg
+418,train,rb,7,Reading book,Book,man2/man22rb.egg,3,man2/man22rb-rb10.egg,0,1000,L0007.R0003.egg,L0007.R0003.A0000.egg
+419,train,rb,7,Reading book,Book,man2/man22rb.egg,3,man2/man22rb-rb2.egg,1,800,L0007.R0003.egg,L0007.R0003.A0001.egg
+420,train,rb,7,Reading book,Book,man2/man22rb.egg,3,man2/man22rb-rb3.egg,2,800,L0007.R0003.egg,L0007.R0003.A0002.egg
+421,train,rb,7,Reading book,Book,man2/man22rb.egg,3,man2/man22rb-rb4.egg,3,800,L0007.R0003.egg,L0007.R0003.A0003.egg
+422,train,rb,7,Reading book,Book,man2/man22rb.egg,3,man2/man22rb-rb5.egg,4,900,L0007.R0003.egg,L0007.R0003.A0004.egg
+423,train,rb,7,Reading book,Book,man2/man22rb.egg,3,man2/man22rb-rb6.egg,5,800,L0007.R0003.egg,L0007.R0003.A0005.egg
+424,train,rb,7,Reading book,Book,man2/man22rb.egg,3,man2/man22rb-rb7.egg,6,900,L0007.R0003.egg,L0007.R0003.A0006.egg
+425,train,rb,7,Reading book,Book,man2/man22rb.egg,3,man2/man22rb-rb8.egg,7,1000,L0007.R0003.egg,L0007.R0003.A0007.egg
+426,train,rb,7,Reading book,Book,man2/man22rb.egg,3,man2/man22rb-rb9.egg,8,1000,L0007.R0003.egg,L0007.R0003.A0008.egg
+427,train,rb,7,Reading book,Book,man2/man2rb.egg,4,man2/man2rb-rb.egg,0,1350,L0007.R0004.egg,L0007.R0004.A0000.egg
+428,train,rb,7,Reading book,Book,woman1/woman12rb.egg,5,woman1/woman12rb-rb10.egg,0,1100,L0007.R0005.egg,L0007.R0005.A0000.egg
+429,train,rb,7,Reading book,Book,woman1/woman12rb.egg,5,woman1/woman12rb-rb2.egg,1,1100,L0007.R0005.egg,L0007.R0005.A0001.egg
+430,train,rb,7,Reading book,Book,woman1/woman12rb.egg,5,woman1/woman12rb-rb3.egg,2,1000,L0007.R0005.egg,L0007.R0005.A0002.egg
+431,train,rb,7,Reading book,Book,woman1/woman12rb.egg,5,woman1/woman12rb-rb4.egg,3,1100,L0007.R0005.egg,L0007.R0005.A0003.egg
+432,train,rb,7,Reading book,Book,woman1/woman12rb.egg,5,woman1/woman12rb-rb5.egg,4,1000,L0007.R0005.egg,L0007.R0005.A0004.egg
+433,train,rb,7,Reading book,Book,woman1/woman12rb.egg,5,woman1/woman12rb-rb6.egg,5,1100,L0007.R0005.egg,L0007.R0005.A0005.egg
+434,train,rb,7,Reading book,Book,woman1/woman12rb.egg,5,woman1/woman12rb-rb7.egg,6,1100,L0007.R0005.egg,L0007.R0005.A0006.egg
+435,train,rb,7,Reading book,Book,woman1/woman12rb.egg,5,woman1/woman12rb-rb8.egg,7,1100,L0007.R0005.egg,L0007.R0005.A0007.egg
+436,train,rb,7,Reading book,Book,woman1/woman12rb.egg,5,woman1/woman12rb-rb9.egg,8,1000,L0007.R0005.egg,L0007.R0005.A0008.egg
+437,train,rb,7,Reading book,Book,woman1/woman1rb.egg,6,woman1/woman1rb-rb.egg,0,950,L0007.R0006.egg,L0007.R0006.A0000.egg
+438,train,rb,7,Reading book,Book,woman2/woman2rb.egg,7,woman2/woman2rb-rb.egg,0,880,L0007.R0007.egg,L0007.R0007.A0000.egg
+439,train,rb,7,Reading book,Book,woman2/women22rb.egg,8,woman2/women22rb-rb10.egg,0,1000,L0007.R0008.egg,L0007.R0008.A0000.egg
+440,train,rb,7,Reading book,Book,woman2/women22rb.egg,8,woman2/women22rb-rb2.egg,1,1000,L0007.R0008.egg,L0007.R0008.A0001.egg
+441,train,rb,7,Reading book,Book,woman2/women22rb.egg,8,woman2/women22rb-rb3.egg,2,1000,L0007.R0008.egg,L0007.R0008.A0002.egg
+442,train,rb,7,Reading book,Book,woman2/women22rb.egg,8,woman2/women22rb-rb4.egg,3,1000,L0007.R0008.egg,L0007.R0008.A0003.egg
+443,train,rb,7,Reading book,Book,woman2/women22rb.egg,8,woman2/women22rb-rb5.egg,4,1000,L0007.R0008.egg,L0007.R0008.A0004.egg
+444,train,rb,7,Reading book,Book,woman2/women22rb.egg,8,woman2/women22rb-rb6.egg,5,1000,L0007.R0008.egg,L0007.R0008.A0005.egg
+445,train,rb,7,Reading book,Book,woman2/women22rb.egg,8,woman2/women22rb-rb7.egg,6,1000,L0007.R0008.egg,L0007.R0008.A0006.egg
+446,train,rb,7,Reading book,Book,woman2/women22rb.egg,8,woman2/women22rb-rb8.egg,7,1000,L0007.R0008.egg,L0007.R0008.A0007.egg
+447,train,rb,7,Reading book,Book,woman2/women22rb.egg,8,woman2/women22rb-rb9.egg,8,1000,L0007.R0008.egg,L0007.R0008.A0008.egg
+448,test,ts1,8,Talking on smartphone,Smartphone (left handed),man0/man0ts1.egg,0,man0/man0ts1-ts11.egg,0,1050,L0008.R0000.egg,L0008.R0000.A0000.egg
+449,test,ts1,8,Talking on smartphone,Smartphone (left handed),man0/man0ts1.egg,0,man0/man0ts1-ts12.egg,1,1350,L0008.R0000.egg,L0008.R0000.A0001.egg
+450,test,ts1,8,Talking on smartphone,Smartphone (left handed),man0/man0ts1.egg,0,man0/man0ts1-ts13.egg,2,1300,L0008.R0000.egg,L0008.R0000.A0002.egg
+451,test,ts1,8,Talking on smartphone,Smartphone (left handed),man0/man0ts1.egg,0,man0/man0ts1-ts14.egg,3,1400,L0008.R0000.egg,L0008.R0000.A0003.egg
+452,test,ts1,8,Talking on smartphone,Smartphone (left handed),man0/man0ts1.egg,0,man0/man0ts1-ts15.egg,4,400,L0008.R0000.egg,L0008.R0000.A0004.egg
+453,test,ts1,8,Talking on smartphone,Smartphone (left handed),man0/man0ts1.egg,0,man0/man0ts1-ts16.egg,5,900,L0008.R0000.egg,L0008.R0000.A0005.egg
+454,train,ts1,8,Talking on smartphone,Smartphone (left handed),man1/man12ts1.egg,1,man1/man12ts1-ts12.egg,0,1000,L0008.R0001.egg,L0008.R0001.A0000.egg
+455,train,ts1,8,Talking on smartphone,Smartphone (left handed),man1/man12ts1.egg,1,man1/man12ts1-ts13.egg,1,900,L0008.R0001.egg,L0008.R0001.A0001.egg
+456,train,ts1,8,Talking on smartphone,Smartphone (left handed),man1/man12ts1.egg,1,man1/man12ts1-ts14.egg,2,1000,L0008.R0001.egg,L0008.R0001.A0002.egg
+457,train,ts1,8,Talking on smartphone,Smartphone (left handed),man1/man1ts1.egg,2,man1/man1ts1-ts1.egg,0,580,L0008.R0002.egg,L0008.R0002.A0000.egg
+458,train,ts1,8,Talking on smartphone,Smartphone (left handed),man2/man22ts1.egg,3,man2/man22ts1-ts12.egg,0,1100,L0008.R0003.egg,L0008.R0003.A0000.egg
+459,train,ts1,8,Talking on smartphone,Smartphone (left handed),man2/man22ts1.egg,3,man2/man22ts1-ts13.egg,1,1100,L0008.R0003.egg,L0008.R0003.A0001.egg
+460,train,ts1,8,Talking on smartphone,Smartphone (left handed),man2/man22ts1.egg,3,man2/man22ts1-ts14.egg,2,1100,L0008.R0003.egg,L0008.R0003.A0002.egg
+461,train,ts1,8,Talking on smartphone,Smartphone (left handed),man2/man22ts1.egg,3,man2/man22ts1-ts15.egg,3,1100,L0008.R0003.egg,L0008.R0003.A0003.egg
+462,train,ts1,8,Talking on smartphone,Smartphone (left handed),man2/man2ts1.egg,4,man2/man2ts1-ts1.egg,0,740,L0008.R0004.egg,L0008.R0004.A0000.egg
+463,train,ts1,8,Talking on smartphone,Smartphone (left handed),woman1/woman12ts1.egg,5,woman1/woman12ts1-ts12.egg,0,1000,L0008.R0005.egg,L0008.R0005.A0000.egg
+464,train,ts1,8,Talking on smartphone,Smartphone (left handed),woman1/woman12ts1.egg,5,woman1/woman12ts1-ts13.egg,1,1000,L0008.R0005.egg,L0008.R0005.A0001.egg
+465,train,ts1,8,Talking on smartphone,Smartphone (left handed),woman1/woman12ts1.egg,5,woman1/woman12ts1-ts14.egg,2,1000,L0008.R0005.egg,L0008.R0005.A0002.egg
+466,train,ts1,8,Talking on smartphone,Smartphone (left handed),woman1/woman12ts1.egg,5,woman1/woman12ts1-ts15.egg,3,900,L0008.R0005.egg,L0008.R0005.A0003.egg
+467,train,ts1,8,Talking on smartphone,Smartphone (left handed),woman1/woman12ts1.egg,5,woman1/woman12ts1-ts16.egg,4,900,L0008.R0005.egg,L0008.R0005.A0004.egg
+468,train,ts1,8,Talking on smartphone,Smartphone (left handed),woman1/woman1ts1.egg,6,woman1/woman1ts1-ts1.egg,0,340,L0008.R0006.egg,L0008.R0006.A0000.egg
+469,train,ts1,8,Talking on smartphone,Smartphone (left handed),woman2/woman2ts1.egg,7,woman2/woman2ts1-ts1.egg,0,360,L0008.R0007.egg,L0008.R0007.A0000.egg
+470,train,ts1,8,Talking on smartphone,Smartphone (left handed),woman2/women22ts1.egg,8,woman2/women22ts1-ts12.egg,0,1000,L0008.R0008.egg,L0008.R0008.A0000.egg
+471,train,ts1,8,Talking on smartphone,Smartphone (left handed),woman2/women22ts1.egg,8,woman2/women22ts1-ts13.egg,1,1000,L0008.R0008.egg,L0008.R0008.A0001.egg
+472,train,ts1,8,Talking on smartphone,Smartphone (left handed),woman2/women22ts1.egg,8,woman2/women22ts1-ts14.egg,2,1000,L0008.R0008.egg,L0008.R0008.A0002.egg
+473,train,ts1,8,Talking on smartphone,Smartphone (left handed),woman2/women22ts1.egg,8,woman2/women22ts1-ts15.egg,3,1000,L0008.R0008.egg,L0008.R0008.A0003.egg
+474,test,ts2,8,Talking on smartphone,Smartphone (right handed),man0/man0ts2.egg,0,man0/man0ts2-ts210.egg,0,1300,L0008.R0000.egg,L0008.R0000.A0000.egg
+475,test,ts2,8,Talking on smartphone,Smartphone (right handed),man0/man0ts2.egg,0,man0/man0ts2-ts27.egg,1,1430,L0008.R0000.egg,L0008.R0000.A0001.egg
+476,test,ts2,8,Talking on smartphone,Smartphone (right handed),man0/man0ts2.egg,0,man0/man0ts2-ts28.egg,2,1300,L0008.R0000.egg,L0008.R0000.A0002.egg
+477,test,ts2,8,Talking on smartphone,Smartphone (right handed),man0/man0ts2.egg,0,man0/man0ts2-ts29.egg,3,1300,L0008.R0000.egg,L0008.R0000.A0003.egg
+478,train,ts2,8,Talking on smartphone,Smartphone (right handed),man1/man12ts2.egg,1,man1/man12ts2-ts210.egg,0,1000,L0008.R0001.egg,L0008.R0001.A0000.egg
+479,train,ts2,8,Talking on smartphone,Smartphone (right handed),man1/man12ts2.egg,1,man1/man12ts2-ts26.egg,1,1000,L0008.R0001.egg,L0008.R0001.A0001.egg
+480,train,ts2,8,Talking on smartphone,Smartphone (right handed),man1/man12ts2.egg,1,man1/man12ts2-ts27.egg,2,900,L0008.R0001.egg,L0008.R0001.A0002.egg
+481,train,ts2,8,Talking on smartphone,Smartphone (right handed),man1/man12ts2.egg,1,man1/man12ts2-ts28.egg,3,900,L0008.R0001.egg,L0008.R0001.A0003.egg
+482,train,ts2,8,Talking on smartphone,Smartphone (right handed),man1/man12ts2.egg,1,man1/man12ts2-ts29.egg,4,1000,L0008.R0001.egg,L0008.R0001.A0004.egg
+483,train,ts2,8,Talking on smartphone,Smartphone (right handed),man1/man1ts2.egg,2,man1/man1ts2-ts2.egg,0,500,L0008.R0002.egg,L0008.R0002.A0000.egg
+484,train,ts2,8,Talking on smartphone,Smartphone (right handed),man2/man22ts2.egg,3,man2/man22ts2-ts210.egg,0,1100,L0008.R0003.egg,L0008.R0003.A0000.egg
+485,train,ts2,8,Talking on smartphone,Smartphone (right handed),man2/man22ts2.egg,3,man2/man22ts2-ts26.egg,1,1100,L0008.R0003.egg,L0008.R0003.A0001.egg
+486,train,ts2,8,Talking on smartphone,Smartphone (right handed),man2/man22ts2.egg,3,man2/man22ts2-ts27.egg,2,1100,L0008.R0003.egg,L0008.R0003.A0002.egg
+487,train,ts2,8,Talking on smartphone,Smartphone (right handed),man2/man22ts2.egg,3,man2/man22ts2-ts28.egg,3,1100,L0008.R0003.egg,L0008.R0003.A0003.egg
+488,train,ts2,8,Talking on smartphone,Smartphone (right handed),man2/man22ts2.egg,3,man2/man22ts2-ts29.egg,4,1100,L0008.R0003.egg,L0008.R0003.A0004.egg
+489,train,ts2,8,Talking on smartphone,Smartphone (right handed),man2/man2ts2.egg,4,man2/man2ts2-ts2.egg,0,500,L0008.R0004.egg,L0008.R0004.A0000.egg
+490,train,ts2,8,Talking on smartphone,Smartphone (right handed),woman1/woman12ts2.egg,5,woman1/woman12ts2-ts210.egg,0,900,L0008.R0005.egg,L0008.R0005.A0000.egg
+491,train,ts2,8,Talking on smartphone,Smartphone (right handed),woman1/woman12ts2.egg,5,woman1/woman12ts2-ts27.egg,1,1000,L0008.R0005.egg,L0008.R0005.A0001.egg
+492,train,ts2,8,Talking on smartphone,Smartphone (right handed),woman1/woman12ts2.egg,5,woman1/woman12ts2-ts28.egg,2,900,L0008.R0005.egg,L0008.R0005.A0002.egg
+493,train,ts2,8,Talking on smartphone,Smartphone (right handed),woman1/woman12ts2.egg,5,woman1/woman12ts2-ts29.egg,3,900,L0008.R0005.egg,L0008.R0005.A0003.egg
+494,train,ts2,8,Talking on smartphone,Smartphone (right handed),woman1/woman1ts2.egg,6,woman1/woman1ts2-ts2.egg,0,500,L0008.R0006.egg,L0008.R0006.A0000.egg
+495,train,ts2,8,Talking on smartphone,Smartphone (right handed),woman2/woman2ts2.egg,7,woman2/woman2ts2-ts2.egg,0,340,L0008.R0007.egg,L0008.R0007.A0000.egg
+496,train,ts2,8,Talking on smartphone,Smartphone (right handed),woman2/women22ts2.egg,8,woman2/women22ts2-ts210.egg,0,1000,L0008.R0008.egg,L0008.R0008.A0000.egg
+497,train,ts2,8,Talking on smartphone,Smartphone (right handed),woman2/women22ts2.egg,8,woman2/women22ts2-ts26.egg,1,1000,L0008.R0008.egg,L0008.R0008.A0001.egg
+498,train,ts2,8,Talking on smartphone,Smartphone (right handed),woman2/women22ts2.egg,8,woman2/women22ts2-ts27.egg,2,1000,L0008.R0008.egg,L0008.R0008.A0002.egg
+499,train,ts2,8,Talking on smartphone,Smartphone (right handed),woman2/women22ts2.egg,8,woman2/women22ts2-ts28.egg,3,1000,L0008.R0008.egg,L0008.R0008.A0003.egg
+500,train,ts2,8,Talking on smartphone,Smartphone (right handed),woman2/women22ts2.egg,8,woman2/women22ts2-ts29.egg,4,1000,L0008.R0008.egg,L0008.R0008.A0004.egg
+501,test,us,9,Using smartphone,Smartphone,man0/man0us.egg,0,man0/man0us-us1.egg,0,900,L0009.R0000.egg,L0009.R0000.A0000.egg
+502,test,us,9,Using smartphone,Smartphone,man0/man0us.egg,0,man0/man0us-us10.egg,1,1270,L0009.R0000.egg,L0009.R0000.A0001.egg
+503,test,us,9,Using smartphone,Smartphone,man0/man0us.egg,0,man0/man0us-us2.egg,2,1300,L0009.R0000.egg,L0009.R0000.A0002.egg
+504,test,us,9,Using smartphone,Smartphone,man0/man0us.egg,0,man0/man0us-us3.egg,3,1300,L0009.R0000.egg,L0009.R0000.A0003.egg
+505,test,us,9,Using smartphone,Smartphone,man0/man0us.egg,0,man0/man0us-us4.egg,4,1350,L0009.R0000.egg,L0009.R0000.A0004.egg
+506,test,us,9,Using smartphone,Smartphone,man0/man0us.egg,0,man0/man0us-us5.egg,5,1350,L0009.R0000.egg,L0009.R0000.A0005.egg
+507,test,us,9,Using smartphone,Smartphone,man0/man0us.egg,0,man0/man0us-us6.egg,6,500,L0009.R0000.egg,L0009.R0000.A0006.egg
+508,test,us,9,Using smartphone,Smartphone,man0/man0us.egg,0,man0/man0us-us7.egg,7,850,L0009.R0000.egg,L0009.R0000.A0007.egg
+509,test,us,9,Using smartphone,Smartphone,man0/man0us.egg,0,man0/man0us-us8.egg,8,1400,L0009.R0000.egg,L0009.R0000.A0008.egg
+510,test,us,9,Using smartphone,Smartphone,man0/man0us.egg,0,man0/man0us-us9.egg,9,1300,L0009.R0000.egg,L0009.R0000.A0009.egg
+511,train,us,9,Using smartphone,Smartphone,man1/man12us.egg,1,man1/man12us-us10.egg,0,1000,L0009.R0001.egg,L0009.R0001.A0000.egg
+512,train,us,9,Using smartphone,Smartphone,man1/man12us.egg,1,man1/man12us-us2.egg,1,1000,L0009.R0001.egg,L0009.R0001.A0001.egg
+513,train,us,9,Using smartphone,Smartphone,man1/man12us.egg,1,man1/man12us-us3.egg,2,1000,L0009.R0001.egg,L0009.R0001.A0002.egg
+514,train,us,9,Using smartphone,Smartphone,man1/man12us.egg,1,man1/man12us-us4.egg,3,900,L0009.R0001.egg,L0009.R0001.A0003.egg
+515,train,us,9,Using smartphone,Smartphone,man1/man12us.egg,1,man1/man12us-us5.egg,4,1000,L0009.R0001.egg,L0009.R0001.A0004.egg
+516,train,us,9,Using smartphone,Smartphone,man1/man12us.egg,1,man1/man12us-us6.egg,5,1000,L0009.R0001.egg,L0009.R0001.A0005.egg
+517,train,us,9,Using smartphone,Smartphone,man1/man12us.egg,1,man1/man12us-us7.egg,6,1000,L0009.R0001.egg,L0009.R0001.A0006.egg
+518,train,us,9,Using smartphone,Smartphone,man1/man12us.egg,1,man1/man12us-us8.egg,7,900,L0009.R0001.egg,L0009.R0001.A0007.egg
+519,train,us,9,Using smartphone,Smartphone,man1/man12us.egg,1,man1/man12us-us9.egg,8,1000,L0009.R0001.egg,L0009.R0001.A0008.egg
+520,train,us,9,Using smartphone,Smartphone,man1/man1us.egg,2,man1/man1us-us.egg,0,1250,L0009.R0002.egg,L0009.R0002.A0000.egg
+521,train,us,9,Using smartphone,Smartphone,man2/man22us.egg,3,man2/man22us-us10.egg,0,1100,L0009.R0003.egg,L0009.R0003.A0000.egg
+522,train,us,9,Using smartphone,Smartphone,man2/man22us.egg,3,man2/man22us-us2.egg,1,900,L0009.R0003.egg,L0009.R0003.A0001.egg
+523,train,us,9,Using smartphone,Smartphone,man2/man22us.egg,3,man2/man22us-us3.egg,2,800,L0009.R0003.egg,L0009.R0003.A0002.egg
+524,train,us,9,Using smartphone,Smartphone,man2/man22us.egg,3,man2/man22us-us4.egg,3,900,L0009.R0003.egg,L0009.R0003.A0003.egg
+525,train,us,9,Using smartphone,Smartphone,man2/man22us.egg,3,man2/man22us-us5.egg,4,800,L0009.R0003.egg,L0009.R0003.A0004.egg
+526,train,us,9,Using smartphone,Smartphone,man2/man22us.egg,3,man2/man22us-us6.egg,5,1000,L0009.R0003.egg,L0009.R0003.A0005.egg
+527,train,us,9,Using smartphone,Smartphone,man2/man22us.egg,3,man2/man22us-us7.egg,6,1000,L0009.R0003.egg,L0009.R0003.A0006.egg
+528,train,us,9,Using smartphone,Smartphone,man2/man22us.egg,3,man2/man22us-us8.egg,7,900,L0009.R0003.egg,L0009.R0003.A0007.egg
+529,train,us,9,Using smartphone,Smartphone,man2/man22us.egg,3,man2/man22us-us9.egg,8,900,L0009.R0003.egg,L0009.R0003.A0008.egg
+530,train,us,9,Using smartphone,Smartphone,man2/man2us.egg,4,man2/man2us-us.egg,0,1420,L0009.R0004.egg,L0009.R0004.A0000.egg
+531,train,us,9,Using smartphone,Smartphone,woman1/woman12us.egg,5,woman1/woman12us-us10.egg,0,900,L0009.R0005.egg,L0009.R0005.A0000.egg
+532,train,us,9,Using smartphone,Smartphone,woman1/woman12us.egg,5,woman1/woman12us-us2.egg,1,900,L0009.R0005.egg,L0009.R0005.A0001.egg
+533,train,us,9,Using smartphone,Smartphone,woman1/woman12us.egg,5,woman1/woman12us-us3.egg,2,900,L0009.R0005.egg,L0009.R0005.A0002.egg
+534,train,us,9,Using smartphone,Smartphone,woman1/woman12us.egg,5,woman1/woman12us-us4.egg,3,900,L0009.R0005.egg,L0009.R0005.A0003.egg
+535,train,us,9,Using smartphone,Smartphone,woman1/woman12us.egg,5,woman1/woman12us-us5.egg,4,900,L0009.R0005.egg,L0009.R0005.A0004.egg
+536,train,us,9,Using smartphone,Smartphone,woman1/woman12us.egg,5,woman1/woman12us-us6.egg,5,900,L0009.R0005.egg,L0009.R0005.A0005.egg
+537,train,us,9,Using smartphone,Smartphone,woman1/woman12us.egg,5,woman1/woman12us-us7.egg,6,900,L0009.R0005.egg,L0009.R0005.A0006.egg
+538,train,us,9,Using smartphone,Smartphone,woman1/woman12us.egg,5,woman1/woman12us-us8.egg,7,900,L0009.R0005.egg,L0009.R0005.A0007.egg
+539,train,us,9,Using smartphone,Smartphone,woman1/woman12us.egg,5,woman1/woman12us-us9.egg,8,900,L0009.R0005.egg,L0009.R0005.A0008.egg
+540,train,us,9,Using smartphone,Smartphone,woman1/woman1us.egg,6,woman1/woman1us-us.egg,0,850,L0009.R0006.egg,L0009.R0006.A0000.egg
+541,train,us,9,Using smartphone,Smartphone,woman2/woman2us.egg,7,woman2/woman2us-us.egg,0,750,L0009.R0007.egg,L0009.R0007.A0000.egg
+542,train,us,9,Using smartphone,Smartphone,woman2/women22us.egg,8,woman2/women22us-us10.egg,0,1000,L0009.R0008.egg,L0009.R0008.A0000.egg
+543,train,us,9,Using smartphone,Smartphone,woman2/women22us.egg,8,woman2/women22us-us2.egg,1,1000,L0009.R0008.egg,L0009.R0008.A0001.egg
+544,train,us,9,Using smartphone,Smartphone,woman2/women22us.egg,8,woman2/women22us-us3.egg,2,900,L0009.R0008.egg,L0009.R0008.A0002.egg
+545,train,us,9,Using smartphone,Smartphone,woman2/women22us.egg,8,woman2/women22us-us4.egg,3,1000,L0009.R0008.egg,L0009.R0008.A0003.egg
+546,train,us,9,Using smartphone,Smartphone,woman2/women22us.egg,8,woman2/women22us-us5.egg,4,1000,L0009.R0008.egg,L0009.R0008.A0004.egg
+547,train,us,9,Using smartphone,Smartphone,woman2/women22us.egg,8,woman2/women22us-us6.egg,5,900,L0009.R0008.egg,L0009.R0008.A0005.egg
+548,train,us,9,Using smartphone,Smartphone,woman2/women22us.egg,8,woman2/women22us-us7.egg,6,900,L0009.R0008.egg,L0009.R0008.A0006.egg
+549,train,us,9,Using smartphone,Smartphone,woman2/women22us.egg,8,woman2/women22us-us8.egg,7,1000,L0009.R0008.egg,L0009.R0008.A0007.egg
+550,train,us,9,Using smartphone,Smartphone,woman2/women22us.egg,8,woman2/women22us-us9.egg,8,900,L0009.R0008.egg,L0009.R0008.A0008.egg
+551,test,wd,10,Washing dish,Dish and sponge,man0/man0wd.egg,0,man0/man0wd-wd1.egg,0,1199,L0010.R0000.egg,L0010.R0000.A0000.egg
+552,test,wd,10,Washing dish,Dish and sponge,man0/man0wd.egg,0,man0/man0wd-wd10.egg,1,700,L0010.R0000.egg,L0010.R0000.A0001.egg
+553,test,wd,10,Washing dish,Dish and sponge,man0/man0wd.egg,0,man0/man0wd-wd2.egg,2,730,L0010.R0000.egg,L0010.R0000.A0002.egg
+554,test,wd,10,Washing dish,Dish and sponge,man0/man0wd.egg,0,man0/man0wd-wd3.egg,3,700,L0010.R0000.egg,L0010.R0000.A0003.egg
+555,test,wd,10,Washing dish,Dish and sponge,man0/man0wd.egg,0,man0/man0wd-wd4.egg,4,700,L0010.R0000.egg,L0010.R0000.A0004.egg
+556,test,wd,10,Washing dish,Dish and sponge,man0/man0wd.egg,0,man0/man0wd-wd5.egg,5,650,L0010.R0000.egg,L0010.R0000.A0005.egg
+557,test,wd,10,Washing dish,Dish and sponge,man0/man0wd.egg,0,man0/man0wd-wd6.egg,6,750,L0010.R0000.egg,L0010.R0000.A0006.egg
+558,test,wd,10,Washing dish,Dish and sponge,man0/man0wd.egg,0,man0/man0wd-wd7.egg,7,700,L0010.R0000.egg,L0010.R0000.A0007.egg
+559,test,wd,10,Washing dish,Dish and sponge,man0/man0wd.egg,0,man0/man0wd-wd8.egg,8,700,L0010.R0000.egg,L0010.R0000.A0008.egg
+560,test,wd,10,Washing dish,Dish and sponge,man0/man0wd.egg,0,man0/man0wd-wd9.egg,9,700,L0010.R0000.egg,L0010.R0000.A0009.egg
+561,train,wd,10,Washing dish,Dish and sponge,man1/man12wd.egg,1,man1/man12wd-wd2.egg,0,800,L0010.R0001.egg,L0010.R0001.A0000.egg
+562,train,wd,10,Washing dish,Dish and sponge,man1/man12wd.egg,1,man1/man12wd-wd3.egg,1,800,L0010.R0001.egg,L0010.R0001.A0001.egg
+563,train,wd,10,Washing dish,Dish and sponge,man1/man12wd.egg,1,man1/man12wd-wd4.egg,2,800,L0010.R0001.egg,L0010.R0001.A0002.egg
+564,train,wd,10,Washing dish,Dish and sponge,man1/man12wd.egg,1,man1/man12wd-wd5.egg,3,800,L0010.R0001.egg,L0010.R0001.A0003.egg
+565,train,wd,10,Washing dish,Dish and sponge,man1/man12wd.egg,1,man1/man12wd-wd6.egg,4,700,L0010.R0001.egg,L0010.R0001.A0004.egg
+566,train,wd,10,Washing dish,Dish and sponge,man1/man12wd.egg,1,man1/man12wd-wd7.egg,5,900,L0010.R0001.egg,L0010.R0001.A0005.egg
+567,train,wd,10,Washing dish,Dish and sponge,man1/man12wd.egg,1,man1/man12wd-wd8.egg,6,700,L0010.R0001.egg,L0010.R0001.A0006.egg
+568,train,wd,10,Washing dish,Dish and sponge,man1/man13wd.egg,2,man1/man13wd-wd10.egg,0,700,L0010.R0002.egg,L0010.R0002.A0000.egg
+569,train,wd,10,Washing dish,Dish and sponge,man1/man13wd.egg,2,man1/man13wd-wd9.egg,1,1600,L0010.R0002.egg,L0010.R0002.A0001.egg
+570,train,wd,10,Washing dish,Dish and sponge,man1/man1wd.egg,3,man1/man1wd-wd.egg,0,250,L0010.R0003.egg,L0010.R0003.A0000.egg
+571,train,wd,10,Washing dish,Dish and sponge,man2/man22wd.egg,4,man2/man22wd-wd10.egg,0,700,L0010.R0004.egg,L0010.R0004.A0000.egg
+572,train,wd,10,Washing dish,Dish and sponge,man2/man22wd.egg,4,man2/man22wd-wd2.egg,1,800,L0010.R0004.egg,L0010.R0004.A0001.egg
+573,train,wd,10,Washing dish,Dish and sponge,man2/man22wd.egg,4,man2/man22wd-wd3.egg,2,700,L0010.R0004.egg,L0010.R0004.A0002.egg
+574,train,wd,10,Washing dish,Dish and sponge,man2/man22wd.egg,4,man2/man22wd-wd4.egg,3,700,L0010.R0004.egg,L0010.R0004.A0003.egg
+575,train,wd,10,Washing dish,Dish and sponge,man2/man22wd.egg,4,man2/man22wd-wd5.egg,4,700,L0010.R0004.egg,L0010.R0004.A0004.egg
+576,train,wd,10,Washing dish,Dish and sponge,man2/man22wd.egg,4,man2/man22wd-wd6.egg,5,700,L0010.R0004.egg,L0010.R0004.A0005.egg
+577,train,wd,10,Washing dish,Dish and sponge,man2/man22wd.egg,4,man2/man22wd-wd7.egg,6,700,L0010.R0004.egg,L0010.R0004.A0006.egg
+578,train,wd,10,Washing dish,Dish and sponge,man2/man22wd.egg,4,man2/man22wd-wd8.egg,7,700,L0010.R0004.egg,L0010.R0004.A0007.egg
+579,train,wd,10,Washing dish,Dish and sponge,man2/man22wd.egg,4,man2/man22wd-wd9.egg,8,700,L0010.R0004.egg,L0010.R0004.A0008.egg
+580,train,wd,10,Washing dish,Dish and sponge,man2/man2wd.egg,5,man2/man2wd-wd.egg,0,1250,L0010.R0005.egg,L0010.R0005.A0000.egg
+581,train,wd,10,Washing dish,Dish and sponge,woman1/woman12wd.egg,6,woman1/woman12wd-wd10.egg,0,800,L0010.R0006.egg,L0010.R0006.A0000.egg
+582,train,wd,10,Washing dish,Dish and sponge,woman1/woman12wd.egg,6,woman1/woman12wd-wd2.egg,1,900,L0010.R0006.egg,L0010.R0006.A0001.egg
+583,train,wd,10,Washing dish,Dish and sponge,woman1/woman12wd.egg,6,woman1/woman12wd-wd3.egg,2,800,L0010.R0006.egg,L0010.R0006.A0002.egg
+584,train,wd,10,Washing dish,Dish and sponge,woman1/woman12wd.egg,6,woman1/woman12wd-wd4.egg,3,800,L0010.R0006.egg,L0010.R0006.A0003.egg
+585,train,wd,10,Washing dish,Dish and sponge,woman1/woman12wd.egg,6,woman1/woman12wd-wd5.egg,4,800,L0010.R0006.egg,L0010.R0006.A0004.egg
+586,train,wd,10,Washing dish,Dish and sponge,woman1/woman12wd.egg,6,woman1/woman12wd-wd6.egg,5,700,L0010.R0006.egg,L0010.R0006.A0005.egg
+587,train,wd,10,Washing dish,Dish and sponge,woman1/woman12wd.egg,6,woman1/woman12wd-wd7.egg,6,900,L0010.R0006.egg,L0010.R0006.A0006.egg
+588,train,wd,10,Washing dish,Dish and sponge,woman1/woman12wd.egg,6,woman1/woman12wd-wd8.egg,7,800,L0010.R0006.egg,L0010.R0006.A0007.egg
+589,train,wd,10,Washing dish,Dish and sponge,woman1/woman12wd.egg,6,woman1/woman12wd-wd9.egg,8,800,L0010.R0006.egg,L0010.R0006.A0008.egg
+590,train,wd,10,Washing dish,Dish and sponge,woman1/woman1wd.egg,7,woman1/woman1wd-wd.egg,0,900,L0010.R0007.egg,L0010.R0007.A0000.egg
+591,train,wd,10,Washing dish,Dish and sponge,woman2/woman2wd.egg,8,woman2/woman2wd-wd.egg,0,720,L0010.R0008.egg,L0010.R0008.A0000.egg
+592,train,wd,10,Washing dish,Dish and sponge,woman2/women22wd.egg,9,woman2/women22wd-wd10.egg,0,800,L0010.R0009.egg,L0010.R0009.A0000.egg
+593,train,wd,10,Washing dish,Dish and sponge,woman2/women22wd.egg,9,woman2/women22wd-wd2.egg,1,800,L0010.R0009.egg,L0010.R0009.A0001.egg
+594,train,wd,10,Washing dish,Dish and sponge,woman2/women22wd.egg,9,woman2/women22wd-wd3.egg,2,800,L0010.R0009.egg,L0010.R0009.A0002.egg
+595,train,wd,10,Washing dish,Dish and sponge,woman2/women22wd.egg,9,woman2/women22wd-wd4.egg,3,800,L0010.R0009.egg,L0010.R0009.A0003.egg
+596,train,wd,10,Washing dish,Dish and sponge,woman2/women22wd.egg,9,woman2/women22wd-wd5.egg,4,700,L0010.R0009.egg,L0010.R0009.A0004.egg
+597,train,wd,10,Washing dish,Dish and sponge,woman2/women22wd.egg,9,woman2/women22wd-wd6.egg,5,800,L0010.R0009.egg,L0010.R0009.A0005.egg
+598,train,wd,10,Washing dish,Dish and sponge,woman2/women22wd.egg,9,woman2/women22wd-wd7.egg,6,800,L0010.R0009.egg,L0010.R0009.A0006.egg
+599,train,wd,10,Washing dish,Dish and sponge,woman2/women22wd.egg,9,woman2/women22wd-wd8.egg,7,800,L0010.R0009.egg,L0010.R0009.A0007.egg
+600,train,wd,10,Washing dish,Dish and sponge,woman2/women22wd.egg,9,woman2/women22wd-wd9.egg,8,700,L0010.R0009.egg,L0010.R0009.A0008.egg
+601,test,wtv,12,Watching TV,Remote control,man0/man0wtv.egg,0,man0/man0wtv-wtv1.egg,0,930,L0012.R0000.egg,L0012.R0000.A0000.egg
+602,test,wtv,12,Watching TV,Remote control,man0/man0wtv.egg,0,man0/man0wtv-wtv10.egg,1,1480,L0012.R0000.egg,L0012.R0000.A0001.egg
+603,test,wtv,12,Watching TV,Remote control,man0/man0wtv.egg,0,man0/man0wtv-wtv2.egg,2,1480,L0012.R0000.egg,L0012.R0000.A0002.egg
+604,test,wtv,12,Watching TV,Remote control,man0/man0wtv.egg,0,man0/man0wtv-wtv3.egg,3,1480,L0012.R0000.egg,L0012.R0000.A0003.egg
+605,test,wtv,12,Watching TV,Remote control,man0/man0wtv.egg,0,man0/man0wtv-wtv4.egg,4,1480,L0012.R0000.egg,L0012.R0000.A0004.egg
+606,test,wtv,12,Watching TV,Remote control,man0/man0wtv.egg,0,man0/man0wtv-wtv5.egg,5,1480,L0012.R0000.egg,L0012.R0000.A0005.egg
+607,test,wtv,12,Watching TV,Remote control,man0/man0wtv.egg,0,man0/man0wtv-wtv6.egg,6,1480,L0012.R0000.egg,L0012.R0000.A0006.egg
+608,test,wtv,12,Watching TV,Remote control,man0/man0wtv.egg,0,man0/man0wtv-wtv7.egg,7,1480,L0012.R0000.egg,L0012.R0000.A0007.egg
+609,test,wtv,12,Watching TV,Remote control,man0/man0wtv.egg,0,man0/man0wtv-wtv8.egg,8,1480,L0012.R0000.egg,L0012.R0000.A0008.egg
+610,test,wtv,12,Watching TV,Remote control,man0/man0wtv.egg,0,man0/man0wtv-wtv9.egg,9,1480,L0012.R0000.egg,L0012.R0000.A0009.egg
+611,train,wtv,12,Watching TV,Remote control,man1/man12wtv.egg,1,man1/man12wtv-wtv10.egg,0,800,L0012.R0001.egg,L0012.R0001.A0000.egg
+612,train,wtv,12,Watching TV,Remote control,man1/man12wtv.egg,1,man1/man12wtv-wtv2.egg,1,800,L0012.R0001.egg,L0012.R0001.A0001.egg
+613,train,wtv,12,Watching TV,Remote control,man1/man12wtv.egg,1,man1/man12wtv-wtv3.egg,2,900,L0012.R0001.egg,L0012.R0001.A0002.egg
+614,train,wtv,12,Watching TV,Remote control,man1/man12wtv.egg,1,man1/man12wtv-wtv4.egg,3,1200,L0012.R0001.egg,L0012.R0001.A0003.egg
+615,train,wtv,12,Watching TV,Remote control,man1/man12wtv.egg,1,man1/man12wtv-wtv5.egg,4,800,L0012.R0001.egg,L0012.R0001.A0004.egg
+616,train,wtv,12,Watching TV,Remote control,man1/man12wtv.egg,1,man1/man12wtv-wtv6.egg,5,800,L0012.R0001.egg,L0012.R0001.A0005.egg
+617,train,wtv,12,Watching TV,Remote control,man1/man12wtv.egg,1,man1/man12wtv-wtv7.egg,6,800,L0012.R0001.egg,L0012.R0001.A0006.egg
+618,train,wtv,12,Watching TV,Remote control,man1/man12wtv.egg,1,man1/man12wtv-wtv8.egg,7,800,L0012.R0001.egg,L0012.R0001.A0007.egg
+619,train,wtv,12,Watching TV,Remote control,man1/man12wtv.egg,1,man1/man12wtv-wtv9.egg,8,800,L0012.R0001.egg,L0012.R0001.A0008.egg
+620,train,wtv,12,Watching TV,Remote control,man1/man1wtv.egg,2,man1/man1wtv-wtv.egg,0,1000,L0012.R0002.egg,L0012.R0002.A0000.egg
+621,train,wtv,12,Watching TV,Remote control,man2/man22wtv.egg,3,man2/man22wtv-wtv10.egg,0,1000,L0012.R0003.egg,L0012.R0003.A0000.egg
+622,train,wtv,12,Watching TV,Remote control,man2/man22wtv.egg,3,man2/man22wtv-wtv2.egg,1,800,L0012.R0003.egg,L0012.R0003.A0001.egg
+623,train,wtv,12,Watching TV,Remote control,man2/man22wtv.egg,3,man2/man22wtv-wtv3.egg,2,800,L0012.R0003.egg,L0012.R0003.A0002.egg
+624,train,wtv,12,Watching TV,Remote control,man2/man22wtv.egg,3,man2/man22wtv-wtv4.egg,3,800,L0012.R0003.egg,L0012.R0003.A0003.egg
+625,train,wtv,12,Watching TV,Remote control,man2/man22wtv.egg,3,man2/man22wtv-wtv5.egg,4,900,L0012.R0003.egg,L0012.R0003.A0004.egg
+626,train,wtv,12,Watching TV,Remote control,man2/man22wtv.egg,3,man2/man22wtv-wtv6.egg,5,1000,L0012.R0003.egg,L0012.R0003.A0005.egg
+627,train,wtv,12,Watching TV,Remote control,man2/man22wtv.egg,3,man2/man22wtv-wtv7.egg,6,1000,L0012.R0003.egg,L0012.R0003.A0006.egg
+628,train,wtv,12,Watching TV,Remote control,man2/man22wtv.egg,3,man2/man22wtv-wtv8.egg,7,1000,L0012.R0003.egg,L0012.R0003.A0007.egg
+629,train,wtv,12,Watching TV,Remote control,man2/man22wtv.egg,3,man2/man22wtv-wtv9.egg,8,1000,L0012.R0003.egg,L0012.R0003.A0008.egg
+630,train,wtv,12,Watching TV,Remote control,man2/man2wtv.egg,4,man2/man2wtv-wtv.egg,0,1250,L0012.R0004.egg,L0012.R0004.A0000.egg
+631,train,wtv,12,Watching TV,Remote control,woman1/woman12wtv.egg,5,woman1/woman12wtv-wtv10.egg,0,900,L0012.R0005.egg,L0012.R0005.A0000.egg
+632,train,wtv,12,Watching TV,Remote control,woman1/woman12wtv.egg,5,woman1/woman12wtv-wtv2.egg,1,900,L0012.R0005.egg,L0012.R0005.A0001.egg
+633,train,wtv,12,Watching TV,Remote control,woman1/woman12wtv.egg,5,woman1/woman12wtv-wtv3.egg,2,900,L0012.R0005.egg,L0012.R0005.A0002.egg
+634,train,wtv,12,Watching TV,Remote control,woman1/woman12wtv.egg,5,woman1/woman12wtv-wtv4.egg,3,800,L0012.R0005.egg,L0012.R0005.A0003.egg
+635,train,wtv,12,Watching TV,Remote control,woman1/woman12wtv.egg,5,woman1/woman12wtv-wtv5.egg,4,900,L0012.R0005.egg,L0012.R0005.A0004.egg
+636,train,wtv,12,Watching TV,Remote control,woman1/woman12wtv.egg,5,woman1/woman12wtv-wtv6.egg,5,900,L0012.R0005.egg,L0012.R0005.A0005.egg
+637,train,wtv,12,Watching TV,Remote control,woman1/woman12wtv.egg,5,woman1/woman12wtv-wtv7.egg,6,800,L0012.R0005.egg,L0012.R0005.A0006.egg
+638,train,wtv,12,Watching TV,Remote control,woman1/woman12wtv.egg,5,woman1/woman12wtv-wtv8.egg,7,850,L0012.R0005.egg,L0012.R0005.A0007.egg
+639,train,wtv,12,Watching TV,Remote control,woman1/woman12wtv.egg,5,woman1/woman12wtv-wtv9.egg,8,900,L0012.R0005.egg,L0012.R0005.A0008.egg
+640,train,wtv,12,Watching TV,Remote control,woman1/woman1wtv.egg,6,woman1/woman1wtv-wtv.egg,0,800,L0012.R0006.egg,L0012.R0006.A0000.egg
+641,train,wtv,12,Watching TV,Remote control,woman2/woman2wtv.egg,7,woman2/woman2wtv-wtv.egg,0,850,L0012.R0007.egg,L0012.R0007.A0000.egg
+642,train,wtv,12,Watching TV,Remote control,woman2/women22wtv.egg,8,woman2/women22wtv-wtv10.egg,0,1000,L0012.R0008.egg,L0012.R0008.A0000.egg
+643,train,wtv,12,Watching TV,Remote control,woman2/women22wtv.egg,8,woman2/women22wtv-wtv2.egg,1,900,L0012.R0008.egg,L0012.R0008.A0001.egg
+644,train,wtv,12,Watching TV,Remote control,woman2/women22wtv.egg,8,woman2/women22wtv-wtv3.egg,2,900,L0012.R0008.egg,L0012.R0008.A0002.egg
+645,train,wtv,12,Watching TV,Remote control,woman2/women22wtv.egg,8,woman2/women22wtv-wtv4.egg,3,1000,L0012.R0008.egg,L0012.R0008.A0003.egg
+646,train,wtv,12,Watching TV,Remote control,woman2/women22wtv.egg,8,woman2/women22wtv-wtv5.egg,4,1000,L0012.R0008.egg,L0012.R0008.A0004.egg
+647,train,wtv,12,Watching TV,Remote control,woman2/women22wtv.egg,8,woman2/women22wtv-wtv6.egg,5,900,L0012.R0008.egg,L0012.R0008.A0005.egg
+648,train,wtv,12,Watching TV,Remote control,woman2/women22wtv.egg,8,woman2/women22wtv-wtv7.egg,6,1000,L0012.R0008.egg,L0012.R0008.A0006.egg
+649,train,wtv,12,Watching TV,Remote control,woman2/women22wtv.egg,8,woman2/women22wtv-wtv8.egg,7,900,L0012.R0008.egg,L0012.R0008.A0007.egg
+650,train,wtv,12,Watching TV,Remote control,woman2/women22wtv.egg,8,woman2/women22wtv-wtv9.egg,8,900,L0012.R0008.egg,L0012.R0008.A0008.egg
