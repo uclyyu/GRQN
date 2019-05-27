@@ -169,6 +169,8 @@ if __name__ == '__main__':
 	parser.add_argument('--blender-texdir-wall', type=str, default=UndefinedString())
 	parser.add_argument('--blender-texdir-blind', type=str, default=UndefinedString())
 	parser.add_argument('--blender-proto-file', type=str, default=UndefinedString())
+	parser.add_argument('--blender-enable-puncture', type=bool, default=True, help='Enable to remove random faces of the blind.')
+	parser.add_argument('--blender-enable-nudge', type=bool, default=True, help='Enable to randomly rotate and translate individual wall blocks.')
 	parser.add_argument('--savedir-3dscene', type=str, default=UndefinedString())
 	parser.add_argument('--searchdir-actor', type=str, default=UndefinedString())
 	parser.add_argument('--searchdir-animation', type=str, default=UndefinedString())

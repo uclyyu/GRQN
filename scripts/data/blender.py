@@ -4,7 +4,11 @@ from glob import glob
 from collections import namedtuple
 
 
-Vec3 = namedtuple('Vec3', ['x', 'y', 'z'])
+class Vec3(object):
+	def __init__(self, x=None, y=None, z=None):
+		self.x = x
+		self.y = y
+		self.z = z 
 
 
 class BadSampleException(Exception):
@@ -178,12 +182,12 @@ def _check_texture_images(imag_group):
 	return imag_group
 
 
-def sample_blind (texture_path, sample_mode='train'):
+def sample_blind (texture_path, sample_mode, enable_puncture=True):
 	tag = 'blind'
 	name_proto, = random.sample(['.'.join(['obj', tag, 'proto', X]) for X in ['A', 'B']], 1)
 	name_dup = '.'.join(['obj', tag, 'dup'])
 	imag_group = glob('/'.join([texture_path, 'img.*']))
-	array_count = Vec3(x=None, y=None, z=random.randint(8, 18))
+	array_count = Vec3(z=random.randint(8, 18))
 	seed_range = _get_seeds(sample_mode)
 
 	# find dup object and remove
@@ -216,8 +220,9 @@ def sample_blind (texture_path, sample_mode='train'):
 		remove_rate = random.uniform(45, 55)
 
 	# Select and delete random faces
-	if _remove_random_faces(dup, remove_rate, random.randint(*seed_range)):
-		raise BadSampleException
+	if enable_puncture:
+		if _remove_random_faces(dup, remove_rate, random.randint(*seed_range)):
+			raise BadSampleException
 
 	# Solidify object
 	_apply_solidify_modifier(dup, random.uniform(0.01, 0.08))
@@ -226,7 +231,7 @@ def sample_blind (texture_path, sample_mode='train'):
 	_texture_object(dup, imag_group, 3)
 
 
-def sample_wall(texture_path, sample_mode='train'):
+def sample_wall(texture_path, sample_mode, enable_nudge=True):
 	tag = 'wall'
 	name_proto, = random.sample(['.'.join(['obj', tag, 'proto', X]) for X in ['A']], 1) 
 	name_dup_ = '.'.join(['obj', tag, 'dup', '_'])
@@ -254,7 +259,8 @@ def sample_wall(texture_path, sample_mode='train'):
 		_apply_array_modifier(dup, 'x', array_count.x)
 
 		# Shuffle random mesh
-		_nudge_random_faces(dup, percent=random.uniform(3, 4), seed=random.randint(*seed_range), N=10)
+		if enable_nudge:
+			_nudge_random_faces(dup, percent=random.uniform(3, 4), seed=random.randint(*seed_range), N=10)
 
 		# Deal with textures
 		_texture_object(dup, imag_group, 3)
@@ -277,7 +283,7 @@ def sample_wall(texture_path, sample_mode='train'):
 			dup.rotation_euler[2] = math.radians(-90)
 
 
-def sample_floor(texture_path, sample_mode='train'):
+def sample_floor(texture_path, sample_mode):
 	tag = 'floor'
 	name_proto = '.'.join(['obj', tag, 'proto'])
 	name_dup = name_proto.replace('proto', 'dup')
