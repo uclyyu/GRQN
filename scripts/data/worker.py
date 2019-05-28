@@ -1,13 +1,51 @@
 import multiprocessing as mp
 import numpy as np
-import queue, sys, argparse, json, scene, os, random, shutil, glob, time
+import queue, sys, argparse, json, scene, os, random, shutil, glob, time, itertools
 from loguru import logger
 from PIL import Image
 
 
-# def mp_collect(worker, mode, serial, bjson, sjson, wsize, scene_ext, model_ext, output_base):
-def mp_collect(worker, serialq, args):
+def mp_collect_3dscene(worker, serialq, args):
 	import blender
+	# --- blender: json information 
+	bp_main = os.path.abspath(args.blender_proto_file)
+	bp_expo = os.path.abspath(args.savedir_3dscene)
+
+	# --- for blender exports
+	use_bam = True if args.fileext_3dscene == '.bam' else False
+
+	# --- blender: make a new copy of blender proto file and load export utility
+	savedir_proto = os.path.join(args.savedir_sample, '../blender')
+	proto_name = os.path.basename(bp_main).replace('.blend', '{}.blend'.format(worker))
+	if not os.path.isdir(savedir_proto):
+		os.mkdir(savedir_proto)
+	bp_proto = os.path.join(savedir_proto, proto_name)
+	shutil.copy(bp_main, bp_proto)
+	blender.addon_utils.enable('io_scene_egg')
+	blender.bpy.ops.wm.open_mainfile(filepath=bp_proto)
+
+
+	# --- Main procedures
+	while True:
+		try:
+			job, blind_type, tx_floor, tx_wall, tx_blind = serialq.get(timeout=3)
+		except queue.Empty:
+			logger.info('Worker {worker}: empty queue.', worker=worker)
+			return
+		else:
+			# Generate
+			# - If generation_mode is set to `3dscene' then it will proceed to output .egg/.bam only
+			# 	and skip existing 3dscene file.
+			scene_file = os.path.join(bp_expo, 'scene_{:08d}{}'.format(job, args.fileext_3dscene))
+			if not os.path.isfile(scene_file):
+				blender.sample_environment(
+					job, args.generation_phase, tx_floor, tx_wall, tx_blind, scene_file, 
+					use_blind=True, use_bam=use_bam, 
+					blind_type=blind_type, enable_puncture=args.blender_enable_puncture, 
+					enable_nudge=args.blender_enable_nudge, texture_repeat=args.blender_texture_repeat)
+
+
+def mp_collect_sample(worker, serialq, args):
 	# --- blender: json information 
 	bp_main = os.path.abspath(args.blender_proto_file)
 	bp_flor = os.path.abspath(args.blender_texdir_floor)
@@ -24,22 +62,10 @@ def mp_collect(worker, serialq, args):
 	use_bam = True if args.fileext_3dscene == '.bam' else False
 
 	# --- List of actors
-	if args.generation_mode == 'sample':
-		actors = glob.glob(os.path.sep.join([sp_actr, 'L??.R????{}'.format(args.fileext_actor)]))
-
-	# --- blender: make a new copy of blender proto file and load export utility
-	savedir_proto = os.path.join(args.savedir_sample, '../blender')
-	proto_name = os.path.basename(bp_main).replace('.blend', '{}.blend'.format(worker))
-	if not os.path.isdir(savedir_proto):
-		os.mkdir(savedir_proto)
-	bp_proto = os.path.join(savedir_proto, proto_name)
-	shutil.copy(bp_main, bp_proto)
-	blender.addon_utils.enable('io_scene_egg')
-	blender.bpy.ops.wm.open_mainfile(filepath=bp_proto)
+	actors = glob.glob(os.path.sep.join([sp_actr, 'L????.R????{}'.format(args.fileext_actor)]))
 
 	# --- A new instance of scene manager
-	if args.generation_mode == 'sample':
-		smgr = scene.SceneManager('collect', sp_pose, size=args.render_size)
+	smgr = scene.SceneManager('collect', sp_pose, size=args.render_size)
 
 	# --- Main procedures
 	while True:
@@ -49,51 +75,33 @@ def mp_collect(worker, serialq, args):
 			logger.info('Worker {worker}: empty queue.', worker=worker)
 			return
 		else:
-			if job % 2 == 0:
-				logger.info('Worker {worker}: handling job {job:,} without a blind.', worker=worker, job=job)
-				use_blind = False
-			else:
-				logger.info('Worker {worker}: handling job {job:,} using a blind.', worker=worker, job=job)
-				use_blind = True
-
 			# Generate
-			# - If generation_mode is set to `3dscene' then it will proceed to output .egg/.bam only
 			# - If generation_mode is set to `sample' then it will check if the corresponding .egg/bam exists;
-			# 	if not, a temporary .egg/.bam will be (over-)written before generating samples.
-			scene_file = os.path.join(bp_expo, 'scene_{:08d}{}'.format(job, args.fileext_3dscene))
-			if args.generation_mode == '3dscene':
-				if not os.path.isfile(scene_file):
-					blender.sample_environment(
-						job, args.generation_phase, bp_flor, bp_wall, bp_blnd, scene_file, 
-						use_blind=use_blind, use_bam=use_bam)
-			elif args.generation_mode == 'sample':
-				if not os.path.isfile(scene_file):
-					# in the absence of pre-generated 3dscene, genearte a temporary 3dscene
-					scene_file = os.path.join(bp_expo, '_temp_scene_{:02d}{}'.format(worker, args.fileext_3dscene))
-					blender.sample_environment(
-						job, args.generation_phase, bp_flor, bp_wall, bp_blnd, scene_file,
-						use_blind=use_blind, use_bam=use_bam)
-				# Sample actor and animation
-				actor, animation = _sample_actors(actors, sp_anim, args.fileext_actor)
-				# Update scene manager
-				job_savedir_sample = os.path.join(args.savedir_sample, '{:08d}'.format(job))
-				smgr.swapScene(scene_file)
-				smgr.swapActor(actor, animation)
-				smgr.rebase(job, job_savedir_sample)
-				smgr.step()
-			else:
-				logger.exception('Unknown mode to proceed: {mode}.', mode=args.generation_mode)
+			# 	if not, an error will be raised.
+			scene_number = job % args.num_3dscenes
+			scene_file = os.path.join(bp_expo, 'scene_{:08d}{}'.format(scene_number, args.fileext_3dscene))
+			
+			if not os.path.isfile(scene_file):
+				raise FileNotFoundError
+
+			# Sample actor and animation
+			actor, animation = _sample_actors(actors, sp_anim, args.fileext_actor)
+			# Update scene manager
+			job_savedir_sample = os.path.join(args.savedir_sample, '{:08d}'.format(job))
+			smgr.swapScene(scene_file)
+			smgr.swapActor(actor, animation)
+			smgr.rebase(job, job_savedir_sample)
+			smgr.step()
 
 			# For every job, check first rgb image for content
-			if args.generation_mode == 'sample':
-				visual = Image.open(os.path.join(job_savedir_sample, 'visual-cond-000.jpg'))
-				visual = np.array(visual)
-				assert not (visual == visual[0, 0, 0]).all()
+			visual = Image.open(os.path.join(job_savedir_sample, 'visual-cond-000.jpg'))
+			visual = np.array(visual)
+			assert not (visual == visual[0, 0, 0]).all()
 
-				heatmap_file = os.path.join(job_savedir_sample, 'heatmap-cond-000.jpg')
-				skeleton_file = os.path.join(job_savedir_sample, 'skeleton-cond-000.jpg')
-				assert os.path.isfile(heatmap_file)
-				assert os.path.isfile(skeleton_file)
+			heatmap_file = os.path.join(job_savedir_sample, 'heatmap-cond-000.jpg')
+			skeleton_file = os.path.join(job_savedir_sample, 'skeleton-cond-000.jpg')
+			assert os.path.isfile(heatmap_file)
+			assert os.path.isfile(skeleton_file)
 
 
 def _sample_actors(actors, anim_search_path, extension):
@@ -162,6 +170,8 @@ if __name__ == '__main__':
 	parser.add_argument('--from-sample', type=int, default=0, help='Genearte from sample N.')
 	parser.add_argument('--chunk-size', type=int, default=1000, help='')
 	parser.add_argument('--num-samples', type=int, default=1000, help='Number of samples to draw.')
+	parser.add_argument('--from-3dscene', type=int, default=0)
+	parser.add_argument('--num-3dscenes', type=int, default=400)
 	parser.add_argument('--fileext-actor', type=str,  default='.bam', choices=['.egg', '.bam'],	help='Panda3D model extension.')
 	parser.add_argument('--fileext-3dscene', type=str, default='.egg', choices=['.egg', '.bam'], help='Panda3D scene extension.')
 	parser.add_argument('--render-size', type=int, nargs=2, default=[256, 256], help='Render window height and width.')
@@ -171,6 +181,7 @@ if __name__ == '__main__':
 	parser.add_argument('--blender-proto-file', type=str, default=UndefinedString())
 	parser.add_argument('--blender-enable-puncture', type=bool, default=True, help='Enable to remove random faces of the blind.')
 	parser.add_argument('--blender-enable-nudge', type=bool, default=True, help='Enable to randomly rotate and translate individual wall blocks.')
+	parser.add_argument('--blender-texture-repeat', type=int, default=1)
 	parser.add_argument('--savedir-3dscene', type=str, default=UndefinedString())
 	parser.add_argument('--searchdir-actor', type=str, default=UndefinedString())
 	parser.add_argument('--searchdir-animation', type=str, default=UndefinedString())
@@ -234,24 +245,28 @@ if __name__ == '__main__':
 	if args.num_workers >= 1:
 		mp.set_start_method('spawn')
 
-		iter_start = args.from_sample
-		iter_end = args.from_sample + args.num_samples
-		iter_step = args.chunk_size
-		for chunk_start in range(iter_start, iter_end, iter_step):
-
-			# Set up a queue of serial numbers
+		if args.generation_mode == '3dscene':
 			serialq = mp.Queue()
-			for i in range(chunk_start, min(iter_end, chunk_start + args.chunk_size)):
-				serialq.put(i)
+			enprod = enumerate(itertools.product(
+				['A', 'B'],
+				sorted(glob.glob(os.path.join(args.blender_texdir_floor, 'img*.jpg'))),
+				sorted(glob.glob(os.path.join(args.blender_texdir_wall,  'img*.jpg'))),
+				sorted(glob.glob(os.path.join(args.blender_texdir_blind, 'img*.jpg')))
+				))
 
-			# Spawn workers
+			num_scenes = 0
+			for i, (blind_type, tx_floor, tx_wall, tx_blind) in enprod:
+				if i >= args.from_3dscene and i < args.from_3dscene + args.num_3dscenes:
+					serialq.put((i, blind_type, tx_floor, tx_wall, tx_blind))
+					num_scenes += 1
+			args.num_3dscenes = min(num_scenes, args.num_3dscenes)
+			logger.info('Total number of scenes: {:,} (out of possible {:,}).'.format(args.num_3dscenes, i + 1))
+
 			workers = []
 			for worker_id in range(args.num_workers):
-				# args = (nw, gmode, serials, bjson, sjson, wsize, scene_ext, model_ext, outpath)
-				p = mp.Process(target=mp_collect, args=(worker_id, serialq, args))
+				p = mp.Process(target=mp_collect_3dscene, args=(worker_id, serialq, args))
 				workers.append(p)
 
-			# Start workers
 			for w in workers:
 				w.start()
 
@@ -260,6 +275,36 @@ if __name__ == '__main__':
 
 			serialq.close()
 			serialq.join_thread()
+
+		elif args.generation_mode == 'sample':
+			iter_start = args.from_sample
+			iter_end = args.from_sample + args.num_samples
+			iter_step = args.chunk_size
+			for chunk_start in range(iter_start, iter_end, iter_step):
+
+				# Set up a queue of serial numbers
+				serialq = mp.Queue()
+				for i in range(chunk_start, min(iter_end, chunk_start + args.chunk_size)):
+					serialq.put(i)
+
+				# Spawn workers
+				workers = []
+				for worker_id in range(args.num_workers):
+					# args = (nw, gmode, serials, bjson, sjson, wsize, scene_ext, model_ext, outpath)
+					p = mp.Process(target=mp_collect_sample, args=(worker_id, serialq, args))
+					workers.append(p)
+
+				# Start workers
+				for w in workers:
+					w.start()
+
+				for w in workers:
+					w.join()
+
+				serialq.close()
+				serialq.join_thread()
+		else:
+			raise NotImplementedError('Unknown generation mode: {}'.format(args.generation_mode))
 
 	else:
 		raise NotImplementedError
