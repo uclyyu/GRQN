@@ -289,7 +289,7 @@ class SceneManager(ShowBase):
 			'length', 'fps', 'start-frame', 
 			'camv-filename', 'skel-filename'])
 		step_phase_deg = self.loader_manifest['step.phase.deg']
-		avail_phase_rad = np.deg2rad(np.arange(0, 360, step_phase_deg))
+		avail_phase_rad = np.deg2rad(np.arange(0, 360, step_phase_deg) + np.random.randint(0, step_phase_deg))
 		T = self.actor.getNumFrames('act')
 		skip = self.loader_manifest['frame.skip']
 
