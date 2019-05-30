@@ -352,7 +352,7 @@ class SceneManager(ShowBase):
 		for file in glob.glob(os.path.join(self.loader_manifest['root'], '*.jpg')):
 			os.remove(file)
 
-		return task.done
+		return task.cont
 
 	def _modeCollectPending(self, task):
 		if self.global_clock.getFrameTime() < 5:
