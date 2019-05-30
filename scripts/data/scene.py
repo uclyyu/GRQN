@@ -1,4 +1,4 @@
-import math, random, sys, os, json, numpy, shutil, cv2
+import math, random, sys, os, json, numpy, shutil, cv2, glob
 from panda3d.core import NodePath, PerspectiveLens, AmbientLight, Spotlight, VBase4, ClockObject, loadPrcFileData
 loadPrcFileData('', 'window-type offscreen')   # Spawn an offscreen buffer
 loadPrcFileData('', 'audio-library-name null') # Avoid ALSA errors https://discourse.panda3d.org/t/solved-render-only-one-frame-and-other-questions/12899/5
@@ -22,11 +22,12 @@ class SceneManager(ShowBase):
 	environment layout, the other for an animated human animation. """
 	def __init__(self, mode, op_config=None, 
 				 scene=None, actor=None, animation=None,
-				 step_phase_deg=3, extremal=None,
-				 size=(256, 256), zNear=0.1, zFar=1000.0, fov=70.0, showPosition=False):
+				 step_phase_deg=12, extremal=None,
+				 actor_frame_skip=7, viewpoint_step=12,
+				 render_size=(256, 256), downsample_size=None, zNear=0.1, zFar=1000.0, fov=70.0, showPosition=False):
 		super(SceneManager, self).__init__()
 
-		self.__dict__.update(size=size, zNear=zNear, zFar=zFar, fov=fov, showPosition=showPosition)
+		self.__dict__.update(size=render_size, zNear=zNear, zFar=zFar, fov=fov, showPosition=showPosition)
 
 		self.time = 0
 		self.global_clock = ClockObject.getGlobalClock()
@@ -35,7 +36,7 @@ class SceneManager(ShowBase):
 		# --- Configure offsceen properties
 		flags = GraphicsPipe.BFFbPropsOptional | GraphicsPipe.BFRefuseWindow
 		wprop = WindowProperties(WindowProperties.getDefault())
-		wprop.setSize(size[0], size[1])
+		wprop.setSize(render_size[0], render_size[1])
 		fprop = FrameBufferProperties(FrameBufferProperties.getDefault())
 		fprop.setRgbColor(1)
 		fprop.setColorBits(24)
@@ -55,6 +56,7 @@ class SceneManager(ShowBase):
 		# wp.setCursorHidden(True)
 		# self.win.requestProperties(wp)
 
+		downsample_size = None if downsample_size == render_size else tuple(downsample_size)
 		# --- Containers
 		self.loader_manifest = OrderedDict([
 			('label', None),
@@ -63,8 +65,10 @@ class SceneManager(ShowBase):
 			('serial', 0),
 			('actor', ''),
 			('animation', ''),
-			('frame.size', size),
-			('step.phase.deg', step_phase_deg)])
+			('render.size', render_size),
+			('downsample.size', downsample_size),
+			('frame.skip', actor_frame_skip),
+			('step.phase.deg', viewpoint_step)])
 		self.pov_state = OrderedDict([
 			('radius',    2.5), 
 			('phase',     0), 
@@ -287,11 +291,14 @@ class SceneManager(ShowBase):
 		step_phase_deg = self.loader_manifest['step.phase.deg']
 		avail_phase_rad = np.deg2rad(np.arange(0, 360, step_phase_deg))
 		T = self.actor.getNumFrames('act')
+		skip = self.loader_manifest['frame.skip']
 
 		# cv2.VideoWriter parameters
 		fourcc = cv2.VideoWriter_fourcc(*'XVID')
-		fps = 0.1
-		render_size = tuple(self.loader_manifest['frame.size'])
+		fps = 1
+		render_size = tuple(self.loader_manifest['render.size'])
+		output_size = tuple(self.loader_manifest['downsample.size'])
+		
 
 		# Video filenames
 		vfname_camv = 'camv.avi'
@@ -300,10 +307,10 @@ class SceneManager(ShowBase):
 		vfp_skel = os.path.join(self.loader_manifest['root'], vfname_skel)
 
 		# Writer targets
-		vw_camv = cv2.VideoWriter(vfp_camv, fourcc, fps, render_size)
-		vw_skel = cv2.VideoWriter(vfp_skel, fourcc, fps, render_size)
+		vw_camv = cv2.VideoWriter(vfp_camv, fourcc, fps, output_size)
+		vw_skel = cv2.VideoWriter(vfp_skel, fourcc, fps, output_size)
 
-		dfrows = 0
+		frame = 0
 		# Loop over each available camera phase
 		for cpi, phase_rad in enumerate(avail_phase_rad):
 			# Determine full camera pose
@@ -315,38 +322,37 @@ class SceneManager(ShowBase):
 			camera_pose = list(self.pov_reading.values())
 			activity = self.loader_manifest['label']
 
+			# update dataframe
+			manifest.loc[cpi] = [
+				activity, cpi, camera_pose, 
+				1 + T // skip, fps, frame,
+				vfname_camv, vfname_skel]
+
 			# Loop over each actor frame and save
-			for timestamp in range(T):
+			for timestamp in range(0, T, skip):
 				self.actor.pose('act', timestamp)
 				self.graphicsEngine.renderFrame()
 
-				ffname_camv = 'camv_P{:04d}.T{:04d}.jpg'.format(cpi, timestamp)
-				ffname_skel = 'skel_P{:04d}.T{:04d}.jpg'.format(cpi, timestamp)
-				# filename_heat = 'heat_P{:04d}.T{:04d}.jpg'.format(cpi, timestamp)
+				ffname_camv = 'camv_F{:08d}.jpg'.format(frame)
+				ffname_skel = 'skel_F{:08d}.jpg'.format(frame)
 				ffp_camv = os.path.join(self.loader_manifest['root'], ffname_camv)
 				ffp_skel = os.path.join(self.loader_manifest['root'], ffname_skel)
-				# fp_heat = os.path.join(self.loader_manifest['root'], filename_heat)
 
-				self._taskWriteVisual(ffp_camv, container=vw_camv)
-				self._taskInvokeOpenPose(ffp_camv)
+				camv_array = self._taskWriteVisual(ffp_camv, container=vw_camv)
+				self._taskInvokeOpenPose(camv_array)
 				self._taskWriteSkeleton(ffp_skel, container=vw_skel)
-				# self._taskWriteHeatmap(fp_heat)
 
-				os.remove(ffp_camv)
-
-			# update dataframe
-			manifest.loc[dfrows] = [
-				activity, cpi, camera_pose, 
-				T, fps, T * cpi,
-				vfname_camv, vfname_skel]
-			dfrows += 1
+				frame += 1
 
 		vw_camv.release()
 		vw_skel.release()
 		fp_manifest = os.path.join(self.loader_manifest['root'], 'manifest.csv')
 		manifest.to_csv(fp_manifest)
 
-		return task.cont
+		for file in glob.glob(os.path.join(self.loader_manifest['root'], '*.jpg')):
+			os.remove(file)
+
+		return task.done
 
 	def _modeCollectPending(self, task):
 		if self.global_clock.getFrameTime() < 5:
@@ -603,8 +609,8 @@ class SceneManager(ShowBase):
 		start = random.randint(0, len(self.actor_valid_poses) - length - 1)
 		return self._slicePoses(start, length)
 
-	def _taskInvokeOpenPose(self, name_visual):
-		self.op_datum.cvInputData = cv2.imread(name_visual)
+	def _taskInvokeOpenPose(self, image_array):
+		self.op_datum.cvInputData = image_array
 		self.op_wrapper.emplaceAndPop([self.op_datum])
 
 	def _taskWriteVisual(self, name_visual, container=None, check=False):
@@ -615,12 +621,25 @@ class SceneManager(ShowBase):
 			visual = Image.open(name_visual)
 			assert visual.size[0] == self.size[0] and visual.size[1] == self.size[1], \
 				"Visual size is {} but expected {}.".format(visual.size, self.size)
+
+		resize = self.loader_manifest['downsample.size']
 		if isinstance(container, list):
+			img = cv2.imread(name_visual)
+			if resize is not None:
+				cv2.imwrite(name_visual, cv2.resize(img, resize, interpolation=cv2.INTER_CUBIC))
 			container.append(name_visual)
+
 		elif isinstance(container, cv2.VideoWriter):
-			container.write(cv2.imread(name_visual))
+			img = cv2.imread(name_visual)
+			if resize is not None:
+				img_resized = cv2.resize(img, resize, interpolation=cv2.INTER_CUBIC)
+				container.write(img_resized)
+			else:
+				container.write(img)
 		else:
-			pass
+			img = cv2.imread(name_visual)
+
+		return img
 
 	def _taskWriteHeatmap(self, name_heatmap, container=None):
 		hm = self.op_datum.poseHeatMaps.copy()[0]
@@ -635,6 +654,9 @@ class SceneManager(ShowBase):
 
 	def _taskWriteSkeleton(self, name_skeleton, container=None):
 		sk = self.op_datum.cvOutputData.copy()
+		resize = self.loader_manifest['downsample.size']
+		if resize is not None:
+				sk = cv2.resize(sk, resize, interpolation=cv2.INTER_CUBIC)
 		if isinstance(container, list):
 			cv2.imwrite(name_skeleton, sk)	
 			container.append(name_skeleton)

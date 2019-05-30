@@ -50,7 +50,11 @@ def mp_collect_sample(worker, serialq, args):
 	sp_pose = args.openpose
 
 	# --- A new instance of scene manager
-	smgr = scene.SceneManager('collect', sp_pose, size=args.render_size)
+	smgr = scene.SceneManager(
+		'collect', sp_pose, 
+		step_phase_deg=12,
+		actor_frame_skip=args.actor_frame_skip, viewpoint_step=args.viewpoint_step_size,
+		render_size=args.render_size, downsample_size=args.downsample_size)
 
 	# --- Main procedures
 	while True:
@@ -73,6 +77,7 @@ def mp_collect_sample(worker, serialq, args):
 			smgr.swapActor(actor, animation)
 			smgr.rebase(job, job_savedir_sample)
 			smgr.step()
+			logger.info('Worker {worker}: job {job} done.', worker=worker, job=job)
 
 
 def _sample_actors(actors, anim_search_path, extension):
@@ -141,11 +146,14 @@ if __name__ == '__main__':
 	parser.add_argument('--from-sample', type=int, default=0, help='Genearte from sample N.')
 	parser.add_argument('--chunk-size', type=int, default=1000)
 	parser.add_argument('--num-samples', type=int, default=1000, help='Number of samples to draw.')
+	parser.add_argument('--actor-frame-skip', type=int, default=7, help='')
+	parser.add_argument('--viewpoint-step-size', type=int, default=12, help='')
 	parser.add_argument('--from-3dscene', type=int, default=0)
 	parser.add_argument('--num-3dscenes', type=int, default=400)
 	parser.add_argument('--fileext-actor', type=str,  default='.bam', choices=['.egg', '.bam'],	help='Panda3D model extension.')
 	parser.add_argument('--fileext-3dscene', type=str, default='.egg', choices=['.egg', '.bam'], help='Panda3D scene extension.')
 	parser.add_argument('--render-size', type=int, nargs=2, default=[256, 256], help='Render window height and width.')
+	parser.add_argument('--downsample-size', type=int, nargs=2, default=[128, 128], help='')
 	parser.add_argument('--blender-texdir-floor', type=str, default=UndefinedString())
 	parser.add_argument('--blender-texdir-wall', type=str, default=UndefinedString())
 	parser.add_argument('--blender-texdir-blind', type=str, default=UndefinedString())
