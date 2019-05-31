@@ -1,123 +1,143 @@
-import torch, torchvision, os, json, cv2
+import torch, torchvision, os, cv2, pandas, random
 import numpy as np
-from PIL import Image
-from collections import namedtuple
-from functools import reduce
-
-
-def _default_transforms_(obj):
-	# transform rgb images
-	itransform = torchvision.transforms.Compose([
-		torchvision.transforms.ToTensor(),
-		torchvision.transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
-		])
-	# transform monochromatic images
-	mtransform = torchvision.transforms.Compose([
-		torchvision.transforms.ToTensor(),
-		])
-	# transform orientation vector
-	vtransform = torchvision.transforms.Compose([
-		torchvision.transforms.Lambda(lambda x: torch.tensor(x, dtype=torch.float32)),
-		torchvision.transforms.Lambda(lambda x: x.unsqueeze(2).unsqueeze(3))
-		])
-	# transform target label
-	ltransform = torchvision.transforms.Compose([
-		torchvision.transforms.Lambda(lambda x: torch.tensor(x, dtype=torch.long)),
-		torchvision.transforms.Lambda(lambda x: x.view(-1))
-		])
-	
-	setattr(obj, 'itransform', itransform)
-	setattr(obj, 'mtransform', mtransform)
-	setattr(obj, 'vtransform', vtransform)
-	setattr(obj, 'ltransform', ltransform)
-
-def _rebase_(root, serial, filename):
-	name = filename.split(os.path.sep)[-1]
-	return os.path.join(root, serial, name)
-
-def _collate_(samples):
-	# samples: [(C, Q, L), (C, Q, L), ...]
-	C, Q, L = zip(*samples)
-	# C: [(Xc, Mc, Kc, Vc), (Xc, Mc, Kc, Vc), ...]
-	Xc, Mc, Kc, Vc = zip(*C)
-	Xq, Mq, Kq, Vq = zip(*Q)
-
-	# Determine shorted time steps.
-	tc = reduce(lambda x, y: min(x, y), [x.size(0) for x in Xc])
-	tq = reduce(lambda x, y: min(x, y), [x.size(0) for x in Xq])
-
-	# Crop time series
-	Xc = torch.stack([x[-tc:] for x in Xc], dim=0)
-	Mc = torch.stack([m[-tc:] for m in Mc], dim=0)
-	Kc = torch.stack([k[-tc:] for k in Kc], dim=0)
-	Vc = torch.stack([v[-tc:] for v in Vc], dim=0)
-
-	Xq = torch.stack([x[:tq] for x in Xq], dim=0)
-	Mq = torch.stack([m[:tq] for m in Mq], dim=0)
-	Kq = torch.stack([k[:tq] for k in Kq], dim=0)
-	Vq = torch.stack([v[:tq] for v in Vq], dim=0)	
-
-	L = torch.cat(L, dim=0)
-
-	return (Xc, Mc, Kc, Vc), (Xq, Mq, Kq, Vq), L
-
-def _load_images(manifest, root, serial, transform):
-	stack = []
-	for file in manifest:
-		with Image.open(_rebase_(root, serial, file)) as img:
-			stack.append(transform(img))
-
-	return torch.stack(stack, dim=0)
 
 
 class GernDataset(torch.utils.data.Dataset):
-	def __init__(self, rootdir, manifest='manifest.json'):
+	def __init__(self, rootdir, window_size=35, min_k=1, max_k=7, min_q=3, max_q=9, transforms=None, manifest='manifest.csv'):
+		"""Dataset
+		
+		Args:
+		    rootdir (str): Relative or absolute path to the folder holding all the data.
+		    min_k (int, optional): Minimum number of context viewpoints
+		    max_k (int, optional): Maximum number of context viewpoints
+		    min_q (int, optional): Minimum number of query viewpoints
+		    max_q (int, optional): Maximum number of query viewpoints
+		    transforms (None, optional): torchvision.transforms object
+		    manifest (str, optional): Filename of data manifest (default='manifest.csv')
+		"""
 		self.rootdir = os.path.abspath(rootdir)
 		self.manifest = manifest
-		self.data = sorted(os.listdir(self.rootdir))
-		_default_transforms_(self)
-
 		assert os.path.exists(self.rootdir)
+
+		self.data = os.listdir(self.rootdir)
 		assert len(self.data) > 0
+
+		# _default_transforms_(self)
+
+		self.transforms = torchvision.transforms.ToTensor() if transforms is None else transforms
+		self.window_size = window_size
+		self.min_k = min_k
+		self.max_k = max_k
+		self.min_q = min_q
+		self.max_q = max_q
+		self.num_k = None
+		self.num_q = None
+
+		self.renew_dataset_state()
+
+	def renew_dataset_state(self):
+		self.num_k = np.random.randint(self.min_k, self.max_k + 1)
+		self.num_q = np.random.randint(self.min_q, self.max_q + 1)
 
 	def __len__(self):
 		return len(self.data)
 
 	def __getitem__(self, index):
+		# Get video filenames
 		serial = self.data[index]  # 8-digit folder name
 		manifest_name = os.path.join(self.rootdir, serial, self.manifest)
+		manifest = pandas.read_csv(manifest_name)
+		fp_camv = os.path.join(self.rootdir, serial, manifest.loc[0]['camv-filename'])
+		fp_skel = os.path.join(self.rootdir, serial, manifest.loc[0]['skel-filename'])
 
-		with open(manifest_name, 'r') as jr:
-			manifest = json.load(jr)
+		label = torch.tensor(manifest.loc[0]['activity'], dtype=torch.long)  # training label
 
-		# --- conditionals
-		tXc = _load_images(manifest['visuals.condition'], self.rootdir, serial, self.itransform)
-		tMc = _load_images(manifest['heatmaps.condition'], self.rootdir, serial, self.mtransform)
-		tKc = _load_images(manifest['skeletons.condition'], self.rootdir, serial, self.itransform)
-		tVc = self.vtransform(manifest['pov.readings.condition'])
+		# Each video consists of concatenated clips of equal length
+		n_phase = len(manifest)
+		clip_length = manifest.loc[0]['length']
 
-		Nc = manifest['num.pre'] + manifest['num.post']
-		assert tXc.size(0) == Nc 
-		assert tMc.size(0) == Nc
-		assert tKc.size(0) == Nc
-		assert tVc.size(0) == Nc
+		# Slice time window		
+		inclip_indices = np.arange(0, clip_length)
+		window_start = np.random.randint(0, len(inclip_indices) - self.window_size + 1)
+		inclip_window = inclip_indices[window_start:(window_start + self.window_size)]
 
-		# --- queries
-		tXq = _load_images(manifest['visuals.rewind'], self.rootdir, serial, self.itransform)
-		tMq = _load_images(manifest['heatmaps.rewind'], self.rootdir, serial, self.mtransform)
-		tKq = _load_images(manifest['skeletons.rewind'], self.rootdir, serial, self.itransform)
-		tVq = self.vtransform(manifest['pov.readings.rewind'])
+		# Contextual and query viewpoints
+		phases = set(range(n_phase))
+		k_phase = np.array(random.sample(phases, self.num_k))
+		q_phase = random.sample(phases.difference(k_phase), self.num_q)
 
-		Nq = manifest['num.rewind']
-		assert tXq.size(0) == Nq 
-		assert tMq.size(0) == Nq
-		assert tKq.size(0) == Nq
-		assert tVq.size(0) == Nq
+		# Apply offsets to time window
+		k_frame_offset_indices = k_phase[np.random.randint(0, self.num_k, size=self.window_size)]
+		k_frame_offsets = manifest['start-frame'][k_frame_offset_indices].values
+		k_offset_window = inclip_window + k_frame_offsets
 
-		# --- activity label
-		Lq = self.ltransform(manifest['label'])
+		# Contextual viewpoints
+		k_pose = (
+			manifest['camera-pose'][k_frame_offset_indices]
+			.str[1:-1]  # remove '[' and ']'
+			.str.split(',')
+			.apply(pandas.to_numeric, errors='raise', downcast='float')
+			.tolist()
+			)
+		k_pose = self.transforms(np.array(k_pose)).view(self.window_size, 7, 1, 1) 
 
-		return (tXc, tMc, tKc, tVc), (tXq, tMq, tKq, tVq), Lq
+		camvcap = cv2.VideoCapture(fp_camv)
+		skelcap = cv2.VideoCapture(fp_skel)
+
+		# Contextual camera views
+		kstack_camv = []
+		kstack_skel = []
+
+		for ki in k_offset_window:
+			camvcap.set(cv2.CAP_PROP_POS_FRAMES, ki)
+			skelcap.set(cv2.CAP_PROP_POS_FRAMES, ki)
+			success, readout = camvcap.read()
+			assert success
+			kstack_camv.append(self.transforms(readout))
+			success, readout = skelcap.read()
+			assert success
+			kstack_skel.append(self.transforms(readout))
+
+		# Query viewpoints
+		q_pose = (
+			manifest['camera-pose'].loc[q_phase]
+			.str[1:-1]
+			.str.split(',')
+			.apply(pandas.to_numeric, errors='raise', downcast='float')
+			.tolist()
+			)
+		q_pose = self.transforms(np.array(q_pose)).view(self.num_q, 7, 1, 1)
+
+		# Query camera views
+		qstack_camv = []
+		qstack_skel = []
+
+		for qph in q_phase:
+			q_camv = []
+			q_skel = []
+			for frame in inclip_window + manifest.loc[qph]['start-frame']:
+				camvcap.set(cv2.CAP_PROP_POS_FRAMES, frame)
+				skelcap.set(cv2.CAP_PROP_POS_FRAMES, frame)
+				success, readout = camvcap.read()
+				assert success
+				q_camv.append(self.transforms(readout))
+				success, readout = skelcap.read()
+				assert success
+				q_skel.append(self.transforms(readout))
+			qstack_camv.append(torch.stack(q_camv, dim=0))
+			qstack_skel.append(torch.stack(q_skel, dim=0))
+
+		camvcap.release()
+		skelcap.release()
+
+		kX = torch.stack(kstack_camv, dim=0)
+		kK = torch.stack(kstack_skel, dim=0)
+		kV = k_pose
+		qX = torch.stack(qstack_camv, dim=0)
+		qK = torch.stack(qstack_skel, dim=0)
+		qV = q_pose
+
+		return kX, kK, kV, qX, qK, qV, label
 
 
 class GernSampler(torch.utils.data.Sampler):
@@ -135,9 +155,25 @@ class GernSampler(torch.utils.data.Sampler):
 
 
 class GernDataLoader(torch.utils.data.DataLoader):
-	def __init__(self, rootdir, subset_size=64, batch_size=8, drop_last=True, **kwargs):
+	def __init__(self, rootdir, subset_size, batch_size, drop_last=True, **kwargs):
 		dataset = GernDataset(rootdir)
 		sampler = GernSampler(dataset, subset_size)
 		batch_sampler = torch.utils.data.BatchSampler(sampler, batch_size, drop_last=drop_last)
 
-		super(GernDataLoader, self).__init__(dataset, batch_sampler=batch_sampler, collate_fn=_collate_, **kwargs)
+		super(GernDataLoader, self).__init__(dataset, batch_sampler=batch_sampler, **kwargs)
+
+
+# if __name__ == '__main__':
+# 	rootdir = '/home/yen/data/gern/phase/train/examples'
+# 	gdl = GernDataLoader(rootdir, subset_size=2, batch_size=2, drop_last=True, num_workers=4)
+# 	gdl.dataset.renew_dataset_state()
+# 	for kx, kk, kv, qx, qk, qv, label in gdl:
+# 		print(gdl.dataset.num_k)
+# 		print(gdl.dataset.num_q)
+# 		print('kx-- ', kx.size())
+# 		print('kk-- ', kk.size())
+# 		print('kv-- ', kv.size())
+# 		print('qx-- ', qx.size())
+# 		print('qk-- ', qk.size())
+# 		print('qv-- ', qv.size())
+# 		print(label)
