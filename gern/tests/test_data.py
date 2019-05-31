@@ -8,28 +8,36 @@ class TestGernDataset(unittest.TestCase):
 		self.dataset_cpu = data.GernDataset('resources/examples/dataset')
 
 	def test_indexing_cpu(self):
-		cnd, qry, lab = self.dataset_cpu[0]
-		Xc, Mc, Kc, Vc = cnd
-		Xq, Mq, Kq, Vq = qry
-
-		self.assertEqual(Xc[0].size(), torch.Size([3, 256, 256]))
-
-		for cnd, qry, lab in self.dataset_cpu:
-			pass
+		print(' --- ', self.__class__.__name__)
+		self.dataset_cpu.renew_dataset_state()
+		kx, kk, kv, qx, qk, qv, label = self.dataset_cpu[0]
+		print('kX: ', kx.size())
+		print('kK: ', kk.size())
+		print('kV: ', kv.size())
+		print('qX: ', qx.size())
+		print('qK: ', qk.size())
+		print('qV: ', qv.size())
+		print('Label: ', label)
 
 
 class TestGernDataLoader(unittest.TestCase):
 	def setUp(self):
-		self.batch_size = 3
-		self.subset_size = 4
+		self.batch_size = 2
+		self.subset_size = 2
 		self.loader_cpu = data.GernDataLoader('resources/examples/dataset', subset_size=self.subset_size, drop_last=True, batch_size=self.batch_size)
-		self.num_batch = self.subset_size // self.batch_size
 
 	def test_draw_cpu(self):
-		for i, (C, Q, L) in enumerate(self.loader_cpu):
-			pass
-		self.assertEqual(i + 1, self.num_batch)
-		self.assertEqual(C[0].size(0), self.batch_size)
+		print(' --- ', self.__class__.__name__)
+		self.loader_cpu.dataset.renew_dataset_state()
+		for i, (kx, kk, kv, qx, qk, qv, label) in enumerate(self.loader_cpu):
+			print(i, ' kX: ', kx.size())
+			print(i, ' kK: ', kk.size())
+			print(i, ' kV: ', kv.size())
+			print(i, ' qX: ', qx.size())
+			print(i, ' qK: ', qk.size())
+			print(i, ' qV: ', qv.size())
+			print(i, ' Label: ', label)
+
 
 
 if __name__ == '__main__':

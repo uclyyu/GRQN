@@ -161,19 +161,3 @@ class GernDataLoader(torch.utils.data.DataLoader):
 		batch_sampler = torch.utils.data.BatchSampler(sampler, batch_size, drop_last=drop_last)
 
 		super(GernDataLoader, self).__init__(dataset, batch_sampler=batch_sampler, **kwargs)
-
-
-# if __name__ == '__main__':
-# 	rootdir = '/home/yen/data/gern/phase/train/examples'
-# 	gdl = GernDataLoader(rootdir, subset_size=2, batch_size=2, drop_last=True, num_workers=4)
-# 	gdl.dataset.renew_dataset_state()
-# 	for kx, kk, kv, qx, qk, qv, label in gdl:
-# 		print(gdl.dataset.num_k)
-# 		print(gdl.dataset.num_q)
-# 		print('kx-- ', kx.size())
-# 		print('kk-- ', kk.size())
-# 		print('kv-- ', kv.size())
-# 		print('qx-- ', qx.size())
-# 		print('qk-- ', qk.size())
-# 		print('qv-- ', qv.size())
-# 		print(label)
