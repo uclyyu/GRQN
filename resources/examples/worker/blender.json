@@ -1,7 +1,0 @@
-{
-	"blender_main_file": "../../resources/blender/env_proto.blend",
-	"texture_path_floor": "../../resources/textures/floor/train", 
-	"texture_path_wall": "../../resources/textures/wall/train", 
-	"texture_path_blind": "../../resources/textures/blind/train",
-	"export_path": "../../../../data/gern/egg_scene"
-}

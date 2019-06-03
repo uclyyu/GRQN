@@ -4,7 +4,11 @@ from glob import glob
 from collections import namedtuple
 
 
-Vec3 = namedtuple('Vec3', ['x', 'y', 'z'])
+class Vec3(object):
+	def __init__(self, x=None, y=None, z=None):
+		self.x = x
+		self.y = y
+		self.z = z 
 
 
 class BadSampleException(Exception):
@@ -178,12 +182,18 @@ def _check_texture_images(imag_group):
 	return imag_group
 
 
-def sample_blind (texture_path, sample_mode='train'):
+def sample_blind (texture_path, sample_mode, blind_type, enable_puncture=True, texture_repeat=1):
+	assert blind_type in ('A', 'B')
 	tag = 'blind'
-	name_proto, = random.sample(['.'.join(['obj', tag, 'proto', X]) for X in ['A', 'B']], 1)
+	name_proto = '.'.join(['obj', tag, 'proto', blind_type])
 	name_dup = '.'.join(['obj', tag, 'dup'])
-	imag_group = glob('/'.join([texture_path, 'img.*']))
-	array_count = Vec3(x=None, y=None, z=random.randint(8, 18))
+	if os.path.isdir(texture_path):
+		imag_group = _check_texture_images(glob('/'.join([texture_path, 'img.*'])))
+	elif os.path.isfile(texture_path):
+		imag_group = [texture_path]
+	else:
+		raise FileNotFoundError
+	array_count = Vec3(z=random.randint(8, 18))
 	seed_range = _get_seeds(sample_mode)
 
 	# find dup object and remove
@@ -216,22 +226,28 @@ def sample_blind (texture_path, sample_mode='train'):
 		remove_rate = random.uniform(45, 55)
 
 	# Select and delete random faces
-	if _remove_random_faces(dup, remove_rate, random.randint(*seed_range)):
-		raise BadSampleException
+	if enable_puncture:
+		if _remove_random_faces(dup, remove_rate, random.randint(*seed_range)):
+			raise BadSampleException
 
 	# Solidify object
 	_apply_solidify_modifier(dup, random.uniform(0.01, 0.08))
 
 	# Finally, deal with textures
-	_texture_object(dup, imag_group, 3)
+	_texture_object(dup, imag_group, texture_repeat)
 
 
-def sample_wall(texture_path, sample_mode='train'):
+def sample_wall(texture_path, sample_mode, enable_nudge=True, texture_repeat=1):
 	tag = 'wall'
 	name_proto, = random.sample(['.'.join(['obj', tag, 'proto', X]) for X in ['A']], 1) 
 	name_dup_ = '.'.join(['obj', tag, 'dup', '_'])
-	imag_group = _check_texture_images(glob('/'.join([texture_path, 'img.*'])))
-	array_count = Vec3(x=random.randint(40, 50), y=None, z=random.randint(10, 12))
+	if os.path.isdir(texture_path):
+		imag_group = _check_texture_images(glob('/'.join([texture_path, 'img.*'])))
+	elif os.path.isfile(texture_path):
+		imag_group = [texture_path]
+	else:
+		raise FileNotFoundError
+	array_count = Vec3(x=random.randint(40, 50), z=random.randint(10, 12))
 	seed_range = _get_seeds(sample_mode)
 
 	for wall in ['N', 'W', 'S', 'E']:
@@ -254,10 +270,11 @@ def sample_wall(texture_path, sample_mode='train'):
 		_apply_array_modifier(dup, 'x', array_count.x)
 
 		# Shuffle random mesh
-		_nudge_random_faces(dup, percent=random.uniform(3, 4), seed=random.randint(*seed_range), N=10)
+		if enable_nudge:
+			_nudge_random_faces(dup, percent=random.uniform(3, 4), seed=random.randint(*seed_range), N=10)
 
 		# Deal with textures
-		_texture_object(dup, imag_group, 3)
+		_texture_object(dup, imag_group, texture_repeat)
 
 		# Object specific adjustments
 		if wall == 'N':
@@ -277,28 +294,35 @@ def sample_wall(texture_path, sample_mode='train'):
 			dup.rotation_euler[2] = math.radians(-90)
 
 
-def sample_floor(texture_path, sample_mode='train'):
+def sample_floor(texture_path, sample_mode, texture_repeat=1):
 	tag = 'floor'
 	name_proto = '.'.join(['obj', tag, 'proto'])
 	name_dup = name_proto.replace('proto', 'dup')
-	imag_group = _check_texture_images(glob('/'.join([texture_path, 'img.*'])))
+	if os.path.isdir(texture_path):
+		imag_group = _check_texture_images(glob('/'.join([texture_path, 'img.*'])))
+	elif os.path.isfile(texture_path):
+		imag_group = [texture_path]
+	else:
+		raise FileNotFoundError
 
 	_remove_object_by_name(name_dup)
 	dup = _duplicate_object(name_proto)
 
-	_texture_object(dup, imag_group, 3)
+	_texture_object(dup, imag_group, texture_repeat)
 
 
 def sample_environment(job, mode, texture_path_floor, texture_path_wall, texture_path_blind, export_name,
-					   use_floor=True, use_wall=True, use_blind=True, use_bam=True):
+					   use_floor=True, use_wall=True, use_blind=True, use_bam=True,
+					   blind_type='A', enable_puncture=True, enable_nudge=True,
+					   texture_repeat=1):
 	_deselect_all()
 
 	if use_floor:
 		sample_floor(texture_path_floor, sample_mode=mode)
 	if use_wall:
-		sample_wall(texture_path_wall, sample_mode=mode)
+		sample_wall(texture_path_wall, sample_mode=mode, enable_nudge=enable_nudge, texture_repeat=texture_repeat)
 	if use_blind:
-		sample_blind(texture_path_blind, sample_mode=mode)
+		sample_blind(texture_path_blind, sample_mode=mode, blind_type=blind_type, enable_puncture=enable_puncture, texture_repeat=texture_repeat)
 
 	_deselect_all() 
 

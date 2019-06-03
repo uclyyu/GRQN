@@ -1,4 +1,4 @@
-import math, random, sys, os, json, numpy, shutil
+import math, random, sys, os, json, numpy, shutil, cv2, glob
 from panda3d.core import NodePath, PerspectiveLens, AmbientLight, Spotlight, VBase4, ClockObject, loadPrcFileData
 loadPrcFileData('', 'window-type offscreen')   # Spawn an offscreen buffer
 loadPrcFileData('', 'audio-library-name null') # Avoid ALSA errors https://discourse.panda3d.org/t/solved-render-only-one-frame-and-other-questions/12899/5
@@ -7,8 +7,9 @@ from direct.showbase.ShowBase import ShowBase, WindowProperties, FrameBufferProp
 from direct.gui.OnscreenText import TextNode, OnscreenText
 from collections import OrderedDict
 from PIL import Image
-import cv2
-from openpose import openpose
+import pandas as pd
+import numpy as np
+from openpose import pyopenpose as openpose
 _PY_OPENPOSE_AVAIL_ = True
 
 
@@ -21,11 +22,12 @@ class SceneManager(ShowBase):
 	environment layout, the other for an animated human animation. """
 	def __init__(self, mode, op_config=None, 
 				 scene=None, actor=None, animation=None,
-				 pose_gap=4, step_size_deg=3, extremal=None,
-				 size=(256, 256), zNear=0.1, zFar=1000.0, fov=70.0, showPosition=False):
+				 step_phase_deg=12, extremal=None,
+				 actor_frame_skip=7, viewpoint_step=12,
+				 render_size=(256, 256), downsample_size=None, zNear=0.1, zFar=1000.0, fov=70.0, showPosition=False):
 		super(SceneManager, self).__init__()
 
-		self.__dict__.update(size=size, zNear=zNear, zFar=zFar, fov=fov, showPosition=showPosition)
+		self.__dict__.update(size=render_size, zNear=zNear, zFar=zFar, fov=fov, showPosition=showPosition)
 
 		self.time = 0
 		self.global_clock = ClockObject.getGlobalClock()
@@ -34,7 +36,7 @@ class SceneManager(ShowBase):
 		# --- Configure offsceen properties
 		flags = GraphicsPipe.BFFbPropsOptional | GraphicsPipe.BFRefuseWindow
 		wprop = WindowProperties(WindowProperties.getDefault())
-		wprop.setSize(size[0], size[1])
+		wprop.setSize(render_size[0], render_size[1])
 		fprop = FrameBufferProperties(FrameBufferProperties.getDefault())
 		fprop.setRgbColor(1)
 		fprop.setColorBits(24)
@@ -54,29 +56,19 @@ class SceneManager(ShowBase):
 		# wp.setCursorHidden(True)
 		# self.win.requestProperties(wp)
 
+		downsample_size = None if downsample_size == render_size else tuple(downsample_size)
 		# --- Containers
 		self.loader_manifest = OrderedDict([
 			('label', None),
+			('scene', None),
 			('root', '.'),
 			('serial', 0),
 			('actor', ''),
 			('animation', ''),
-			('num.pre', None),
-			('num.post', None),
-			('num.rewind', None),
-			('poses.pre', None),
-			('poses.post', None),
-			('poses.rewind', None),
-			('visuals.rewind', []),
-			('visuals.condition', []),
-			('heatmaps.rewind', []),
-			('heatmaps.condition', []),
-			('skeletons.rewind', []),
-			('skeletons.condition', []),
-			('pose.gap.size', pose_gap),
-			('pov.readings.rewind', []),
-			('pov.readings.condition', []),
-			('actor.step.size.rad', math.radians(step_size_deg))])
+			('render.size', render_size),
+			('downsample.size', downsample_size),
+			('frame.skip', actor_frame_skip),
+			('step.phase.deg', viewpoint_step)])
 		self.pov_state = OrderedDict([
 			('radius',    2.5), 
 			('phase',     0), 
@@ -292,133 +284,74 @@ class SceneManager(ShowBase):
 		return task.cont
 
 	def _modeCollect(self, task):
-		self._renderFrame()
-		# --- Determine sample size
-		num_pose_pre = random.randint(1, 8)
-		num_pose_post = random.randint(16, 32)
-		num_pose_rewind = random.randint(1, int(num_pose_post / 2))
-		pose_slice = self._samplePoseSlice(num_pose_pre + num_pose_post)
-		pose_slice_pre = pose_slice[:num_pose_pre]
-		pose_slice_post = pose_slice[num_pose_pre:]
-		pose_slice_rewind = list(reversed(pose_slice_post[-num_pose_rewind:]))
+		manifest = pd.DataFrame(columns=[
+			'activity', 'camera-pose-index', 'camera-pose', 
+			'length', 'fps', 'start-frame', 
+			'camv-filename', 'skel-filename'])
+		step_phase_deg = self.loader_manifest['step.phase.deg']
+		avail_phase_rad = np.deg2rad(np.arange(0, 360, step_phase_deg) + np.random.randint(0, step_phase_deg))
+		T = self.actor.getNumFrames('act')
+		skip = self.loader_manifest['frame.skip']
 
-		self.loader_manifest.update({
-			'num.pre': num_pose_pre,
-			'num.post': num_pose_post,
-			'num.rewind': num_pose_rewind,
-			'poses.pre': pose_slice_pre,
-			'poses.post': pose_slice_post,
-			'poses.rewind': pose_slice_rewind
-			})
+		# cv2.VideoWriter parameters
+		fourcc = cv2.VideoWriter_fourcc(*'XVID')
+		fps = 1
+		render_size = tuple(self.loader_manifest['render.size'])
+		output_size = tuple(self.loader_manifest['downsample.size'])
+		
 
-		# --- Prepare conditional inputs
-		# Output strings
-		_name_visual = os.path.sep.join([self.loader_manifest['root'], 'visual-cond-{:03d}.jpg'])
-		_name_heatmap = os.path.sep.join([self.loader_manifest['root'], 'heatmap-cond-{:03d}.jpg'])
-		_name_skeleton = os.path.sep.join([self.loader_manifest['root'], 'skeleton-cond-{:03d}.jpg'])
+		# Video filenames
+		vfname_camv = 'camv.avi'
+		vfname_skel = 'skel.avi'
+		vfp_camv = os.path.join(self.loader_manifest['root'], vfname_camv)
+		vfp_skel = os.path.join(self.loader_manifest['root'], vfname_skel)
 
-		# Allow up to two samples per quadrant
-		for i, q in enumerate(pose_slice_pre):
-			self.actor.pose('act', q)
-			if i < 4:
-				# The first centers on the actor		
-				self.povRandomiseState(phase_quadrant='all', to_actor=True)
-			else:
-				# The second has a randomised view
-				self.povRandomiseState(phase_quadrant='all', to_actor=False)
+		# Writer targets
+		vw_camv = cv2.VideoWriter(vfp_camv, fourcc, fps, output_size)
+		vw_skel = cv2.VideoWriter(vfp_skel, fourcc, fps, output_size)
 
-			# Record camera states
+		frame = 0
+		# Loop over each available camera phase
+		for cpi, phase_rad in enumerate(avail_phase_rad):
+			# Determine full camera pose
+			self._povRandomiseRadius()
+			self._povRandomiseElevation()
+			self._povSetState(phase=phase_rad)
+			self._povTurnToActor(jitter=3)
 			self.cameraCopyPOV()
-			self._povCopyReadings(self.loader_manifest['pov.readings.condition'])
+			camera_pose = list(self.pov_reading.values())
+			activity = self.loader_manifest['label']
 
-			# Screenshots, heatmaps, and skeletons
-			name_visual = _name_visual.format(i)
-			name_heatmap = _name_heatmap.format(i)
-			name_skeleton = _name_skeleton.format(i)
-			self._renderFrame()
-			self._taskWriteVisual(name_visual, self.loader_manifest['visuals.condition'])
-			if _PY_OPENPOSE_AVAIL_:
-				self._taskInvokeOpenPose(name_visual)
-				self._taskWriteHeatmap(name_heatmap, self.loader_manifest['heatmaps.condition'])
-				self._taskWriteSkeleton(name_skeleton, self.loader_manifest['skeletons.condition'])
+			# update dataframe
+			manifest.loc[cpi] = [
+				activity, cpi, camera_pose, 
+				1 + T // skip, fps, frame,
+				vfname_camv, vfname_skel]
 
-		# Next, sample temporal data from a random position
-		self.povRandomiseState(phase_quadrant='all', to_actor=True)
-		step = math.copysign(self.loader_manifest['actor.step.size.rad'], random.uniform(-1, 1))
-		for i, q in enumerate(pose_slice_post):
-			k = i + num_pose_pre
-			self.actor.pose('act', q)
-			# Move POV
-			self._povAdvancePhase(step)
-			self._povTurnToActor()
-			# Record camera states
-			self.cameraCopyPOV()
-			self._povCopyReadings(self.loader_manifest['pov.readings.condition'])
+			# Loop over each actor frame and save
+			for timestamp in range(0, T, skip):
+				self.actor.pose('act', timestamp)
+				self.graphicsEngine.renderFrame()
 
-			# Screenshots, heatmaps, and skeletons
-			name_visual = _name_visual.format(k)
-			name_heatmap = _name_heatmap.format(k)
-			name_skeleton = _name_skeleton.format(k)
-			self._renderFrame()
-			self._taskWriteVisual(name_visual, self.loader_manifest['visuals.condition'])
-			if _PY_OPENPOSE_AVAIL_:
-				self._taskInvokeOpenPose(name_visual)
-				self._taskWriteHeatmap(name_heatmap, self.loader_manifest['heatmaps.condition'])
-				self._taskWriteSkeleton(name_skeleton, self.loader_manifest['skeletons.condition'])
+				ffname_camv = 'camv_F{:08d}.jpg'.format(frame)
+				ffname_skel = 'skel_F{:08d}.jpg'.format(frame)
+				ffp_camv = os.path.join(self.loader_manifest['root'], ffname_camv)
+				ffp_skel = os.path.join(self.loader_manifest['root'], ffname_skel)
 
-		# --- Prepare query outputs
-		# Output strings
-		_name_visual = os.path.sep.join([self.loader_manifest['root'], 'visual-rewn-{:03d}.jpg'])
-		_name_heatmap = os.path.sep.join([self.loader_manifest['root'], 'heatmap-rewn-{:03d}.jpg'])
-		_name_skeleton = os.path.sep.join([self.loader_manifest['root'], 'skeleton-rewn-{:03d}.jpg'])
+				camv_array = self._taskWriteVisual(ffp_camv, container=vw_camv)
+				self._taskInvokeOpenPose(camv_array)
+				self._taskWriteSkeleton(ffp_skel, container=vw_skel)
 
-		self.povRandomiseState(phase_quadrant='all', to_actor=True)
-		if random.uniform(-1, 1) < 0:
-			# Random sample
-			for i, q in enumerate(pose_slice_rewind):
-				self.actor.pose('act', q)
-				self._povTurnToActor(jitter=math.radians(random.uniform(-3, 3)))
-				self.cameraCopyPOV()
-				self._povCopyReadings(self.loader_manifest['pov.readings.rewind'])
+				frame += 1
 
-				name_visual = _name_visual.format(i)
-				name_heatmap = _name_heatmap.format(i)
-				name_skeleton = _name_skeleton.format(i)
-				self._renderFrame()
-				self._taskWriteVisual(name_visual, self.loader_manifest['visuals.rewind'])
-				if _PY_OPENPOSE_AVAIL_:
-					self._taskInvokeOpenPose(name_visual)
-					self._taskWriteHeatmap(name_heatmap, self.loader_manifest['heatmaps.rewind'])
-					self._taskWriteSkeleton(name_skeleton, self.loader_manifest['skeletons.rewind'])
-				self.povRandomiseState(phase_quadrant='all', to_actor=True)
+		vw_camv.release()
+		vw_skel.release()
+		fp_manifest = os.path.join(self.loader_manifest['root'], 'manifest.csv')
+		manifest.to_csv(fp_manifest)
 
-		else:
-			# Circular sample
-			step = math.copysign(self.loader_manifest['actor.step.size.rad'], random.uniform(-1, 1))
-			for i, q in enumerate(pose_slice_rewind):
-				self.actor.pose('act', q)
-				self._povAdvancePhase(step)
-				self._povTurnToActor()
-				self.cameraCopyPOV()
-				self._povCopyReadings(self.loader_manifest['pov.readings.rewind'])
+		for file in glob.glob(os.path.join(self.loader_manifest['root'], '*.jpg')):
+			os.remove(file)
 
-				name_visual = _name_visual.format(i)
-				name_heatmap = _name_heatmap.format(i)
-				name_skeleton = _name_skeleton.format(i)
-				self._renderFrame()
-				self._taskWriteVisual(name_visual, self.loader_manifest['visuals.rewind'])
-				if _PY_OPENPOSE_AVAIL_:
-					self._taskInvokeOpenPose(name_visual)
-					self._taskWriteHeatmap(name_heatmap, self.loader_manifest['heatmaps.rewind'])
-					self._taskWriteSkeleton(name_skeleton, self.loader_manifest['skeletons.rewind'])
-
-		# --- Finally, output manifest
-		manifest_output = os.path.sep.join([self.loader_manifest['root'], 'manifest.json'])
-		with open(manifest_output, 'w') as jw:
-			json.dump(self.loader_manifest, jw)
-
-		# --- Revert back to pending state
-		# self.taskMgr.add(self._modeCollectPending, 'mode-collect-pending')
 		return task.cont
 
 	def _modeCollectPending(self, task):
@@ -575,34 +508,20 @@ class SceneManager(ShowBase):
 		self.taskMgr.step()
 
 	def swapActor(self, actor, animation, loop=False):
+		# Note: Frames are numbered beginning at 0
 		if isinstance(self.actor, NodePath):
 			self.actor.detachNode()
-			# self.actor.cleanup()  # The same actor/animation is likely to be loaded again...
+			self.actor.cleanup()
 			# self.actor.removeNode()
 		self.actor = Actor(actor, {'act': animation})
 		self.actor.reparentTo(self.render)
 		self.actor.setScale(0.085, 0.085, 0.085)
 
-		total_frames = self.actor.getNumFrames('act')
-		gap = self.loader_manifest['pose.gap.size']
-		self.actor_valid_poses = numpy.arange(0, total_frames, gap).tolist()
-
 		label = int(actor.split(os.path.sep)[-1].split('.')[0].split('L')[-1])
 		self.loader_manifest.update(
 			{'label': label,
 			 'actor': actor, 
-			 'animation': animation,
-			 'poses.pre': None,
-			 'poses.post': None,
-			 'poses.rewind': None})
-		self.loader_manifest['visuals.rewind'].clear()
-		self.loader_manifest['visuals.condition'].clear()
-		self.loader_manifest['heatmaps.rewind'].clear()
-		self.loader_manifest['heatmaps.condition'].clear()
-		self.loader_manifest['skeletons.rewind'].clear()
-		self.loader_manifest['skeletons.condition'].clear()
-		self.loader_manifest['pov.readings.rewind'].clear()
-		self.loader_manifest['pov.readings.condition'].clear()
+			 'animation': animation})
 
 		self._actorRandomiseYaw()
 		self.povRandomiseState(to_actor=True)
@@ -622,7 +541,7 @@ class SceneManager(ShowBase):
 			self.scene.removeNode()
 		self.scene = self.loader.loadModel(scene)
 		self.scene.reparentTo(self.render)
-
+		self.loader_manifest['scene'] = scene
 		if resample_light:
 			self._resampleSpotlight()
 
@@ -690,29 +609,61 @@ class SceneManager(ShowBase):
 		start = random.randint(0, len(self.actor_valid_poses) - length - 1)
 		return self._slicePoses(start, length)
 
-	def _taskInvokeOpenPose(self, name_visual):
-		self.op_datum.cvInputData = cv2.imread(name_visual)
+	def _taskInvokeOpenPose(self, image_array):
+		self.op_datum.cvInputData = image_array
 		self.op_wrapper.emplaceAndPop([self.op_datum])
 
-	def _taskWriteVisual(self, name_visual, container):
+	def _taskWriteVisual(self, name_visual, container=None, check=False):
 		self.graphicsEngine.renderFrame()
 		self.screenshot(name_visual, defaultFilename=False, source=self.win)
 		# Perform checks
-		visual = Image.open(name_visual)
-		assert visual.size[0] == self.size[0] and visual.size[1] == self.size[1], \
-			"Visual size is {} but expected {}.".format(visual.size, self.size)
-		container.append(name_visual)
+		if check:
+			visual = Image.open(name_visual)
+			assert visual.size[0] == self.size[0] and visual.size[1] == self.size[1], \
+				"Visual size is {} but expected {}.".format(visual.size, self.size)
 
-	def _taskWriteHeatmap(self, name_heatmap, container):
+		resize = self.loader_manifest['downsample.size']
+		if isinstance(container, list):
+			img = cv2.imread(name_visual)
+			if resize is not None:
+				cv2.imwrite(name_visual, cv2.resize(img, resize, interpolation=cv2.INTER_CUBIC))
+			container.append(name_visual)
+
+		elif isinstance(container, cv2.VideoWriter):
+			img = cv2.imread(name_visual)
+			if resize is not None:
+				img_resized = cv2.resize(img, resize, interpolation=cv2.INTER_CUBIC)
+				container.write(img_resized)
+			else:
+				container.write(img)
+		else:
+			img = cv2.imread(name_visual)
+
+		return img
+
+	def _taskWriteHeatmap(self, name_heatmap, container=None):
 		hm = self.op_datum.poseHeatMaps.copy()[0]
 		hm = (hm * 255).astype('uint8')
-		cv2.imwrite(name_heatmap, hm)
-		container.append(name_heatmap)
+		if isinstance(container, list):
+			cv2.imwrite(name_heatmap, hm)
+			container.append(name_heatmap)
+		elif isinstance(container, cv2.VideoWriter):
+			container.write(hm)
+		else:
+			cv2.imwrite(name_heatmap, hm)
 
-	def _taskWriteSkeleton(self, name_skeleton, container):
+	def _taskWriteSkeleton(self, name_skeleton, container=None):
 		sk = self.op_datum.cvOutputData.copy()
-		cv2.imwrite(name_skeleton, sk)
-		container.append(name_skeleton)
+		resize = self.loader_manifest['downsample.size']
+		if resize is not None:
+				sk = cv2.resize(sk, resize, interpolation=cv2.INTER_CUBIC)
+		if isinstance(container, list):
+			cv2.imwrite(name_skeleton, sk)	
+			container.append(name_skeleton)
+		elif isinstance(container, cv2.VideoWriter):
+			container.write(sk)
+		else:
+			cv2.imwrite(name_skeleton, sk)	
 
 
 if __name__ == '__main__':
