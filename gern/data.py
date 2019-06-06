@@ -1,5 +1,143 @@
-import torch, torchvision, os, cv2, pandas, random
+import torch, torchvision, os, cv2, pandas, random, math
 import numpy as np
+from itertools import chain
+
+class BallTubeDataset(torch.utils.data.Dataset):
+	def __init__(self, rootdir, min_k=3, max_k=5, min_q=3, max_q=5, transforms=None, manifest='manifest.csv'):
+		self.rootdir = os.path.abspath(rootdir)
+		self.manifest = manifest
+		assert os.path.isdir(self.rootdir)
+
+		self.data = os.listdir(self.rootdir)
+		assert len(self.data) > 0
+
+		self.transforms = torchvision.transforms.ToTensor() if transforms is None else transforms
+		self.min_k = min_k
+		self.max_k = max_k
+		self.min_q = min_q
+		self.max_q = max_q
+		self.num_k = None
+		self.num_q = None
+
+		self.renew_dataset_state()
+
+	def renew_dataset_state(self):
+		self.num_k = np.random.randint(self.min_k, self.max_k + 1)
+		self.num_q = np.random.randint(self.min_q, self.max_q + 1)
+
+	def __len__(self):
+		return len(self.data)
+
+	def __getitem__(self, index):
+		# path information
+		dirname = self.data[index] 
+		fp_manifest = os.path.join(self.rootdir, dirname, self.manifest)
+		fp_video = os.path.join(self.rootdir, dirname, 'video.avi')
+
+		manifest = pandas.read_csv(fp_manifest)
+		label = torch.tensor(manifest.loc[0]['ball-colour'], dtype=torch.long)  # classifier label
+
+		# set up set of indices to each camera phase
+		n_phases = len(manifest)
+		phase_indices = set(range(n_phases))
+		print(phase_indices)
+
+		# allocate visible phases to context and query
+		pdseries_visible = manifest['visible-frames'].where(lambda c: c != '[]').dropna()
+		visible_phase_indices = set(pdseries_visible.index.tolist())
+		nonvisible_phase_indices = phase_indices - visible_phase_indices
+		assert len(visible_phase_indices) >= 2
+		print(visible_phase_indices)
+		print(nonvisible_phase_indices)
+		
+		visible_num_k = math.ceil(len(visible_phase_indices) / 2)
+		visible_num_q = len(visible_phase_indices) - visible_num_k
+		k_phase = set(random.sample(visible_phase_indices, visible_num_k))
+		q_phase = visible_phase_indices - k_phase
+
+		# collect visible frame indices
+		visible_frames = (
+			pdseries_visible
+			.str[1:-1]
+			.str.split(',')
+			.apply(pandas.to_numeric, errors='raise')
+			.tolist())
+		visible_frames = set(chain(*visible_frames))
+
+		# update phase_indices for context and query
+		print(k_phase)
+		print(q_phase)
+
+		k_phase = k_phase | set(random.sample(nonvisible_phase_indices, min(len(nonvisible_phase_indices), self.num_k)))
+		q_phase = q_phase | set(random.sample(nonvisible_phase_indices, min(len(nonvisible_phase_indices), self.num_q)))
+		k_phase = np.array(list(k_phase))
+		q_phase = np.array(list(q_phase))
+		print(k_phase)
+		print(q_phase)
+
+
+		# sample context frames and collect camera poses
+		clip_length = manifest.loc[1]['frame-start']
+		inclip_indices = np.arange(0, clip_length)
+
+		# make sure we actually pick visible frames in the context
+		while True:
+			k_frame_offset_indices = k_phase[np.random.randint(0, self.num_k, size=clip_length)]
+			k_frame_offsets = manifest['frame-start'][k_frame_offset_indices].values
+			k_frames = inclip_indices + k_frame_offsets
+			if len(set(k_frames).intersection(visible_frames)) > 0:
+				break
+
+		k_poses = (
+			manifest['camera-pose'][k_frame_offset_indices]
+			.str[1:-1]
+			.str.split(',')
+			.apply(pandas.to_numeric, errors='raise', downcast='float')
+			.tolist())
+		k_poses = self.transforms(np.array(k_poses)).view(clip_length, 7, 1, 1)
+
+		# extract context frames from video
+		cap = cv2.VideoCapture(fp_video)
+		kstack = []
+		import pdb
+		pdb.set_trace()
+		for ki in k_frames:
+			assert cap.set(cv2.CAP_PROP_POS_FRAMES, ki)
+			success, readout = cap.read()
+			assert success
+			kstack.append(self.transforms(readout))
+
+		# collect query camera poses and frames
+		q_poses = (
+			manifest['camera-pose'].loc[q_phase]
+			.str[1:-1]
+			.str.split(',')
+			.apply(pandas.to_numeric, errors='raise', downcast='float')
+			.tolist()
+			)
+		q_poses = self.transforms(np.array(q_poses)).view(self.num_q, 7, 1, 1)
+
+
+		qstack = []
+
+		for qph in q_phase:
+			q_ = []
+			for frame in inclip_indices + manifest.loc[qph]['frame-start']:
+				cap.set(cv2.CAP_PROP_POS_FRAMES, frame)
+				success, readout = cap.read()
+				assert success
+				q_.append(self.transforms(readout))
+			qstack.append(torch.stack(q_, dim=0))
+
+		cap.release()
+
+		kX = torch.stack(kstack, dim=0)
+		kV = k_poses
+		qX = torch.stack(qstack, dim=0)
+		qV = q_poses
+
+		return kX, kV, qX, qV, label
+
 
 
 class GernDataset(torch.utils.data.Dataset):
@@ -161,3 +299,8 @@ class GernDataLoader(torch.utils.data.DataLoader):
 		batch_sampler = torch.utils.data.BatchSampler(sampler, batch_size, drop_last=drop_last)
 
 		super(GernDataLoader, self).__init__(dataset, batch_sampler=batch_sampler, **kwargs)
+
+
+if __name__ == '__main__':
+	dataset = BallTubeDataset('/home/yen/data/balltube/train')
+	kx, kv, qx, qv, label = dataset[0]
