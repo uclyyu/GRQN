@@ -3,27 +3,17 @@ import numpy as np
 from itertools import chain
 
 class BallTubeDataset(torch.utils.data.Dataset):
-	def __init__(self, rootdir, min_k=3, max_k=5, min_q=3, max_q=5, transforms=None, manifest='manifest.csv'):
+	def __init__(self, rootdir, k=(2, 3), q=(1, 4), transforms=None, manifest='manifest.csv'):
 		self.rootdir = os.path.abspath(rootdir)
 		self.manifest = manifest
 		assert os.path.isdir(self.rootdir)
 
-		self.data = os.listdir(self.rootdir)
+		self.data = list(filter(lambda x: os.path.isdir(os.path.join(self.rootdir, x)), os.listdir(self.rootdir)))
 		assert len(self.data) > 0
 
 		self.transforms = torchvision.transforms.ToTensor() if transforms is None else transforms
-		self.min_k = min_k
-		self.max_k = max_k
-		self.min_q = min_q
-		self.max_q = max_q
-		self.num_k = None
-		self.num_q = None
-
-		self.renew_dataset_state()
-
-	def renew_dataset_state(self):
-		self.num_k = np.random.randint(self.min_k, self.max_k + 1)
-		self.num_q = np.random.randint(self.min_q, self.max_q + 1)
+		self.num_k = k
+		self.num_q = q
 
 	def __len__(self):
 		return len(self.data)
@@ -40,20 +30,16 @@ class BallTubeDataset(torch.utils.data.Dataset):
 		# set up set of indices to each camera phase
 		n_phases = len(manifest)
 		phase_indices = set(range(n_phases))
-		print(phase_indices)
 
 		# allocate visible phases to context and query
 		pdseries_visible = manifest['visible-frames'].where(lambda c: c != '[]').dropna()
 		visible_phase_indices = set(pdseries_visible.index.tolist())
-		nonvisible_phase_indices = phase_indices - visible_phase_indices
-		assert len(visible_phase_indices) >= 2
-		print(visible_phase_indices)
-		print(nonvisible_phase_indices)
-		
-		visible_num_k = math.ceil(len(visible_phase_indices) / 2)
-		visible_num_q = len(visible_phase_indices) - visible_num_k
-		k_phase = set(random.sample(visible_phase_indices, visible_num_k))
-		q_phase = visible_phase_indices - k_phase
+		assert len(visible_phase_indices) >= self.num_k[0] + self.num_q[0]
+
+		k_phase_visible = set(random.sample(visible_phase_indices, self.num_k[0]))
+		q_phase_visible = set(random.sample(visible_phase_indices - k_phase_visible, self.num_q[0]))
+		phase_indices = phase_indices - k_phase_visible - q_phase_visible
+		visible_phase_indices = visible_phase_indices & phase_indices
 
 		# collect visible frame indices
 		visible_frames = (
@@ -65,16 +51,10 @@ class BallTubeDataset(torch.utils.data.Dataset):
 		visible_frames = set(chain(*visible_frames))
 
 		# update phase_indices for context and query
-		print(k_phase)
-		print(q_phase)
-
-		k_phase = k_phase | set(random.sample(nonvisible_phase_indices, min(len(nonvisible_phase_indices), self.num_k)))
-		q_phase = q_phase | set(random.sample(nonvisible_phase_indices, min(len(nonvisible_phase_indices), self.num_q)))
+		k_phase = k_phase_visible | set(random.sample(phase_indices, self.num_k[1]))
+		q_phase = q_phase_visible | set(random.sample(phase_indices - (visible_phase_indices & k_phase), self.num_q[1]))
 		k_phase = np.array(list(k_phase))
 		q_phase = np.array(list(q_phase))
-		print(k_phase)
-		print(q_phase)
-
 
 		# sample context frames and collect camera poses
 		clip_length = manifest.loc[1]['frame-start']
@@ -82,7 +62,7 @@ class BallTubeDataset(torch.utils.data.Dataset):
 
 		# make sure we actually pick visible frames in the context
 		while True:
-			k_frame_offset_indices = k_phase[np.random.randint(0, self.num_k, size=clip_length)]
+			k_frame_offset_indices = k_phase[np.random.randint(0, sum(self.num_k), size=clip_length)]
 			k_frame_offsets = manifest['frame-start'][k_frame_offset_indices].values
 			k_frames = inclip_indices + k_frame_offsets
 			if len(set(k_frames).intersection(visible_frames)) > 0:
@@ -99,8 +79,7 @@ class BallTubeDataset(torch.utils.data.Dataset):
 		# extract context frames from video
 		cap = cv2.VideoCapture(fp_video)
 		kstack = []
-		import pdb
-		pdb.set_trace()
+		
 		for ki in k_frames:
 			assert cap.set(cv2.CAP_PROP_POS_FRAMES, ki)
 			success, readout = cap.read()
@@ -115,11 +94,9 @@ class BallTubeDataset(torch.utils.data.Dataset):
 			.apply(pandas.to_numeric, errors='raise', downcast='float')
 			.tolist()
 			)
-		q_poses = self.transforms(np.array(q_poses)).view(self.num_q, 7, 1, 1)
-
+		q_poses = self.transforms(np.array(q_poses)).view(len(q_phase), 7, 1, 1)
 
 		qstack = []
-
 		for qph in q_phase:
 			q_ = []
 			for frame in inclip_indices + manifest.loc[qph]['frame-start']:
@@ -131,13 +108,50 @@ class BallTubeDataset(torch.utils.data.Dataset):
 
 		cap.release()
 
+		q_visible_indices = np.searchsorted(q_phase, list(q_phase_visible))
+		q_visible_indices = torch.tensor(q_visible_indices, dtype=torch.long)
+
 		kX = torch.stack(kstack, dim=0)
 		kV = k_poses
 		qX = torch.stack(qstack, dim=0)
 		qV = q_poses
 
-		return kX, kV, qX, qV, label
+		return kX, kV, qX, qV, label, q_visible_indices
 
+
+def _balltube_collate(args):
+	kx, kv, qx, qv, label, qvi = zip(*args)
+
+	kx = torch.stack(kx, dim=0)
+	kv = torch.stack(kv, dim=0)
+	qx = torch.stack(qx, dim=0)
+	qv = torch.stack(qv, dim=0)
+	label = torch.stack(label, dim=0)
+	qvi = torch.stack(qvi, dim=0)
+
+	return kx, kv, qx, qv, label, qvi
+
+class BallTubeSampler(torch.utils.data.Sampler):
+	def __init__(self, data_source, num_samples):
+		self.max_n = len(data_source)
+		self.n_samples = num_samples
+
+		assert self.n_samples <= self.max_n
+
+	def __iter__(self):
+		yield from np.random.randint(0, self.max_n, self.n_samples)
+
+	def __len__(self):
+		return self.n_samples
+
+
+class BallTubeDataLoader(torch.utils.data.DataLoader):
+	def __init__(self, rootdir, subset_size, batch_size, drop_last=True, **kwargs):
+		dataset = BallTubeDataset(rootdir)
+		sampler = BallTubeSampler(dataset, subset_size)
+		batch_sampler = torch.utils.data.BatchSampler(sampler, batch_size, drop_last=drop_last)
+
+		super(BallTubeDataLoader, self).__init__(dataset, batch_sampler=batch_sampler, collate_fn=_balltube_collate, **kwargs)
 
 
 class GernDataset(torch.utils.data.Dataset):
@@ -299,8 +313,3 @@ class GernDataLoader(torch.utils.data.DataLoader):
 		batch_sampler = torch.utils.data.BatchSampler(sampler, batch_size, drop_last=drop_last)
 
 		super(GernDataLoader, self).__init__(dataset, batch_sampler=batch_sampler, **kwargs)
-
-
-if __name__ == '__main__':
-	dataset = BallTubeDataset('/home/yen/data/balltube/train')
-	kx, kv, qx, qv, label = dataset[0]
