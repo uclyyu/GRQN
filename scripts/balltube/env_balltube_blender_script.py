@@ -191,43 +191,53 @@ def make_dataset(runs, phase, scene, obj, mat, cam, wregion, rv3d, csvhead):
 			position_ball(obj['ball'], tube_rot, bp)
 
 			# looping over camera poses and video frames
-			frame_count = 0
-
 			with open(os.path.join(fp, 'manifest.csv'), 'w') as csv_manifest:
 				csvwriter = csv.DictWriter(csv_manifest, fieldnames=csvhead)
 				csvwriter.writeheader()
 
-				for cpi, phase_deg in enumerate(range(0, 360, 45)):
-					# rotate camera and get the camera pose
-					pose = rotate_camera(cam, phase_deg)
-					# update camera frame in pixel space
-					# camframe_px = view3d_camera_border(scene, cam, wregion, rv3d)
+				while True:
+					data = []
+					frame_count = 0
+					visible_phase_count = 0
+					for cpi, phase_deg in enumerate(range(0, 360, 45)):
+						# rotate camera and get the camera pose
+						pose = rotate_camera(cam, phase_deg)
+						# update camera frame in pixel space
+						# camframe_px = view3d_camera_border(scene, cam, wregion, rv3d)
 
-					# camera coordinate in object space
-					cam_co = cam.location
+						# camera coordinate in object space
+						cam_co = cam.location
 
-					visible_frames = []
-					data = {'frame-start': frame_count}
-					for frame in range(scene.frame_start, scene.frame_end + 1):
-						scene.frame_current = frame
+						visible_frames = []
+						datum = {'frame-start': frame_count}
+						for frame in range(scene.frame_start, scene.frame_end + 1):
+							scene.frame_current = frame
 
-						# write image and advance counter
-						scene.render.filepath = os.path.join(fp, 'F{:08d}'.format(frame_count))
-						bpy.ops.render.render(write_still=True)
-						frame_count += 1
+							# write image and advance counter
+							scene.render.filepath = os.path.join(fp, 'F{:08d}'.format(frame_count))
+							bpy.ops.render.render(write_still=True)
+							frame_count += 1
 
-						# if detect_ball_visibility(obj['ball'], wregion, rv3d, camframe_px, scene, bm_ball):
-						# 	visible_frames.append(frame_count)
-						if ray_cast(scene, cam_co, bm_ball.verts, obj['ball']):
-							visible_frames.append(frame_count)
+							# if detect_ball_visibility(obj['ball'], wregion, rv3d, camframe_px, scene, bm_ball):
+							# 	visible_frames.append(frame_count)
+							if ray_cast(scene, cam_co, bm_ball.verts, obj['ball']):
+								visible_frames.append(frame_count)
 
-					data.update({
-						'ball-colour': colour_label,  # {0, 1, 2}
-						'ball-initial-position': bp,  # [x, y, z]
-						'camera-pose-index': cpi, 
-						'camera-pose': pose, 
-						'visible-frames': visible_frames})
-					csvwriter.writerow(data)
+						if len(visible_frames) > 0:
+							visible_phase_count += 1
+
+						datum.update({
+							'ball-colour': colour_label,  # {0, 1, 2}
+							'ball-initial-position': bp,  # [x, y, z]
+							'camera-pose-index': cpi, 
+							'camera-pose': pose, 
+							'visible-frames': visible_frames})
+						data.append(datum.copy())
+
+					if visible_phase_count >= 3:
+						break
+
+				csvwriter.writerows(data)
 			scene_count += 1
 
 
