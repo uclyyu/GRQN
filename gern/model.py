@@ -14,96 +14,69 @@ def init_parameters(module):
 
 
 class RepresentationEncoderPrimitive(nn.Module):
-	def __init__(self):
+	def __init__(self, input_channels=3, output_channels=256):
 		super(RepresentationEncoderPrimitive, self).__init__()
-
+		cinp = input_channels
+		cout = output_channels
+		self.output_channels = cout
 		self.features = self.features = nn.ModuleList([
 			# 0 ---
 			nn.Sequential(
-				nn.Conv2d(7, 32, (3, 3), (2, 2), padding=1), 
+				nn.Conv2d(cinp, 256, (2, 2), (2, 2), padding=0), 
 				nn.ReLU(True),
-				GroupNorm2d(32, 8), 
+				GroupNorm2d(256, 32), 
 				SkipConnect(
-					nn.Conv2d(32, 32, (3, 3), (1, 1), padding=1)), 
+					nn.Conv2d(256, 128, (3, 3), (1, 1), padding=1),
+					nn.Conv2d(256, 128, (1, 1), (1, 1), padding=0)), 
 				nn.ReLU(True),
-				GroupNorm2d(32, 8), 
-				nn.MaxPool2d((2, 2), stride=(2, 2)),
-				nn.Conv2d(32, 64, (3, 3), (1, 1), padding=1), 
+				GroupNorm2d(128, 32), 
+				nn.Conv2d(128, 256, (2, 2), (2, 2), padding=0),
 				nn.ReLU(True),
-				GroupNorm2d(64, 8), 
-				SkipConnect(
-					nn.Conv2d(64, 64, (3, 3), (1, 1), padding=1)), 
-				nn.ReLU(True),
-				GroupNorm2d(64, 8), 
-				nn.MaxPool2d((2, 2), stride=(2, 2)),
-				nn.Conv2d( 64, 128, (3, 3), (1, 1), padding=1), 
-				nn.ReLU(True),
-				GroupNorm2d(128, 8), 
-				SkipConnect(
-					nn.Sequential(
-						nn.Conv2d(128, 128, (3, 3), (1, 1), padding=1), 
-						nn.ReLU(True),
-						GroupNorm2d(128, 8), 
-						nn.Conv2d(128, 128, (3, 3), (1, 1), padding=1), 
-						)), 
-				nn.ReLU(True),
-				GroupNorm2d(128, 8), 
-				nn.MaxPool2d((2, 2), stride=(2, 2))
-			),
-			# 1 ---
+				GroupNorm2d(256, 32)),
 			nn.Sequential(
-				nn.Conv2d(135, 128, (3, 3), (2, 2), padding=1), 
-				nn.ReLU(True),
-				GroupNorm2d(128, 8),
-				nn.MaxPool2d((2, 2), stride=(2, 2)),
-				nn.Conv2d(128, 256, (3, 3), (1, 1), padding=1), 
-				nn.ReLU(True),
-				GroupNorm2d(256, 8),
 				SkipConnect(
-					nn.Conv2d(256, 256, (1, 1), (1, 1), bias=False),
-					nn.Sequential(
-						nn.Conv2d(256, 256, (3, 3), (1, 1), padding=1),
-						nn.ReLU(True),
-						GroupNorm2d(256, 8),
-						nn.Conv2d(256, 256, (3, 3), (1, 1), padding=1))
-					), 
+					nn.Conv2d(263, 128, (3, 3), (1, 1), padding=1),
+					nn.Conv2d(263, 128, (1, 1), (1, 1), padding=0)),
 				nn.ReLU(True),
-				GroupNorm2d(256, 8),
-				nn.MaxPool2d((2, 2), stride=(2, 2)),
-				nn.Conv2d(256, 256, (3, 3), (2, 2), padding=1)
-			)
+				GroupNorm2d(128, 32),
+				nn.Conv2d(128, 256, (3, 3), (1, 1), padding=1),
+				nn.ReLU(True),
+				GroupNorm2d(256, 32),
+				nn.Conv2d(256, 256, (1, 1), (1, 1), padding=0),
+				nn.AvgPool2d((16, 16))
+				)
 		])
 
 		self.features.apply(init_parameters)
 		# print('{}: {:,} trainable parameters.'.format(self.__class__.__name__, count_parameters(self)))
 
-	def forward(self, x, m, k, v):
-		# --- Inputs (size)
-		# x: RGB input sequence (B, T, 3, 256, 256)
-		# m: Openpose 'background' heatmap (B, T, 1, 256, 256)
-		# k: Openpose rendered keypoints (B, T, 3, 256, 256)
-		# v: Camera orientation (B, T, 7, 1, 1)
-		# --- Output (size)
-		# Representation primitive (B, T, 256, 1, 1)
-		B, T, _, H, W = x.size()
-		dev = x.device
+	def forward(self, x, v):
+		print(x.size())
+		xsize = x.size()
+		xdims = len(xsize)
+		if xdims == 5:
+			B, T, C, H, W = xsize
+			x = x.view(B * T, C, H, W)
+			v = v.view(B * T, 7, 1, 1)
+		elif xdims == 6:
+			B, Q, T, C, H, W = x.size
+			x = x.view(B * Q * T, C, H, W)
+			v = v.view(B * Q * T, C, H, W)
+		
+		print(x.size())
+		h = self.features[0](x)
+		h = torch.cat([h, v.expand(-1, -1, h.size(2), h.size(3))], dim=1)
+		out = self.features[1](h)
 
-		x = x.view(B * T, -1, H, W)
-		m = m.view(B * T, -1, H, W)
-		k = k.view(B * T, -1, H, W)
-		v = v.view(B * T, -1, 1, 1)
-
-		inp = torch.cat([x, m, k], dim=1)
-		inp = self.features[0](inp)
-		inp = torch.cat([inp, v.expand(-1, -1, inp.size(2), inp.size(3))], dim=1)
-		out = self.features[1](inp)
-
-		return out.view(B, T, -1, out.size(2), out.size(3))
+		if xdims == 5:
+			return out.view(B, T, self.output_channels)
+		elif xdims == 6:
+			return out.view(B, Q, T, self.output_channels)
 
 
 class RepresentationEncoderState(torch.jit.ScriptModule):
 	__constants__ = ['hidden_size']
-	def __init__(self, input_size=256, hidden_size=128, zoneout=.15):
+	def __init__(self, input_size=256, hidden_size=128, zoneout=0.3):
 		super(RepresentationEncoderState, self).__init__()
 
 		self.input_size = input_size
@@ -151,157 +124,55 @@ class RepresentationEncoderState(torch.jit.ScriptModule):
 		return hids, cel, pog
 
 
-class RepresentationEncoder(nn.Module):
-	def __init__(self, primitive_size=256, state_size=128, hidden_size=256):
+class RepresentationEncoder(torch.jit.ScriptModule):
+	__constants__ = ['zoneout_prob', 'hidden_size']
+	def __init__(self, primitive_size=256, state_size=128, hidden_size=256, zoneout=0.3):
 		super(RepresentationEncoder, self).__init__()
 
 		input_size = primitive_size + state_size
-
-		self.op_hidden = nn.Sequential(
-			nn.Linear(input_size, hidden_size),
-			nn.ReLU(True),
-			GroupNorm1d(hidden_size, 8),
-			SkipConnect(nn.Sequential(
-				nn.Linear(hidden_size, hidden_size),
-				nn.ReLU(),
-				GroupNorm1d(hidden_size, 8),
-				nn.Linear(hidden_size, hidden_size, bias=False))),
-			nn.ReLU(True),
-			GroupNorm1d(hidden_size, 8),
-			SkipConnect(nn.Sequential(
-				nn.Linear(hidden_size, hidden_size),
-				nn.ReLU(),
-				GroupNorm1d(hidden_size, 8),
-				nn.Linear(hidden_size, hidden_size, bias=False))),
-			nn.ReLU(True),
-			GroupNorm1d(hidden_size, 8),
-			)
-		self.op_key = nn.Linear(hidden_size, primitive_size)
-		self.op_query = nn.Linear(hidden_size, primitive_size)
-
-		self.apply(init_parameters)
-
-		# print('{}: {:,} trainable parameters.'.format(self.__class__.__name__, count_parameters(self)))
-
-	def forward(self, prim, state):
-		inp = torch.cat([prim, state], dim=1)
-
-		hid = self.op_hidden(inp)
-		key = self.op_key(hid)
-		qry = self.op_query(hid)
-		att = nn.functional.softmax(key * qry, dim=1)
-
-		return att * prim
-
-
-class RepresentationAggregator(nn.Module):
-	def __init__(self, input_size=128, output_size=256):
-		super(RepresentationAggregator, self).__init__()
-
-		self.features = nn.Sequential(
-			nn.Linear(input_size, output_size),
-			nn.ReLU(True),
-			GroupNorm1d(output_size, 8),
-			SkipConnect(nn.Sequential(
-				nn.Linear(output_size, output_size),
-				nn.ReLU(),
-				GroupNorm1d(output_size, 8),
-				nn.Linear(output_size, output_size, bias=False))),
-			nn.ReLU(True),
-			GroupNorm1d(output_size, 8),
-			SkipConnect(nn.Sequential(
-				nn.Linear(output_size, output_size),
-				nn.ReLU(),
-				GroupNorm1d(output_size, 8),
-				nn.Linear(output_size, output_size, bias=False))),
-			nn.ReLU(True),
-			GroupNorm1d(output_size, 8),
-			nn.Linear(output_size, output_size)
-			)
-
-		self.apply(init_parameters)
-
-		# print('{}: {:,} trainable parameters.'.format(self.__class__.__name__, count_parameters(self)))
-
-	def forward(self, x):
-		return self.features(x)
-
-
-class AggregateRewind(torch.jit.ScriptModule):
-
-	__constants__ = ['hidden_size']
-
-	def __init__(self, input_size=256, hidden_size=128, zoneout=.15):
-		super(AggregateRewind, self).__init__()
-
 		self.hidden_size = hidden_size
-		self.op_progrm = LSTMCell(input_size, hidden_size, zoneout=zoneout)
-		self.op_rewind = nn.Sequential(
-			nn.Linear(input_size + hidden_size, hidden_size),
-			nn.ReLU(True),
-			GroupNorm1d(hidden_size, 8),
-			SkipConnect(nn.Sequential(
-				nn.Linear(hidden_size, hidden_size),
-				nn.ReLU(True),
-				GroupNorm1d(hidden_size, 8),
-				nn.Linear(hidden_size, hidden_size, bias=False))),
-			nn.ReLU(True),
-			GroupNorm1d(hidden_size, 8),
-			SkipConnect(nn.Sequential(
-				nn.Linear(hidden_size, hidden_size),
-				nn.ReLU(True),
-				GroupNorm1d(hidden_size, 8),
-				nn.Linear(hidden_size, hidden_size, bias=False))),
-			nn.ReLU(True),
-			GroupNorm1d(hidden_size, 8),
-			nn.Linear(hidden_size, input_size)
-			)
+		self.zoneout_prob = zoneout
+		self.layer = nn.Linear(input_size + hidden_size, hidden_size * 3)
 
-		self.op_rewind.apply(init_parameters)
+		self.apply(init_parameters)
 
 		# print('{}: {:,} trainable parameters.'.format(self.__class__.__name__, count_parameters(self)))
 
 	@torch.jit.script_method
-	def forward(self, x, hid=None, cel=None, pog=None, steps=0):
-		# type: (Tensor, Optional[Tensor], Optional[Tensor], Optional[Tensor], int) -> Tuple[Tensor, Tensor]
-		"""Summary
-		
-		Args:
-		    x (Tensor, 2D): aggregated scene representation
-		    hid (Tensor, 2D, optional): lstm hidden neurons at t=T
-		    pog (Tensor, 2D, optional): lstm hidden neurons at t=T-1
-		    steps (int, optional): number of step to look back in time
-		
-		Returns:
-		    Tuple[Tensor, Tensor]: Description
-		"""
-		
-
-		# x: input aggregate
-		# hid: lstm hidden state
-		# cel: lstm cell state
-		# pog: previous lstm output gate
-
-		hidden_shape = torch.Size([x.size(0), self.hidden_size])
-		if hid is None:
-			hid = torch.zeros(1, device=x.device).expand(hidden_shape)
-
-		if cel is None:
-			cel = torch.zeros(1, device=x.device).expand(hidden_shape)
+	def forward(self, prim, state, hid=None, cel=None, pog=None):
+		# type: (Tensor, Tensor, Optional[Tensor], Optional[Tensor], Optional[Tensor]) -> Tuple[Tensor, Tensor, Tensor]
+		inp = torch.cat([prim, state], dim=2)
+		T = inp.size(1)
+		device = prim.device 
+		default_shape = torch.Size([inp.size(0), self.hidden_size])
 
 		if pog is None:
-			pog = torch.zeros(1, device=x.device).expand(hidden_shape)
+			pog = torch.zeros(1, dtype=torch.float32, device=device).expand(default_shape)
+		if hid is None:
+			hid = torch.zeros(1, dtype=torch.float32, device=device).expand(default_shape)
+		if cel is None:
+			cel = torch.zeros(1, dtype=torch.float32, device=device).expand(default_shape)
 
-		rewind = [x]
-		for _ in range(steps):
-			x_ = rewind[-1]
-			hid, cel, pog = self.op_progrm(x_, hid, cel, pog)
+		for t in range(T):
+			prim_t = prim[:, t]
+			rnn_inp = torch.cat([inp[:, t], hid], dim=1)
+			rnn_out = self.layer(rnn_inp)
+			gf, gi, go = torch.chunk(rnn_out, 3, dim=1)
 
-			r_input = torch.cat([x_, hid], dim=1)
-			r = self.op_rewind(r_input) + x_
-			rewind.append(r)
+			gf = torch.sigmoid(gf)
+			gi = torch.sigmoid(gi)
+			go = torch.sigmoid(go)
 
-		return torch.stack(rewind, dim=1), pog
+			if self.training:
+				mask = torch.zeros_like(go).bernoulli(self.zoneout_prob)
+				cel = gf * cel + prim_t * gi
+				hid = ((1 - mask) * go + mask * pog) * torch.tanh(cel)
+				pog = go
+			else:
+				cel = gf * cel + prim_t * gi
+				hid = go * torch.tanh(cel)
+
+		return hid, cel, pog
 
 
 class GaussianFactor(nn.Module):
@@ -388,159 +259,68 @@ class GeneratorDelta(nn.Module):
 		return self.layers(inp)
 
 
-class DecoderBase(nn.Module):
-	def __init__(self):
-		super(DecoderBase, self).__init__()
-
-		self.decoder_base = nn.Sequential(
-			nn.ConvTranspose2d(256, 256, (3, 3), (2, 2), padding=0),
-			nn.ReLU(True),
-			GroupNorm2d(256, 8),
-			SkipConnect(
-				nn.Conv2d(256, 256, (3, 3), (1, 1), padding=1),
-				nn.Conv2d(256, 256, (1, 1), (1, 1), bias=False)),
-			nn.ReLU(True),
-			GroupNorm2d(256, 8),
-			nn.ConvTranspose2d(256, 128, (3, 3), (2, 2), padding=0),
-			nn.ReLU(True),
-			GroupNorm2d(128, 8),
-			SkipConnect(
-				nn.Conv2d(128, 128, (3, 3), (1, 1), padding=1),
-				nn.Conv2d(128, 128, (1, 1), (1, 1), bias=False)),
-			nn.ReLU(True),
-			GroupNorm2d(128, 8),
-			nn.ConvTranspose2d(128, 128, (3, 3), (2, 2), padding=0),
-			nn.ReLU(True),
-			GroupNorm2d(128, 8),
-			SkipConnect(
-				nn.Conv2d(128, 128, (3, 3), (1, 1), padding=1),
-				nn.Conv2d(128, 128, (1, 1), (1, 1), bias=False)),
-			nn.ReLU(True),
-			GroupNorm2d(128, 8),
-			)
-
-		self.apply(init_parameters)
-
-	def forward(self, x):
-		y = self.decoder_base(x)
-		return y[:, :, 2:-3, 2:-3]
-
-
-class DecoderHeatmap(nn.Module):
-	def __init__(self):
-		super(DecoderHeatmap, self).__init__()
-
-		self.decoder_hm = nn.Sequential(
-			nn.ConvTranspose2d(128, 64, (3, 3), (1, 1), padding=1),
-			nn.ReLU(True),
-			GroupNorm2d(64, 8),
-			SkipConnect(
-				nn.Conv2d(64, 64, (3, 3), (1, 1), padding=1),
-				nn.Conv2d(64, 64, (1, 1), (1, 1), bias=False)),
-			nn.ReLU(True),
-			GroupNorm2d(64, 8),
-			nn.ConvTranspose2d(64, 16, (3, 3), (2, 2), padding=1),
-			nn.ReLU(True),
-			GroupNorm2d(16, 8),
-			SkipConnect(
-				nn.Conv2d(16, 16, (3, 3), (1, 1), padding=1),
-				nn.Conv2d(16, 16, (1, 1), (1, 1), bias=False)),
-			nn.ReLU(True),
-			GroupNorm2d(16, 4),
-			nn.Conv2d(16, 1, (3, 3), (1, 1), padding=1)
-			)
-
-		self.apply(init_parameters)
-
-	def forward(self, x):
-		return self.decoder_hm(x)[:, :, 2:-1, 2:-1]
-
-
 class DecoderRGBVision(nn.Module):
 	def __init__(self):
 		super(DecoderRGBVision, self).__init__()
 
-		self.decoder_pre = nn.Sequential(
-			nn.ConvTranspose2d(128, 64, (3, 3), (1, 1), padding=1),
+		self.decoder = nn.Sequential(
+			nn.ConvTranspose2d(256, 256, (2, 2), (2, 2), padding=0),
 			nn.ReLU(True),
-			GroupNorm2d(64, 8),
+			GroupNorm2d(256, 32),
 			SkipConnect(
-				nn.Conv2d(64, 64, (3, 3), (1, 1), padding=1),
-				nn.Conv2d(64, 64, (1, 1), (1, 1), bias=False)),
+				nn.Conv2d(256, 128, (1, 1), (1, 1), padding=0),
+				nn.Conv2d(256, 128, (3, 3), (1, 1), padding=1)),
 			nn.ReLU(True),
-			GroupNorm2d(64, 8),
-			nn.ConvTranspose2d(64, 16, (3, 3), (2, 2), padding=1),
-			nn.ReLU(True),
-			GroupNorm2d(16, 4),
+			GroupNorm2d(128, 32),
 			SkipConnect(
-				nn.Conv2d(16, 16, (3, 3), (1, 1), padding=1),
-				nn.Conv2d(16, 16, (1, 1), (1, 1), bias=False)),
+				nn.Conv2d(128, 128, (1, 1), (1, 1), padding=0),
+				nn.Conv2d(128, 128, (3, 3), (1, 1), padding=1)),
 			nn.ReLU(True),
-			GroupNorm2d(16, 4),
-			nn.Conv2d(16, 16, (3, 3), (1, 1), padding=1)
-			)
-
-		self.decoder_post = nn.Sequential(
-			nn.Conv2d(17, 16, (3, 3), (1, 1), padding=1), 
+			GroupNorm2d(128, 32),
+			nn.ConvTranspose2d(128, 64, (2, 2), (2, 2), padding=0),
 			nn.ReLU(True),
-			GroupNorm2d(16, 4), 
+			GroupNorm2d(64, 32),
 			SkipConnect(
-				nn.Conv2d(16, 16, (3, 3), (1, 1), padding=1),
-				nn.Conv2d(16, 16, (1, 1), (1, 1), bias=False)),
+				nn.Conv2d(64, 16, (1, 1), (1, 1), padding=0),
+				nn.Conv2d(64, 16, (3, 3), (1, 1), padding=1)),
 			nn.ReLU(True),
-			GroupNorm2d(16, 4), 
-			nn.Conv2d(16, 16, (3, 3), (1, 1), padding=1),
-			nn.ReLU(True),
-			GroupNorm2d(16, 4), 
-			SkipConnect(
-				nn.Conv2d(16, 16, (3, 3), (1, 1), padding=1),
-				nn.Conv2d(16, 16, (1, 1), (1, 1), bias=False)),
-			nn.ReLU(True),
-			GroupNorm2d(16, 4), 
 			nn.Conv2d(16, 3, (3, 3), (1, 1), padding=1)
 			)
 
 		self.apply(init_parameters)
 
-	def forward(self, b, h):
-		pre = self.decoder_pre(b)[:, :, 2:-1, 2:-1]
-		inp = torch.cat([pre, h], dim=1)
-		post = self.decoder_post(inp)
-		return post
+	def forward(self, x):
+		return self.decoder(x)
 
 
-class AuxiliaryClassifier(nn.Module):
+class LatentClassifier(nn.Module):
 	def __init__(self, nclass=13):
-		super(AuxiliaryClassifier, self).__init__()
+		super(LatentClassifier, self).__init__()
 
 		self.features = nn.Sequential(
-			SkipConnect(
-				nn.Sequential(
-					nn.Conv2d(256, 256, (3, 3), (1, 1), padding=1),
-					nn.ReLU(True),
-					GroupNorm2d(256, 8),
-					nn.Conv2d(256, 256, (3, 3), (2, 2), padding=1)),
-				nn.Conv2d(256, 256, (1, 1), (2, 2), bias=False)),
+			nn.Conv2d(256, 256, (2, 2), (2, 2), padding=0),
 			nn.ReLU(True),
-			GroupNorm2d(256, 8),
-			nn.MaxPool2d((2, 2)),
-			nn.Conv2d(256, 128, (3, 3), (1, 1), padding=1),
+			GroupNorm2d(256, 32),
 			SkipConnect(
-				nn.Sequential(
-					nn.Conv2d(128, 128, (3, 3), (1, 1), padding=1),
-					nn.ReLU(True),
-					GroupNorm2d(128, 8),
-					nn.Conv2d(128, 128, (3, 3), (2, 2), padding=1)),
-				nn.Conv2d(128, 128, (1, 1), (2, 2), bias=False)),
+				nn.Conv2d(256, 128, (1, 1), (1, 1), padding=0),
+				nn.Conv2d(256, 128, (3, 3), (1, 1), padding=1)),
 			nn.ReLU(True),
-			GroupNorm2d(128, 8),
-			nn.MaxPool2d((2, 2)),
+			GroupNorm2d(128, 32),
+			nn.Conv2d(128, 128, (2, 2), (2, 2), padding=0),
+			SkipConnect(
+				nn.Conv2d(128, 64, (1, 1), (1, 1), padding=0),
+				nn.Conv2d(128, 64, (3, 3), (1, 1), padding=1)),
+			nn.ReLU(True),
+			GroupNorm2d(64, 32),
+			SkipConnect(
+				nn.Conv2d(64, 64, (1, 1), (1, 1), padding=0),
+				nn.Conv2d(64, 64, (3, 3), (1, 1), padding=1)),
+			nn.ReLU(True),
+			nn.AvgPool2d((2, 2)),
+			GroupNorm2d(64, 32),
+
 			)
-		self.classifier = nn.Sequential(
-			SkipConnect(nn.Linear(128, 128)),
-			nn.ReLU(True),
-			GroupNorm1d(128, 8),
-			nn.Linear(128, nclass))
+		self.classifier = nn.Linear(256, nclass)
 
 		self.apply(init_parameters)
 
@@ -557,3 +337,9 @@ GernOutput = namedtuple('GernOutput',
 
 GernTarget = namedtuple('GernTarget',
 	['rgbv', 'heat', 'label'])
+
+
+if __name__ == '__main__':
+	net = LatentClassifier().eval()
+	a = net(torch.randn(3, 256, 16, 16))
+	print(a.size())

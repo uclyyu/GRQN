@@ -32,34 +32,6 @@ class TestRepresentationEncoderState(unittest.TestCase):
 			self.net(inp, None, None, None)
 
 
-class TestAggregateRewind(unittest.TestCase):
-	def setUp(self):
-		self.batch_size = 7
-		self.input_size = 256
-		self.sequence_length = 5
-		self.hidden_size = 512
-		self.zoneout_prob = 0.3
-		self.net = model.AggregateRewind(self.input_size, self.hidden_size, self.zoneout_prob)
-
-	def test_optmiser(self):
-		optimiser = torch.optim.Adam(self.net.parameters(), 1e-3)
-
-	def test_forward(self):
-		for dev in ['cpu', 'cuda']:
-			self.net.to(dev)
-
-			inp = torch.randn(self.batch_size, self.input_size, device=dev)
-			hid = torch.randn(self.batch_size, self.hidden_size, device=dev)
-			cel = torch.randn(hid.size(), device=dev)
-			pog = torch.randn(hid.size(), device=dev)
-
-			# with tensors
-			self.net(inp, hid, cel, pog, self.sequence_length)
-
-			# with Nones
-			self.net(inp, None, None, None, self.sequence_length)
-
-
 class TestRepresentationEncoderPrimitive(unittest.TestCase):
 	def setUp(self):
 		self.net = model.RepresentationEncoderPrimitive()
@@ -90,19 +62,6 @@ class TestRepresentationEncoder(unittest.TestCase):
 		state = torch.randn(1, 128)
 
 		self.assertEqual(self.net(prim, state).size(), torch.Size([1, 256]))
-
-
-class TestRepresentationAggregator(unittest.TestCase):
-	def setUp(self):
-		self.net = model.RepresentationAggregator(128, 256)
-
-	def test_optmiser(self):
-		optimiser = torch.optim.Adam(self.net.parameters(), 1e-3)
-
-	def test_network(self):
-		x = torch.randn(1, 128)
-
-		self.assertEqual(self.net(x).size(), torch.Size([1, 256]))
 
 
 class TestRecurrentCell(unittest.TestCase):
