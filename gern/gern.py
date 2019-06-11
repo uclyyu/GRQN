@@ -17,6 +17,7 @@ class GeRN(torch.jit.ScriptModule):
 		Nh = 256  # recurrent cell hidden
 		Nv =   7  # query vector
 
+		self.lr = nn.Parameter(torch.tensor(1e-3, dtype=torch.float32))
 		# --- representaiton operators
 		self.rop_primitive = RepresentationEncoderPrimitive()
 		self.rop_state = RepresentationEncoderState()
@@ -130,6 +131,7 @@ class GeRN(torch.jit.ScriptModule):
 		cnd_repr = (cnd_repr  # B, C, ---> B, (Q, T), C, 16, 16
 					.unsqueeze(1).unsqueeze(2).unsqueeze(4).unsqueeze(5)
 					.expand(-1, Qc, Tc, -1, 16, 16)
+					.contiguous()
 					.view(Bc * Qc * Tc, -1, 16, 16))
 		qry_repp = (qry_repp  # B, Q, T, C,  ---> B, Q, T, C, (16, 16)
 					.unsqueeze(4).unsqueeze(5)
@@ -138,6 +140,7 @@ class GeRN(torch.jit.ScriptModule):
 		qry_v = (qry_v  # B, Q, C, 1, 1, ---> B, Q, (T,), C, 16, 16
 				 .unsqueeze(2)
 				 .expand(-1, -1, Tc, -1, 16, 16)
+				 .contiguous()
 				 .view(Bc * Qc * Tc, 7, 16, 16))
 
 		# --- Inference/generation
@@ -148,28 +151,23 @@ class GeRN(torch.jit.ScriptModule):
 			prior_means, prior_logvs, posterior_means, posterior_logvs)
 
 		# --- Auxiliary classification task
-		cat_dist = self.aux_class(u_gop)
+		cat_dist = (self.aux_class(u_gop)
+					.view(Bc, Qc, Tc, -1))
+		cat_dist = torch.softmax(cat_dist, dim=3)
+		min_loss = (cat_dist[torch.arange(len(label)), :, :, label]
+					.add(1e-5).log().mul(-1)
+					.min(dim=2)[0]
+					.min(dim=1)[0])
+		grad, = torch.autograd.grad(min_loss.mean(), u_gop, create_graph=True, retain_graph=True)
+
+		# --- Decoding
+		dec_rgbv = self.dop_rgbv(u_gop + self.lr * grad)
+		dec_rgbv = dec_rgbv.view(Bc, Qc, Tc, -1, 64, 64)
 
 		import pdb
 		pdb.set_trace()
 
-		# --- Decoding
-		# dec_base = self.dop_base(u_gop)
-		# dec_heat = self.dop_heat(dec_base)
-		# dec_rgbv = self.dop_rgbv(dec_base, dec_heat)
-
-		return GernOutput(
-			rgbv=dec_rgbv,
-			heat=dec_heat,
-			label=cat_dist,
-			gamma=gamma,
-			cnd_repr=cnd_repf,
-			cnd_aggr=cnd_aggr,
-			prior_mean=prior_means,
-			prior_logv=prior_logvs,
-			posterior_mean=posterior_means,
-			posterior_logv=posterior_logvs,
-			)
+		return dec_rgbv, cat_dist, prior_means, prior_logvs, posterior_means, posterior_logvs
 
 	def make_target(self, qry_x, qry_m, qry_k, qry_v, label, rsteps=None):
 		Tq = qry_v.size(1)
@@ -250,9 +248,8 @@ class GeRN(torch.jit.ScriptModule):
 		cat_dist = self.aux_class(u_gop)
 
 		# --- Decoding
-		dec_base = self.dop_base(u_gop)
-		dec_heat = self.dop_heat(dec_base)
-		dec_rgbv = self.dop_rgbv(dec_base, dec_heat)
+		dec_rgbv = self.dop_rgbv(u_gop)
+
 
 		return GernOutput(
 			rgbv=dec_rgbv,

@@ -51,7 +51,6 @@ class RepresentationEncoderPrimitive(nn.Module):
 		# print('{}: {:,} trainable parameters.'.format(self.__class__.__name__, count_parameters(self)))
 
 	def forward(self, x, v):
-		print(x.size())
 		xsize = x.size()
 		xdims = len(xsize)
 		if xdims == 5:
@@ -59,11 +58,14 @@ class RepresentationEncoderPrimitive(nn.Module):
 			x = x.view(B * T, C, H, W)
 			v = v.view(B * T, 7, 1, 1)
 		elif xdims == 6:
-			B, Q, T, C, H, W = x.size
+			B, Q, T, C, H, W = xsize
 			x = x.view(B * Q * T, C, H, W)
-			v = v.view(B * Q * T, C, H, W)
+			v = (v.unsqueeze(2)
+				  .expand(-1, -1, T, -1, -1, -1)
+				  .contiguous()
+				  .view(B * Q * T, 7, 1, 1))
+			
 		
-		print(x.size())
 		h = self.features[0](x)
 		h = torch.cat([h, v.expand(-1, -1, h.size(2), h.size(3))], dim=1)
 		out = self.features[1](h)
@@ -342,4 +344,3 @@ GernTarget = namedtuple('GernTarget',
 if __name__ == '__main__':
 	net = LatentClassifier().eval()
 	a = net(torch.randn(3, 256, 16, 16))
-	print(a.size())
