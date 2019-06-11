@@ -51,8 +51,8 @@ class BallTubeDataset(torch.utils.data.Dataset):
 		visible_frames = set(chain(*visible_frames))
 
 		# update phase_indices for context and query
-		k_phase = k_phase_visible | set(np.random.choice(phase_indices, self.num_k[1]))
-		q_phase = q_phase_visible | set(np.random.choice(phase_indices - (visible_phase_indices & k_phase), self.num_q[1]))
+		k_phase = k_phase_visible | set(np.random.choice(list(phase_indices), self.num_k[1]))
+		q_phase = q_phase_visible | set(np.random.choice(list(phase_indices - (visible_phase_indices & k_phase)), self.num_q[1]))
 		k_phase = np.array(list(k_phase))
 		q_phase = np.array(list(q_phase))
 
