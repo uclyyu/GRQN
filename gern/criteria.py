@@ -65,7 +65,7 @@ class GernCriterion(nn.Module):
 
 	def forward(self, index, qry_x, dec_rgbv, cat_dist, prior_means, prior_logvs, posterior_means, posterior_logvs, weights, label):
 		qry_x = qry_x[torch.arange(len(index)), index]
-		self.l_rgbv, self.l_rgbv_index = (dec_rgbv - qry_x).mean(dim=[2, 3, 4]).min(dim=1)
+		self.l_rgbv, self.l_rgbv_index = (dec_rgbv - qry_x).pow(2).mean(dim=[2, 3, 4]).min(dim=1)
 		self.l_rgbv = self.l_rgbv.mean()
 
 		self.l_classifier = (cat_dist[torch.arange(len(label)), :, label]
