@@ -3,7 +3,7 @@ import numpy as np
 from itertools import chain
 
 class BallTubeDataset(torch.utils.data.Dataset):
-	def __init__(self, rootdir, k=(2, 3), q=(1, 4), transforms=None, manifest='manifest.csv'):
+	def __init__(self, rootdir, k=(2, 2), q=(1, 2), transforms=None, manifest='manifest.csv'):
 		self.rootdir = os.path.abspath(rootdir)
 		self.manifest = manifest
 		assert os.path.isdir(self.rootdir)
@@ -51,8 +51,8 @@ class BallTubeDataset(torch.utils.data.Dataset):
 		visible_frames = set(chain(*visible_frames))
 
 		# update phase_indices for context and query
-		k_phase = k_phase_visible | set(np.random.choice(list(phase_indices), self.num_k[1]))
-		q_phase = q_phase_visible | set(np.random.choice(list(phase_indices - (visible_phase_indices & k_phase)), self.num_q[1]))
+		k_phase = k_phase_visible | set(random.sample(phase_indices, self.num_k[1]))
+		q_phase = q_phase_visible | set(random.sample(phase_indices - (visible_phase_indices & k_phase), self.num_q[1]))
 		k_phase = np.array(list(k_phase))
 		q_phase = np.array(list(q_phase))
 
