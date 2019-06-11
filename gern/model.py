@@ -300,47 +300,33 @@ class LatentClassifier(nn.Module):
 		super(LatentClassifier, self).__init__()
 
 		self.features = nn.Sequential(
-			nn.Conv2d(256, 256, (2, 2), (2, 2), padding=0),
+			nn.Linear(263, 256),
 			nn.ReLU(True),
-			GroupNorm2d(256, 32),
+			GroupNorm1d(256, 32),
 			SkipConnect(
-				nn.Conv2d(256, 128, (1, 1), (1, 1), padding=0),
-				nn.Conv2d(256, 128, (3, 3), (1, 1), padding=1)),
+				nn.Linear(256, 256)),
 			nn.ReLU(True),
-			GroupNorm2d(128, 32),
-			nn.Conv2d(128, 128, (2, 2), (2, 2), padding=0),
+			GroupNorm1d(256, 32),
+			nn.Linear(256, 128),
 			SkipConnect(
-				nn.Conv2d(128, 64, (1, 1), (1, 1), padding=0),
-				nn.Conv2d(128, 64, (3, 3), (1, 1), padding=1)),
+				nn.Linear(128, 128)),
 			nn.ReLU(True),
-			GroupNorm2d(64, 32),
+			GroupNorm1d(128, 32),
+			nn.Linear(128, 64),
+			nn.ReLU(True),
 			SkipConnect(
-				nn.Conv2d(64, 64, (1, 1), (1, 1), padding=0),
-				nn.Conv2d(64, 64, (3, 3), (1, 1), padding=1)),
+				nn.Linear(64, 64)),
 			nn.ReLU(True),
-			nn.AvgPool2d((2, 2)),
-			GroupNorm2d(64, 32),
-
+			GroupNorm1d(64, 32),
+			nn.Linear(64, nclass)
 			)
-		self.classifier = nn.Linear(256, nclass)
-
+		self.nclass = nclass
 		self.apply(init_parameters)
 
-	def forward(self, x):
+	def forward(self, x, v):
 		B = x.size(0)
-		h = self.features(x)
-		return self.classifier(h.view(B, -1))
-
-
-GernOutput = namedtuple('GernOutput', 
-	['rgbv', 'heat', 'label', 'gamma',
-	 'prior_mean', 'prior_logv', 'posterior_mean', 'posterior_logv',
-	 'cnd_repr', 'cnd_aggr'])
-
-GernTarget = namedtuple('GernTarget',
-	['rgbv', 'heat', 'label'])
-
-
-if __name__ == '__main__':
-	net = LatentClassifier().eval()
-	a = net(torch.randn(3, 256, 16, 16))
+		Q = v.size(1)
+		x = x.unsqueeze(1).expand(-1, Q, -1)
+		v = v.squeeze(4).squeeze(3)
+		inp = torch.cat([x, v], dim=2).view(B * Q, -1)
+		return self.features(inp).view(B, Q, self.nclass)

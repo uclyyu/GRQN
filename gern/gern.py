@@ -9,15 +9,17 @@ from .model import *
 
 
 class GeRN(torch.jit.ScriptModule):
-	def __init__(self):
+	__constants__ = ['asteps']
+	def __init__(self, asteps=1):
 		super(GeRN, self).__init__()
 
 		# --- default sizes/dimensionality
 		Nr = 256  # aggregated representation
 		Nh = 256  # recurrent cell hidden
 		Nv =   7  # query vector
+		Nclass = 3
 
-		self.lr = nn.Parameter(torch.tensor(1e-3, dtype=torch.float32))
+		self.asteps = asteps
 		# --- representaiton operators
 		self.rop_primitive = RepresentationEncoderPrimitive()
 		self.rop_state = RepresentationEncoderState()
@@ -25,7 +27,7 @@ class GeRN(torch.jit.ScriptModule):
 
 		# --- inference operators
 		self.iop_posterior = GaussianFactor()
-		self.iop_state = RecurrentCell(Nr * 2 + Nh, Nh)
+		self.iop_state = RecurrentCell(Nr * 2 + Nh + Nclass, Nh)
 
 		# --- generation operators
 		self.gop_prior = GaussianFactor()
@@ -33,32 +35,23 @@ class GeRN(torch.jit.ScriptModule):
 		self.gop_delta = GeneratorDelta()
 
 		# --- classifier
-		self.aux_class = LatentClassifier()
+		self.aux_class = LatentClassifier(nclass=Nclass)
 
 		# --- decoding operators
 		self.dop_rgbv = DecoderRGBVision()
 
 		print('{}: {:,} trainable parameters.'.format(self.__class__.__name__, count_parameters(self)))
 
-	def pack_time(self, x):
-		size = x.size()
-		T = size[1]
-		new_size = torch.Size([-1]) + size[2:]
-		return x.contiguous().view(new_size), T
-
-	def unpack_time(self, x, t):
-		size = x.size()
-		new_size = torch.Size([-1, t]) + size[1:]
-		return x.contiguous().view(new_size)
-
 	@torch.jit.script_method
-	def _forward_mc_loop(self, asteps, cnd_repr, qry_repp, qry_v, h_iop, c_iop, o_iop, h_gop, c_gop, o_gop, u_gop, prior_means, prior_logvs, posterior_means, posterior_logvs):
-		# type: (int, Tensor, Tensor, Tensor, Tensor, Tensor, Tensor, Tensor, Tensor, Tensor, Tensor, List[Tensor], List[Tensor], List[Tensor], List[Tensor]) -> Tuple[Tensor, List[Tensor], List[Tensor], List[Tensor], List[Tensor]]
+	def _forward_mc_loop(self, cat_logit, cnd_repr, qry_repp, qry_v, h_iop, c_iop, o_iop, h_gop, c_gop, o_gop, u_gop):
+		# type: (Tensor, Tensor, Tensor, Tensor, Tensor, Tensor, Tensor, Tensor, Tensor, Tensor, Tensor) -> Tuple[Tensor, Tensor, Tensor, Tensor, Tensor]
+		prior_means, prior_logvs = [], []
+		posterior_means, posterior_logvs = [], []
 
-		for ast in range(asteps):
+		for ast in range(self.asteps):
 			prior_z, prior_mean, prior_logv = self.gop_prior(h_gop)
 
-			input_iop = torch.cat([cnd_repr, qry_repp, h_gop], dim=1)
+			input_iop = torch.cat([cat_logit, cnd_repr, qry_repp, h_gop], dim=1)
 			h_iop, c_iop, o_iop = self.iop_state(input_iop, h_iop, c_iop, o_iop)
 			posterior_z, posterior_mean, posterior_logv = self.iop_posterior(h_iop)
 
@@ -70,6 +63,10 @@ class GeRN(torch.jit.ScriptModule):
 			prior_means.append(prior_mean), prior_logvs.append(prior_logv)
 			posterior_means.append(posterior_mean), posterior_logvs.append(posterior_logv)
 
+		prior_means = torch.stack(prior_means, dim=0)
+		prior_logvs = torch.stack(prior_logvs, dim=0)
+		posterior_means = torch.stack(posterior_means, dim=0)
+		posterior_logvs = torch.stack(posterior_logvs, dim=0)
 		return u_gop, prior_means, prior_logvs, posterior_means, posterior_logvs
 
 	@torch.jit.script_method
@@ -90,20 +87,16 @@ class GeRN(torch.jit.ScriptModule):
 	def forward(self, 
 				cnd_x, cnd_v, 
 				qry_x, qry_v,
-				label,
-				asteps=16):
+				label):
 		# --- Conditional (cnd_*) and query (qry_*) inputs
 		# cnd/qry_x: RGB image (B, T, 3, 64, 64) or (B, , 6, 64, 64)
 		# cnd/qry_v: Orientation vector (B, T, 7, 1, 1)
 		# * For conditional inputs, time (T) will be reduced, this is not the case
 		#  for query inputs. Different T's are allowed for each input types. 
 		# ---
-
 		# Containers to hold outputs.
 		prior_means, prior_logvs = [], []
 		posterior_means, posterior_logvs = [], []
-		output_heat = []
-		output_rgb = []
 
 		# Size information.
 		Bc, Tc, _, Hc, Wc = cnd_x.size()
@@ -115,59 +108,59 @@ class GeRN(torch.jit.ScriptModule):
 		cnd_state, c_rop_sta, o_rop_sta = self.rop_state(cnd_prim)
 		h_rop_enc, cnd_repr, o_rop_enc = self.rop_representation(cnd_prim, cnd_state)
 
+		cat_logit = self.aux_class(cnd_repr, qry_v)
+		cat_dist = torch.softmax(cat_logit, dim=2)
+		cat_ent = (cat_dist * cat_dist.add(1e-5).log().mul(-1)).sum(dim=2)
+		index = cat_ent.min(dim=1)[1]
+
+		qry_x = qry_x[torch.arange(Bc), index]
+		qry_v = qry_v[torch.arange(Bc), index].unsqueeze(1).expand(-1, Tc, -1, -1, -1)
+		cat_logit = cat_logit[torch.arange(Bc), index]
+
 		# --- Query representation primitives
 		qry_repp = self.rop_primitive(qry_x, qry_v)
 
 		# --- LSTM hidden/cell/prior output gate for inference/generator operators
-		h_iop = torch.zeros(1, device=dev).expand(Bc * Qc * Tc, 256, 16, 16)
-		c_iop = torch.zeros(1, device=dev).expand(Bc * Qc * Tc, 256, 16, 16)
-		o_iop = torch.zeros(1, device=dev).expand(Bc * Qc * Tc, 256, 16, 16)
-		h_gop = torch.zeros(1, device=dev).expand(Bc * Qc * Tc, 256, 16, 16)
-		c_gop = torch.zeros(1, device=dev).expand(Bc * Qc * Tc, 256, 16, 16)
-		o_gop = torch.zeros(1, device=dev).expand(Bc * Qc * Tc, 256, 16, 16)
-		u_gop = torch.zeros(1, device=dev).expand(Bc * Qc * Tc, 256, 16, 16)
+		h_iop = torch.zeros(1, device=dev).expand(Bc * Tc, 256, 16, 16)
+		c_iop = torch.zeros(1, device=dev).expand(Bc * Tc, 256, 16, 16)
+		o_iop = torch.zeros(1, device=dev).expand(Bc * Tc, 256, 16, 16)
+		h_gop = torch.zeros(1, device=dev).expand(Bc * Tc, 256, 16, 16)
+		c_gop = torch.zeros(1, device=dev).expand(Bc * Tc, 256, 16, 16)
+		o_gop = torch.zeros(1, device=dev).expand(Bc * Tc, 256, 16, 16)
+		u_gop = torch.zeros(1, device=dev).expand(Bc * Tc, 256, 16, 16)
+		
 		
 		# tweaking dimensionality
-		cnd_repr = (cnd_repr  # B, C, ---> B, (Q, T), C, 16, 16
-					.unsqueeze(1).unsqueeze(2).unsqueeze(4).unsqueeze(5)
-					.expand(-1, Qc, Tc, -1, 16, 16)
+		cat_logit = (cat_logit  # B, C ---> B, (T,) C, 16, 16
+					 .unsqueeze(1).unsqueeze(3).unsqueeze(4)
+					 .expand(-1, Tc, -1, 16, 16)
+					 .contiguous()
+					 .view(Bc * Tc, -1, 16, 16))
+		cnd_repr = (cnd_repr  # B, C, ---> B, (T,) C, 16, 16
+					.unsqueeze(1).unsqueeze(3).unsqueeze(4)
+					.expand(-1, Tc, -1, 16, 16)
 					.contiguous()
-					.view(Bc * Qc * Tc, -1, 16, 16))
-		qry_repp = (qry_repp  # B, Q, T, C,  ---> B, Q, T, C, (16, 16)
-					.unsqueeze(4).unsqueeze(5)
-					.expand(-1, -1, -1, -1, 16, 16)
-					.view(Bc * Qc * Tc, -1, 16, 16))
-		qry_v = (qry_v  # B, Q, C, 1, 1, ---> B, Q, (T,), C, 16, 16
-				 .unsqueeze(2)
-				 .expand(-1, -1, Tc, -1, 16, 16)
+					.view(Bc * Tc, -1, 16, 16))
+		qry_repp = (qry_repp  # B, T, C,  ---> B, T, C, (16, 16)
+					.unsqueeze(3).unsqueeze(4)
+					.expand(-1, -1, -1, 16, 16)
+					.view(Bc * Tc, -1, 16, 16))
+		qry_v = (qry_v  # B, T, C, 1, 1, ---> B, T, C, 16, 16
+				 .expand(-1, -1, -1, 16, 16)
 				 .contiguous()
-				 .view(Bc * Qc * Tc, 7, 16, 16))
+				 .view(Bc * Tc, 7, 16, 16))
 
 		# --- Inference/generation
-		u_gop, prior_means, prior_logvs, posterior_means, posterior_logvs = self._forward_mc_loop(
-			asteps, cnd_repr, qry_repp, qry_v,
+		u_gop, prior_means, prior_logvs, posterior_means, posterior_logvs = ptcp.checkpoint(self._forward_mc_loop,
+			cat_logit, cnd_repr, qry_repp, qry_v,
 			h_iop, c_iop, o_iop, 
-			h_gop, c_gop, o_gop, u_gop,
-			prior_means, prior_logvs, posterior_means, posterior_logvs)
-
-		# --- Auxiliary classification task
-		cat_dist = (self.aux_class(u_gop)
-					.view(Bc, Qc, Tc, -1))
-		cat_dist = torch.softmax(cat_dist, dim=3)
-		min_loss = (cat_dist[torch.arange(len(label)), :, :, label]
-					.add(1e-5).log().mul(-1)
-					.min(dim=2)[0]
-					.min(dim=1)[0])
-		grad, = torch.autograd.grad(min_loss.mean(), u_gop, create_graph=True, retain_graph=True)
+			h_gop, c_gop, o_gop, u_gop)
 
 		# --- Decoding
-		dec_rgbv = self.dop_rgbv(u_gop + self.lr * grad)
-		dec_rgbv = dec_rgbv.view(Bc, Qc, Tc, -1, 64, 64)
+		dec_rgbv = self.dop_rgbv(u_gop)
+		dec_rgbv = dec_rgbv.view(Bc, Tc, -1, 64, 64)
 
-		import pdb
-		pdb.set_trace()
-
-		return dec_rgbv, cat_dist, prior_means, prior_logvs, posterior_means, posterior_logvs
+		return index, dec_rgbv, cat_dist, prior_means, prior_logvs, posterior_means, posterior_logvs
 
 	def make_target(self, qry_x, qry_m, qry_k, qry_v, label, rsteps=None):
 		Tq = qry_v.size(1)

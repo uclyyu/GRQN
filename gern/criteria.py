@@ -43,10 +43,10 @@ class PerceptualLoss(nn.Module):
 
 def kl_divergence(prior_means, prior_logvs, posterior_means, posterior_logvs):
 	kl = 0.
-	B = posterior_mean[0].size(0)
-	N = len(posterior_mean)
+	B = posterior_means[0].size(0)
+	N = len(posterior_means)
 
-	statz = zip(posterior_mean, posterior_logv, prior_mean, prior_logv)
+	statz = zip(posterior_means, posterior_logvs, prior_means, prior_logvs)
 	for qp in statz:
 		qm, qv, pm, pv = map(lambda v: v.view(B, -1), qp)
 		kl += (-pv + qv).exp().sum(1) + (qm - pm).pow(2).div(pv.exp()).sum(1) + pv.sum(1) - qv.sum(1)
@@ -63,22 +63,21 @@ class GernCriterion(nn.Module):
 		self.l_kldiv = None
 		self.accuracy = None
 
-	def forward(self, qry_x, dec_rgbv, cat_dist, prior_means, prior_logvs, posterior_means, posterior_logvs, weights, label):
-
-		self.l_rgbv, self.l_rgbv_index = (dec_rgbv - qry_x).mean(dim=[3, 4, 5]).min(dim=2)
+	def forward(self, index, qry_x, dec_rgbv, cat_dist, prior_means, prior_logvs, posterior_means, posterior_logvs, weights, label):
+		qry_x = qry_x[torch.arange(len(index)), index]
+		self.l_rgbv, self.l_rgbv_index = (dec_rgbv - qry_x).mean(dim=[2, 3, 4]).min(dim=1)
 		self.l_rgbv = self.l_rgbv.mean()
 
-		self.l_classifier = (cat_dist[torch.arange(len(label)), :, :, label]
+		self.l_classifier = (cat_dist[torch.arange(len(label)), :, label]
 							 .add(1e-5).log().mul(-1)
-							 .min(dim=2)[0]
-							 .min(dim=1)[0]).mean()
+							 .mean())
 
 		self.l_kldiv = kl_divergence(prior_means, prior_logvs, posterior_means, posterior_logvs)
 
-		self.accuracy = ((cat_dist
-						  .max(dim=1)[0]
-						  .max(dim=1)[0]
-						  .max(dim=1)) == label).float().mean() * 100
+		self.accuracy = (cat_dist[torch.arange(len(index)), index]
+						 .max(dim=0)[1]
+						 == label).float().mean() * 100
+		self.accuracy = self.accuracy.item()
 
 		return sum(map(lambda l, w: l * w, [self.l_rgbv, self.l_classifier, self.l_kldiv], weights))
 

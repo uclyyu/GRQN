@@ -40,9 +40,9 @@ def log_best_json(args, epoch, accuracy, l_rgbv, l_classifier, l_kldiv):
 		json.dump(data, jw)
 
 
-def plot_rgbv(dec, orig, index):
-	d = dec[0, 0, index[0, 0]].permute(1, 2, 0).contiguous().detach().cpu().numpy()
-	o = orig[0, 0, index[0, 0]].permute(1, 2, 0).contiguous().detach().cpu().numpy()
+def plot_rgbv(dec, orig, qindex, tindex):
+	d = dec[0, tindex[0]].permute(1, 2, 0).contiguous().detach().cpu().numpy()
+	o = orig[0, qindex[0], tindex[0]].permute(1, 2, 0).contiguous().detach().cpu().numpy()
 	d = (d - d.min()) / (d.max() - d.min())
 	o = (o - o.min()) / (o.max() - o.min())
 	figure = plt.figure(figsize=(10, 5))
@@ -114,12 +114,12 @@ def train_distributed(args, model, criterion, optimiser, lr_scheduler, sd_schedu
 					label = label.to(args.target_device)
 
 					# --- Forward pass
-					model_output = model(cx, cv, qx, qv, label, asteps=args.asteps)
-					dec_rgbv, cat_dist, prior_means, prior_logvs, posterior_means, posterior_logvs = model_output
+					model_output = model(cx, cv, qx, qv, label)
+					index, dec_rgbv, cat_dist, prior_means, prior_logvs, posterior_means, posterior_logvs = model_output
 
-					weighted_loss = criterion(qx, dec_rgbv, cat_dist, 
+					weighted_loss = criterion(index, qx, dec_rgbv, cat_dist, 
 								  		   	  prior_means, prior_logvs, posterior_means, posterior_logvs, 
-											  sd_scheduler.weight, label)
+											  sd_scheduler.weights, label)
 
 					batch_loss += np.array(criterion.item())
 					epoch_loss += np.array(criterion.item())
@@ -180,13 +180,13 @@ def train_distributed(args, model, criterion, optimiser, lr_scheduler, sd_schedu
 				writer.add_scalar(args.tags_loss['accuracy']  ('epoch', phase), epoch_correct, epoch)
 
 				# --- Save origin and decoded images every epoch
-				writer.add_figure(args.tags_figure['rgbv'](phase), plot_rgbv(dec_rgbv, qx, criterion.l_rgbv_index), epoch)
+				writer.add_figure(args.tags_figure['rgbv'](phase), plot_rgbv(dec_rgbv, qx, index, criterion.l_rgbv_index), epoch)
 
 
 def main(args):
 	# --- Setting up trainer
 	group = initialise_process(args)
-	model = GeRN().to(args.target_device)
+	model = GeRN(asteps=args.asteps).to(args.target_device)
 	criterion = GernCriterion().to(args.target_device)
 	optimiser = torch.optim.Adam(filter(lambda p: p.requires_grad, model.parameters()), args.lr_min, amsgrad=True)
 	lr_scheduler = LearningRateScheduler(optimiser, args.lr_min, args.lr_max, args.lr_saturate_epoch)
@@ -201,7 +201,7 @@ def main(args):
 	except FileExistsError:
 		pass
 
-	writer = SummaryWriter(log_dir=writerdir, filename_suffix='.r{:03d}'.format(args.run))
+	writer = SummaryWriter(writerdir, filename_suffix='.r{:03d}'.format(args.run))
 
 	# --- Add tensorboard tags
 	setattr(args, 'tags_loss',{
