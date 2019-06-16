@@ -32,29 +32,28 @@ class BallTubeDataset(torch.utils.data.Dataset):
 		phase_indices = set(range(n_phases))
 
 		# allocate visible phases to context and query
-		pdseries_visible = manifest['visible-frames'].where(lambda c: c != '[]').dropna()
+		pdseries_visible = (manifest['visible-frames']
+							.where(lambda c: c != '[]').dropna()
+							.str[1:-1]
+							.str.split(',')
+							.apply(pandas.to_numeric, errors='raise'))
 		visible_phase_indices = set(pdseries_visible.index.tolist())
+		blind_phase_indices = phase_indices - visible_phase_indices
 		assert len(visible_phase_indices) >= self.num_k[0] + self.num_q[0]
 
 		k_phase_visible = set(random.sample(visible_phase_indices, self.num_k[0]))
 		q_phase_visible = set(random.sample(visible_phase_indices - k_phase_visible, self.num_q[0]))
 		phase_indices = phase_indices - k_phase_visible - q_phase_visible
-		visible_phase_indices = visible_phase_indices & phase_indices
 
 		# collect visible frame indices
-		visible_frames = (
-			pdseries_visible
-			.str[1:-1]
-			.str.split(',')
-			.apply(pandas.to_numeric, errors='raise')
-			.tolist())
+		visible_frames = pdseries_visible.tolist()
 		visible_frames = set(chain(*visible_frames))
 
 		# update phase_indices for context and query
 		k_phase = k_phase_visible | set(random.sample(phase_indices, self.num_k[1]))
-		q_phase = q_phase_visible | set(random.sample(phase_indices - (visible_phase_indices & k_phase), self.num_q[1]))
+		q_phase_blind = set(random.sample(blind_phase_indices - k_phase, self.num_q[1]))
 		k_phase = np.array(list(k_phase))
-		q_phase = np.array(list(q_phase))
+		q_phase_blind = np.array(list(q_phase_blind))
 
 		# sample context frames and collect camera poses
 		clip_length = manifest.loc[1]['frame-start']
@@ -86,37 +85,45 @@ class BallTubeDataset(torch.utils.data.Dataset):
 			assert success
 			kstack.append(self.transforms(readout))
 
+		# --------------------------------------
+		q_phase_visible = list(q_phase_visible)
+		q_frames_visible = [random.sample(pdseries_visible[x].tolist(), 1)[0] for x in q_phase_visible]
+		q_local_frames_visible = np.mod(q_frames_visible, clip_length)
+		
+		q_frame_offset_indices = q_phase_blind[np.random.randint(0, self.num_q[1], size=clip_length)]
+		q_frame_offsets = manifest['frame-start'][q_frame_offset_indices].values
+		q_frames = inclip_indices + q_frame_offsets
+
+		for j, (i, x) in enumerate(zip(q_local_frames_visible, q_frames_visible)):
+			q_frame_offset_indices[i] = q_phase_visible[j]
+			q_frames[i] = x
+
 		# collect query camera poses and frames
 		q_poses = (
-			manifest['camera-pose'].loc[q_phase]
+			manifest['camera-pose'][q_frame_offset_indices]
 			.str[1:-1]
 			.str.split(',')
 			.apply(pandas.to_numeric, errors='raise', downcast='float')
-			.tolist()
-			)
-		q_poses = self.transforms(np.array(q_poses)).view(len(q_phase), 7, 1, 1)
+			.tolist())
+		q_poses = self.transforms(np.array(q_poses)).view(clip_length, 7, 1, 1)
 
 		qstack = []
-		for qph in q_phase:
-			q_ = []
-			for frame in inclip_indices + manifest.loc[qph]['frame-start']:
-				cap.set(cv2.CAP_PROP_POS_FRAMES, frame)
-				success, readout = cap.read()
-				assert success
-				q_.append(self.transforms(readout))
-			qstack.append(torch.stack(q_, dim=0))
+		for qi in q_frames:
+			assert cap.set(cv2.CAP_PROP_POS_FRAMES, ki)
+			success, readout = cap.read()
+			assert success
+			qstack.append(self.transforms(readout))
 
 		cap.release()
 
-		q_visible_indices = np.searchsorted(q_phase, list(q_phase_visible))
-		q_visible_indices = torch.tensor(q_visible_indices, dtype=torch.long)
+		q_local_frames_visible = torch.tensor(q_local_frames_visible, dtype=torch.long)
 
 		kX = torch.stack(kstack, dim=0)
 		kV = k_poses
 		qX = torch.stack(qstack, dim=0)
 		qV = q_poses
-
-		return kX, kV, qX, qV, label, q_visible_indices
+		print(q_local_frames_visible)
+		return kX, kV, qX, qV, label, q_local_frames_visible
 
 
 def _balltube_collate(args):
@@ -136,7 +143,7 @@ class BallTubeSampler(torch.utils.data.Sampler):
 		self.max_n = len(data_source)
 		self.n_samples = num_samples
 
-		assert self.n_samples <= self.max_n
+		# assert self.n_samples <= self.max_n
 
 	def __iter__(self):
 		yield from np.random.randint(0, self.max_n, self.n_samples)
