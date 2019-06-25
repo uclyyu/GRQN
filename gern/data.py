@@ -67,9 +67,9 @@ class BallTubeDataset(torch.utils.data.Dataset):
 
 
 		kX = torch.stack(kstack, dim=0)
-		kV = self.transforms(k_poses).view(1, 16, 7, 1, 1)
+		kV = self.transforms(k_poses).view(16, 7, 1, 1)
 		qX = torch.stack(qstack, dim=0)
-		qV = self.transforms(q_poses).view(1, 16, 7, 1, 1)
+		qV = self.transforms(q_poses).view(16, 7, 1, 1)
 
 		return kX, kV, qX, qV, label
 
