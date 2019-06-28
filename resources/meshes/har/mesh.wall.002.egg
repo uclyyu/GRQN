@@ -1,0 +1,647 @@
+<CoordinateSystem> { Z-Up }
+
+<Comment> {
+  "egg-trans -tbnall -ps keep -o /Users/hikoyu/src/__working/edit/grqn.dgoff/resources/meshes/har/mesh.wall.002.egg /Users/hikoyu/src/__working/edit/grqn.dgoff/resources/meshes/har/mesh.wall.002.egg"
+}
+<Texture> tex.wall.proto.B {
+  "./tex/img.wall.002.jpg"
+  <Scalar> wrap { repeat }
+  <Scalar> minfilter { linear_mipmap_linear }
+  <Scalar> magfilter { linear_mipmap_linear }
+  <Scalar> envtype { modulate }
+}
+<Material> mat.wall.proto.B {
+  <Scalar> diffr { 0.639999985694885 }
+  <Scalar> diffg { 0.639999985694885 }
+  <Scalar> diffb { 0.639999985694885 }
+  <Scalar> ambr { 1 }
+  <Scalar> ambg { 1 }
+  <Scalar> ambb { 1 }
+  <Scalar> emitr { 0 }
+  <Scalar> emitg { 0 }
+  <Scalar> emitb { 0 }
+  <Scalar> specr { 0.5 }
+  <Scalar> specg { 0.5 }
+  <Scalar> specb { 0.5 }
+  <Scalar> shininess { 12.5 }
+}
+<Group> obj.wall.proto.B {
+  <Transform> {
+    <Matrix4> {
+      1 0 0 0
+      0 1 0 0
+      0 0 0.238095253705978 0
+      0 0 0 1
+    }
+  }
+  <VertexPool> obj.wall.proto.B {
+    <Vertex> 0 {
+      -4.2 -4.2 0
+      <UV> {
+        0 0
+        <Tangent> { 0 0 1 }
+        <Binormal> { 0 1 0 }
+      }
+    }
+    <Vertex> 1 {
+      -4.2 -4.2 0
+      <UV> {
+        0 1
+        <Tangent> { 0 0 1 }
+        <Binormal> { -1 0 0 }
+      }
+    }
+    <Vertex> 2 {
+      -4.2 -4.2 0
+      <UV> {
+        0 0
+        <Tangent> { 0 1 0 }
+        <Binormal> { 1 0 0 }
+      }
+    }
+    <Vertex> 3 {
+      -4.2 -4.2 0
+      <UV> {
+        1 0
+        <Tangent> { -1 0 0 }
+        <Binormal> { 0 1 0 }
+      }
+    }
+    <Vertex> 4 {
+      -4.2 -4.2 2
+      <UV> {
+        1 0
+        <Tangent> { 0 0 1 }
+        <Binormal> { 0 1 0 }
+      }
+    }
+    <Vertex> 5 {
+      -4.2 -4.2 2
+      <UV> {
+        1 1
+        <Tangent> { 0 0 1 }
+        <Binormal> { -1 0 0 }
+      }
+    }
+    <Vertex> 6 {
+      -4.2 -4.2 2
+      <UV> {
+        0 0
+        <Tangent> { 1 0 0 }
+        <Binormal> { 0 1 0 }
+      }
+    }
+    <Vertex> 7 {
+      -4.2 -4.2 2
+      <UV> {
+        1 0
+        <Tangent> { 0 -1 0 }
+        <Binormal> { 1 0 0 }
+      }
+    }
+    <Vertex> 8 {
+      -4.2 4.2 0
+      <UV> {
+        0 1
+        <Tangent> { 0 0 1 }
+        <Binormal> { 0 1 0 }
+      }
+    }
+    <Vertex> 9 {
+      -4.2 4.2 0
+      <UV> {
+        0 0
+        <Tangent> { 1 0 0 }
+        <Binormal> { 0 -1 0 }
+      }
+    }
+    <Vertex> 10 {
+      -4.2 4.2 0
+      <UV> {
+        1 0
+        <Tangent> { 0 1 0 }
+        <Binormal> { 1 0 0 }
+      }
+    }
+    <Vertex> 11 {
+      -4.2 4.2 0
+      <UV> {
+        0 0
+        <Tangent> { 0 0 1 }
+        <Binormal> { 1 0 0 }
+      }
+    }
+    <Vertex> 12 {
+      -4.2 4.2 2
+      <UV> {
+        1 1
+        <Tangent> { 0 0 1 }
+        <Binormal> { 0 1 0 }
+      }
+    }
+    <Vertex> 13 {
+      -4.2 4.2 2
+      <UV> {
+        0 0
+        <Tangent> { 0 -1 0 }
+        <Binormal> { 1 0 0 }
+      }
+    }
+    <Vertex> 14 {
+      -4.2 4.2 2
+      <UV> {
+        1 0
+        <Tangent> { -1 0 0 }
+        <Binormal> { 0 -1 0 }
+      }
+    }
+    <Vertex> 15 {
+      -4.2 4.2 2
+      <UV> {
+        1 0
+        <Tangent> { 0 0 1 }
+        <Binormal> { 1 0 0 }
+      }
+    }
+    <Vertex> 16 {
+      -4.058583 -4.058583 0
+      <UV> {
+        0 1
+        <Tangent> { 0 1 0 }
+        <Binormal> { 1 0 0 }
+      }
+    }
+    <Vertex> 17 {
+      -4.058583 -4.058583 0
+      <UV> {
+        1 1
+        <Tangent> { -1 0 0 }
+        <Binormal> { 0 1 0 }
+      }
+    }
+    <Vertex> 18 {
+      -4.058583 -4.058583 0
+      <UV> {
+        1 0
+        <Tangent> { -1 0 0 }
+        <Binormal> { 0 0 1 }
+      }
+    }
+    <Vertex> 19 {
+      -4.058583 -4.058583 0
+      <UV> {
+        0 0
+        <Tangent> { 0 1 0 }
+        <Binormal> { 0 0 1 }
+      }
+    }
+    <Vertex> 20 {
+      -4.058583 -4.058583 2
+      <UV> {
+        0 1
+        <Tangent> { 1 0 0 }
+        <Binormal> { 0 1 0 }
+      }
+    }
+    <Vertex> 21 {
+      -4.058583 -4.058583 2
+      <UV> {
+        1 1
+        <Tangent> { 0 -1 0 }
+        <Binormal> { 1 0 0 }
+      }
+    }
+    <Vertex> 22 {
+      -4.058583 -4.058583 2
+      <UV> {
+        1 1
+        <Tangent> { -1 0 0 }
+        <Binormal> { 0 0 1 }
+      }
+    }
+    <Vertex> 23 {
+      -4.058583 -4.058583 2
+      <UV> {
+        0 1
+        <Tangent> { 0 1 0 }
+        <Binormal> { 0 0 1 }
+      }
+    }
+    <Vertex> 24 {
+      -4.058583 4.058583 0
+      <UV> {
+        0 0
+        <Tangent> { 1 0 0 }
+        <Binormal> { 0 0 1 }
+      }
+    }
+    <Vertex> 25 {
+      -4.058583 4.058583 0
+      <UV> {
+        0 1
+        <Tangent> { 1 0 0 }
+        <Binormal> { 0 -1 0 }
+      }
+    }
+    <Vertex> 26 {
+      -4.058583 4.058583 0
+      <UV> {
+        1 1
+        <Tangent> { 0 1 0 }
+        <Binormal> { 1 0 0 }
+      }
+    }
+    <Vertex> 27 {
+      -4.058583 4.058583 0
+      <UV> {
+        1 0
+        <Tangent> { 0 1 0 }
+        <Binormal> { 0 0 1 }
+      }
+    }
+    <Vertex> 28 {
+      -4.058583 4.058583 2
+      <UV> {
+        0 1
+        <Tangent> { 1 0 0 }
+        <Binormal> { 0 0 1 }
+      }
+    }
+    <Vertex> 29 {
+      -4.058583 4.058583 2
+      <UV> {
+        0 1
+        <Tangent> { 0 -1 0 }
+        <Binormal> { 1 0 0 }
+      }
+    }
+    <Vertex> 30 {
+      -4.058583 4.058583 2
+      <UV> {
+        1 1
+        <Tangent> { -1 0 0 }
+        <Binormal> { 0 -1 0 }
+      }
+    }
+    <Vertex> 31 {
+      -4.058583 4.058583 2
+      <UV> {
+        1 1
+        <Tangent> { 0 1 0 }
+        <Binormal> { 0 0 1 }
+      }
+    }
+    <Vertex> 32 {
+      4.058583 -4.058583 0
+      <UV> {
+        1 0
+        <Tangent> { 0 -1 0 }
+        <Binormal> { 0 0 1 }
+      }
+    }
+    <Vertex> 33 {
+      4.058583 -4.058583 0
+      <UV> {
+        0 1
+        <Tangent> { -1 0 0 }
+        <Binormal> { 0 1 0 }
+      }
+    }
+    <Vertex> 34 {
+      4.058583 -4.058583 0
+      <UV> {
+        1 1
+        <Tangent> { 0 -1 0 }
+        <Binormal> { -1 0 0 }
+      }
+    }
+    <Vertex> 35 {
+      4.058583 -4.058583 0
+      <UV> {
+        0 0
+        <Tangent> { -1 0 0 }
+        <Binormal> { 0 0 1 }
+      }
+    }
+    <Vertex> 36 {
+      4.058583 -4.058583 2
+      <UV> {
+        1 1
+        <Tangent> { 0 -1 0 }
+        <Binormal> { 0 0 1 }
+      }
+    }
+    <Vertex> 37 {
+      4.058583 -4.058583 2
+      <UV> {
+        0 1
+        <Tangent> { 0 1 0 }
+        <Binormal> { -1 0 0 }
+      }
+    }
+    <Vertex> 38 {
+      4.058583 -4.058583 2
+      <UV> {
+        1 1
+        <Tangent> { 1 0 0 }
+        <Binormal> { 0 1 0 }
+      }
+    }
+    <Vertex> 39 {
+      4.058583 -4.058583 2
+      <UV> {
+        0 1
+        <Tangent> { -1 0 0 }
+        <Binormal> { 0 0 1 }
+      }
+    }
+    <Vertex> 40 {
+      4.058583 4.058583 0
+      <UV> {
+        0 0
+        <Tangent> { 0 -1 0 }
+        <Binormal> { 0 0 1 }
+      }
+    }
+    <Vertex> 41 {
+      4.058583 4.058583 0
+      <UV> {
+        1 0
+        <Tangent> { 1 0 0 }
+        <Binormal> { 0 0 1 }
+      }
+    }
+    <Vertex> 42 {
+      4.058583 4.058583 0
+      <UV> {
+        0 1
+        <Tangent> { 0 -1 0 }
+        <Binormal> { -1 0 0 }
+      }
+    }
+    <Vertex> 43 {
+      4.058583 4.058583 0
+      <UV> {
+        1 1
+        <Tangent> { 1 0 0 }
+        <Binormal> { 0 -1 0 }
+      }
+    }
+    <Vertex> 44 {
+      4.058583 4.058583 2
+      <UV> {
+        0 1
+        <Tangent> { 0 -1 0 }
+        <Binormal> { 0 0 1 }
+      }
+    }
+    <Vertex> 45 {
+      4.058583 4.058583 2
+      <UV> {
+        1 1
+        <Tangent> { 1 0 0 }
+        <Binormal> { 0 0 1 }
+      }
+    }
+    <Vertex> 46 {
+      4.058583 4.058583 2
+      <UV> {
+        0 1
+        <Tangent> { -1 0 0 }
+        <Binormal> { 0 -1 0 }
+      }
+    }
+    <Vertex> 47 {
+      4.058583 4.058583 2
+      <UV> {
+        1 1
+        <Tangent> { 0 1 0 }
+        <Binormal> { -1 0 0 }
+      }
+    }
+    <Vertex> 48 {
+      4.2 -4.2 0
+      <UV> {
+        0 0
+        <Tangent> { 0 0 1 }
+        <Binormal> { -1 0 0 }
+      }
+    }
+    <Vertex> 49 {
+      4.2 -4.2 0
+      <UV> {
+        0 0
+        <Tangent> { -1 0 0 }
+        <Binormal> { 0 1 0 }
+      }
+    }
+    <Vertex> 50 {
+      4.2 -4.2 0
+      <UV> {
+        1 0
+        <Tangent> { 0 -1 0 }
+        <Binormal> { -1 0 0 }
+      }
+    }
+    <Vertex> 51 {
+      4.2 -4.2 0
+      <UV> {
+        0 1
+        <Tangent> { 0 0 1 }
+        <Binormal> { 0 -1 0 }
+      }
+    }
+    <Vertex> 52 {
+      4.2 -4.2 2
+      <UV> {
+        1 0
+        <Tangent> { 0 0 1 }
+        <Binormal> { -1 0 0 }
+      }
+    }
+    <Vertex> 53 {
+      4.2 -4.2 2
+      <UV> {
+        0 0
+        <Tangent> { 0 1 0 }
+        <Binormal> { -1 0 0 }
+      }
+    }
+    <Vertex> 54 {
+      4.2 -4.2 2
+      <UV> {
+        1 0
+        <Tangent> { 1 0 0 }
+        <Binormal> { 0 1 0 }
+      }
+    }
+    <Vertex> 55 {
+      4.2 -4.2 2
+      <UV> {
+        1 1
+        <Tangent> { 0 0 1 }
+        <Binormal> { 0 -1 0 }
+      }
+    }
+    <Vertex> 56 {
+      4.2 4.2 0
+      <UV> {
+        0 0
+        <Tangent> { 0 -1 0 }
+        <Binormal> { -1 0 0 }
+      }
+    }
+    <Vertex> 57 {
+      4.2 4.2 0
+      <UV> {
+        1 0
+        <Tangent> { 1 0 0 }
+        <Binormal> { 0 -1 0 }
+      }
+    }
+    <Vertex> 58 {
+      4.2 4.2 0
+      <UV> {
+        0 1
+        <Tangent> { 0 0 1 }
+        <Binormal> { 1 0 0 }
+      }
+    }
+    <Vertex> 59 {
+      4.2 4.2 0
+      <UV> {
+        0 0
+        <Tangent> { 0 0 1 }
+        <Binormal> { 0 -1 0 }
+      }
+    }
+    <Vertex> 60 {
+      4.2 4.2 2
+      <UV> {
+        0 0
+        <Tangent> { -1 0 0 }
+        <Binormal> { 0 -1 0 }
+      }
+    }
+    <Vertex> 61 {
+      4.2 4.2 2
+      <UV> {
+        1 0
+        <Tangent> { 0 1 0 }
+        <Binormal> { -1 0 0 }
+      }
+    }
+    <Vertex> 62 {
+      4.2 4.2 2
+      <UV> {
+        1 1
+        <Tangent> { 0 0 1 }
+        <Binormal> { 1 0 0 }
+      }
+    }
+    <Vertex> 63 {
+      4.2 4.2 2
+      <UV> {
+        1 0
+        <Tangent> { 0 0 1 }
+        <Binormal> { 0 -1 0 }
+      }
+    }
+  }
+  <Polygon> {
+    <Normal> { -1 0 0 }
+    <TRef> { tex.wall.proto.B }
+    <MRef> { mat.wall.proto.B }
+    <VertexRef> { 0 4 12 8 <Ref> { obj.wall.proto.B } }
+  }
+  <Polygon> {
+    <Normal> { 0 1 0 }
+    <TRef> { tex.wall.proto.B }
+    <MRef> { mat.wall.proto.B }
+    <VertexRef> { 11 15 62 58 <Ref> { obj.wall.proto.B } }
+  }
+  <Polygon> {
+    <Normal> { 1 0 0 }
+    <TRef> { tex.wall.proto.B }
+    <MRef> { mat.wall.proto.B }
+    <VertexRef> { 59 63 55 51 <Ref> { obj.wall.proto.B } }
+  }
+  <Polygon> {
+    <Normal> { 0 -1 0 }
+    <TRef> { tex.wall.proto.B }
+    <MRef> { mat.wall.proto.B }
+    <VertexRef> { 48 52 5 1 <Ref> { obj.wall.proto.B } }
+  }
+  <Polygon> {
+    <Normal> { 1 0 0 }
+    <TRef> { tex.wall.proto.B }
+    <MRef> { mat.wall.proto.B }
+    <VertexRef> { 19 27 31 23 <Ref> { obj.wall.proto.B } }
+  }
+  <Polygon> {
+    <Normal> { 0 -1 0 }
+    <TRef> { tex.wall.proto.B }
+    <MRef> { mat.wall.proto.B }
+    <VertexRef> { 24 41 45 28 <Ref> { obj.wall.proto.B } }
+  }
+  <Polygon> {
+    <Normal> { -1 0 0 }
+    <TRef> { tex.wall.proto.B }
+    <MRef> { mat.wall.proto.B }
+    <VertexRef> { 40 32 36 44 <Ref> { obj.wall.proto.B } }
+  }
+  <Polygon> {
+    <Normal> { 0 1 0 }
+    <TRef> { tex.wall.proto.B }
+    <MRef> { mat.wall.proto.B }
+    <VertexRef> { 35 18 22 39 <Ref> { obj.wall.proto.B } }
+  }
+  <Polygon> {
+    <Normal> { 0 0 -1 }
+    <TRef> { tex.wall.proto.B }
+    <MRef> { mat.wall.proto.B }
+    <VertexRef> { 2 10 26 16 <Ref> { obj.wall.proto.B } }
+  }
+  <Polygon> {
+    <Normal> { 0 0 1 }
+    <TRef> { tex.wall.proto.B }
+    <MRef> { mat.wall.proto.B }
+    <VertexRef> { 13 7 21 29 <Ref> { obj.wall.proto.B } }
+  }
+  <Polygon> {
+    <Normal> { 0 0 -1 }
+    <TRef> { tex.wall.proto.B }
+    <MRef> { mat.wall.proto.B }
+    <VertexRef> { 9 57 43 25 <Ref> { obj.wall.proto.B } }
+  }
+  <Polygon> {
+    <Normal> { 0 0 1 }
+    <TRef> { tex.wall.proto.B }
+    <MRef> { mat.wall.proto.B }
+    <VertexRef> { 60 14 30 46 <Ref> { obj.wall.proto.B } }
+  }
+  <Polygon> {
+    <Normal> { 0 0 -1 }
+    <TRef> { tex.wall.proto.B }
+    <MRef> { mat.wall.proto.B }
+    <VertexRef> { 56 50 34 42 <Ref> { obj.wall.proto.B } }
+  }
+  <Polygon> {
+    <Normal> { 0 0 1 }
+    <TRef> { tex.wall.proto.B }
+    <MRef> { mat.wall.proto.B }
+    <VertexRef> { 53 61 47 37 <Ref> { obj.wall.proto.B } }
+  }
+  <Polygon> {
+    <Normal> { 0 0 -1 }
+    <TRef> { tex.wall.proto.B }
+    <MRef> { mat.wall.proto.B }
+    <VertexRef> { 49 3 17 33 <Ref> { obj.wall.proto.B } }
+  }
+  <Polygon> {
+    <Normal> { 0 0 1 }
+    <TRef> { tex.wall.proto.B }
+    <MRef> { mat.wall.proto.B }
+    <VertexRef> { 6 54 38 20 <Ref> { obj.wall.proto.B } }
+  }
+}

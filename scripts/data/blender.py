@@ -115,64 +115,65 @@ def _nudge_random_faces(obj, percent, seed, N=100):
 	bpy.ops.object.mode_set(mode='OBJECT')
 
 
-def _texture_object(obj, image_group, repeat):
+def _texture_object(obj, image, repeat=1):
 	# Set object to active
 	bpy.context.scene.objects.active = obj
 
-	# UV-unwrap object
-	bpy.ops.object.mode_set(mode='EDIT')
-	bpy.ops.mesh.select_mode(type='FACE', action='ENABLE')
-	bpy.ops.mesh.select_all(action='SELECT')
-	bpy.ops.uv.unwrap()
-	bpy.ops.object.mode_set(mode='OBJECT')
-	name_uv = obj.name.replace('obj', 'uv')
-	obj.data.uv_textures.active.name = name_uv
-
-	# Randomly sample a texture image and apply to uv_face.
 	# Make sure material exists
 	mtag = obj.name.replace('obj', 'mat')
 
 	if bpy.data.materials.find(mtag) >= 0:
 		mat = bpy.data.materials[mtag] 
-		bpy.data.materials.remove(mat, do_unlink=True)
-	mat = bpy.data.materials.new(mtag)
-
-	# Make sure texure exists
-	ttag = obj.name.replace('obj', 'tex')
-	if bpy.data.textures.find(ttag) >= 0:
-		tex = bpy.data.textures[ttag]
-		bpy.data.textures.remove(tex, do_unlink=True)
-	tex = bpy.data.textures.new(ttag, type='IMAGE')
-	tex.repeat_x = repeat
-	tex.repeat_y = repeat
-
-	# Assign texture to material
-	if mat.texture_slots[0] is None:
-		tex_slot = mat.texture_slots.add()
+		# bpy.data.materials.remove(mat, do_unlink=True)
 	else:
-		tex_slot = mat.texture_slots[0]
-	tex_slot.texture = tex
-	tex_slot.texture_coords = 'UV'
-	tex_slot.uv_layer = name_uv
-		
+		mat = bpy.data.materials.new(mtag)
+
 	# Assign material to object
 	obj.data.materials.clear()
 	obj.data.materials.append(mat)
 
-	# Sample texture image and assign to texture
-	imag_path, = random.sample(image_group, 1)
-	imag_name = imag_path.split('/')[-1]
-	if bpy.data.images.find(imag_name) < 0:
-		image = bpy.data.images.load(imag_path)
-	else:
-		 image = bpy.data.images[imag_name]
-	tex.image = image
+	if image is not None:
+		# UV-unwrap object
+		bpy.ops.object.mode_set(mode='EDIT')
+		bpy.ops.mesh.select_mode(type='FACE', action='ENABLE')
+		bpy.ops.mesh.select_all(action='SELECT')
+		bpy.ops.uv.unwrap()
+		bpy.ops.object.mode_set(mode='OBJECT')
+		name_uv = obj.name.replace('obj', 'uv')
+		obj.data.uv_textures.active.name = name_uv
 
-	for uv_face in obj.data.uv_textures.active.data:
-		uv_face.image = image
+		# Make sure texure exists	
+		ttag = obj.name.replace('obj', 'tex')
+		if bpy.data.textures.find(ttag) >= 0:
+			tex = bpy.data.textures[ttag]
+			# bpy.data.textures.remove(tex, do_unlink=True)
+		else:
+			tex = bpy.data.textures.new(ttag, type='IMAGE')
+		tex.repeat_x = repeat
+		tex.repeat_y = repeat
 
-	# Set active for rendering
-	obj.data.uv_textures.active.active_render = True
+		# Assign texture to material
+		if mat.texture_slots[0] is None:
+			tex_slot = mat.texture_slots.add()
+		else:
+			tex_slot = mat.texture_slots[0]
+		tex_slot.texture = tex
+		tex_slot.texture_coords = 'UV'
+		tex_slot.uv_layer = name_uv
+			
+		# Sample texture image and assign to texture
+		imag_name = image.split('/')[-1]
+		if bpy.data.images.find(imag_name) < 0:
+			image = bpy.data.images.load(image)
+		else:
+			 image = bpy.data.images[imag_name]
+		tex.image = image
+
+		for uv_face in obj.data.uv_textures.active.data:
+			uv_face.image = image
+
+		# Set active for rendering
+		obj.data.uv_textures.active.active_render = True
 
 
 def _check_texture_images(imag_group):
@@ -346,14 +347,55 @@ def sample_environment(job, mode, texture_path_floor, texture_path_wall, texture
 		subprocess.run('egg2bam -o {} {}'.format(export_name_bam, export_name_egg).split(' '))
 
 
+def floor_to_egg(texture_file, save_file, floor_id):
+	_deselect_all()
+	if bpy.data.objects.find(floor_id) >= 0:
+		obj = bpy.data.objects[floor_id]
+		obj.hide = False
+		_texture_object(obj, texture_file, 1)
+		obj.select = True
+		bpy.data.scenes['Scene'].yabee_settings.opt_tps_proc = 'PANDA'
+		bpy.ops.export.panda3d_egg(filepath=save_file)
+		obj.select = False
+		obj.hide = True
+
+
+def wall_to_egg(texture_file, save_file, wall_id):
+	_deselect_all()
+	if bpy.data.objects.find(wall_id) >= 0:
+		obj = bpy.data.objects[wall_id]
+		obj.hide = False
+		_texture_object(obj, texture_file, 1)
+		obj.select = True
+		bpy.data.scenes['Scene'].yabee_settings.opt_tps_proc = 'PANDA'
+		bpy.ops.export.panda3d_egg(filepath=save_file)
+		obj.select = False
+		obj.hide = True
+
+
+def blind_to_egg(save_file, blind_id):
+	_deselect_all()
+	if bpy.data.objects.find(blind_id) >= 0:
+		obj = bpy.data.objects[blind_id]
+		obj.hide = False
+		_texture_object(obj, None)
+		obj.select = True
+		bpy.data.scenes['Scene'].yabee_settings.opt_tps_proc = 'PANDA'
+		bpy.ops.export.panda3d_egg(filepath=save_file)
+		obj.select = False
+		obj.hide = True
+
+
 if __name__ == '__main__':
-	blf = os.path.abspath('../../resources/blender/env_proto.blend')
-	tpf = os.path.abspath('../../resources/textures/floor/train')
-	tpw = os.path.abspath('../../resources/textures/wall/train')
-	tpb = os.path.abspath('../../resources/textures/blind/train')
-	exp = os.path.abspath('../../../../data/gern/egg_scene')
+	for i in range(5):
+		texture = '../textures/floor/train/img.floor.{:03d}.jpg'.format(i + 1)
+		savefile = '../meshes/har/mesh.floor.{:03d}.egg'.format(i + 1)
+		floor_to_egg(texture, savefile, 'obj.floor.proto')
 
-	addon_utils.enable('io_scene_egg')
-	bpy.ops.wm.open_mainfile(filepath=blf)
+	for i in range(6):
+		texture = '../textures/wall/train/img.wall.{:03d}.jpg'.format(i + 1)
+		savefile = '../meshes/har/mesh.wall.{:03d}.egg'.format(i + 1)
+		wall_to_egg(texture, savefile, 'obj.wall.proto.B')
 
-	sample_environment(1, tpf, tpw, tpb, exp)
+	savefile = '../meshes/har/mesh.blind.001.egg'
+	blind_to_egg(savefile, 'obj.blind.proto.C')
