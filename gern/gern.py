@@ -26,32 +26,33 @@ class GeRN(torch.jit.ScriptModule):
 		self.rop_representation = RepresentationEncoder()
 
 		# --- inference operators
+		self.iop_primitive = RepresentationEncoderPrimitive()
 		self.iop_posterior = GaussianFactor()
-		self.iop_state = RecurrentCell(Nr * 2 + Nh + Nclass, Nh)
+		self.iop_state = RecurrentCell(Nr * 2 + Nh, Nh)
 
 		# --- generation operators
 		self.gop_prior = GaussianFactor()
 		self.gop_state = RecurrentCell(Nr + Nh + Nv, Nh)
 		self.gop_delta = GeneratorDelta()
 
+		# --- decoding operators
+		self.dop_rgbv = DecoderRGBV()
+
 		# --- classifier
 		self.aux_class = LatentClassifier(nclass=Nclass)
-
-		# --- decoding operators
-		self.dop_rgbv = DecoderRGBVision()
 
 		print('{}: {:,} trainable parameters.'.format(self.__class__.__name__, count_parameters(self)))
 
 	@torch.jit.script_method
-	def _forward_mc_loop(self, cat_logit, cnd_repr, qry_repp, qry_v, h_iop, c_iop, o_iop, h_gop, c_gop, o_gop, u_gop):
-		# type: (Tensor, Tensor, Tensor, Tensor, Tensor, Tensor, Tensor, Tensor, Tensor, Tensor, Tensor) -> Tuple[Tensor, Tensor, Tensor, Tensor, Tensor]
+	def _forward_mc_loop(self, cnd_repr, qry_repp, qry_v, h_iop, c_iop, o_iop, h_gop, c_gop, o_gop, u_gop):
+		# type: (Tensor, Tensor, Tensor, Tensor, Tensor, Tensor, Tensor, Tensor, Tensor, Tensor) -> Tuple[Tensor, Tensor, Tensor, Tensor, Tensor]
 		prior_means, prior_logvs = [], []
 		posterior_means, posterior_logvs = [], []
 
 		for ast in range(self.asteps):
 			prior_z, prior_mean, prior_logv = self.gop_prior(h_gop)
 
-			input_iop = torch.cat([cat_logit, cnd_repr, qry_repp, h_gop], dim=1)
+			input_iop = torch.cat([cnd_repr, qry_repp, h_gop], dim=1)
 			h_iop, c_iop, o_iop = self.iop_state(input_iop, h_iop, c_iop, o_iop)
 			posterior_z, posterior_mean, posterior_logv = self.iop_posterior(h_iop)
 
@@ -86,21 +87,13 @@ class GeRN(torch.jit.ScriptModule):
 
 	def forward(self, 
 				cnd_x, cnd_v, 
-				qry_x, qry_v,
-				label):
-		# --- Conditional (cnd_*) and query (qry_*) inputs
-		# cnd/qry_x: RGB image (B, T, 3, 64, 64) or (B, , 6, 64, 64)
-		# cnd/qry_v: Orientation vector (B, T, 7, 1, 1)
-		# * For conditional inputs, time (T) will be reduced, this is not the case
-		#  for query inputs. Different T's are allowed for each input types. 
-		# ---
-		# Containers to hold outputs.
+				qry_x, qry_v):
+
 		prior_means, prior_logvs = [], []
 		posterior_means, posterior_logvs = [], []
 
 		# Size information.
 		Bc, Tc, _, Hc, Wc = cnd_x.size()
-		Qc = qry_v.size(1)
 		dev = cnd_x.device
 
 		# --- Conditional filtered and aggregated representations
@@ -108,17 +101,8 @@ class GeRN(torch.jit.ScriptModule):
 		cnd_state, c_rop_sta, o_rop_sta = self.rop_state(cnd_prim)
 		h_rop_enc, cnd_repr, o_rop_enc = self.rop_representation(cnd_prim, cnd_state)
 
-		cat_logit = self.aux_class(cnd_repr, qry_v)
-		cat_dist = torch.softmax(cat_logit, dim=2)
-		cat_ent = (cat_dist * cat_dist.add(1e-5).log().mul(-1)).sum(dim=2)
-		index = cat_ent.min(dim=1)[1]
-
-		qry_x = qry_x[torch.arange(Bc), index]
-		qry_v = qry_v[torch.arange(Bc), index].unsqueeze(1).expand(-1, Tc, -1, -1, -1)
-		cat_logit = cat_logit[torch.arange(Bc), index]
-
 		# --- Query representation primitives
-		qry_repp = self.rop_primitive(qry_x, qry_v)
+		qry_repp = self.iop_primitive(qry_x, qry_v)
 
 		# --- LSTM hidden/cell/prior output gate for inference/generator operators
 		h_iop = torch.zeros(1, device=dev).expand(Bc * Tc, 256, 16, 16)
@@ -129,18 +113,19 @@ class GeRN(torch.jit.ScriptModule):
 		o_gop = torch.zeros(1, device=dev).expand(Bc * Tc, 256, 16, 16)
 		u_gop = torch.zeros(1, device=dev).expand(Bc * Tc, 256, 16, 16)
 		
-		
 		# tweaking dimensionality
-		cat_logit = (cat_logit  # B, C ---> B, (T,) C, 16, 16
-					 .unsqueeze(1).unsqueeze(3).unsqueeze(4)
-					 .expand(-1, Tc, -1, 16, 16)
-					 .contiguous()
-					 .view(Bc * Tc, -1, 16, 16))
+
 		cnd_repr = (cnd_repr  # B, C, ---> B, (T,) C, 16, 16
-					.unsqueeze(1).unsqueeze(3).unsqueeze(4)
+					.unsqueeze(1).unsqueeze(3).unsqueeze(4))
+		cnd_repr_64 = (cnd_repr
+					   .expand(-1, Tc, -1, 64, 64)
+					   .contiguous()
+					   .view(Bc * Tc, -1, 64, 64))
+		cnd_repr = (cnd_repr
 					.expand(-1, Tc, -1, 16, 16)
 					.contiguous()
 					.view(Bc * Tc, -1, 16, 16))
+		
 		qry_repp = (qry_repp  # B, T, C,  ---> B, T, C, (16, 16)
 					.unsqueeze(3).unsqueeze(4)
 					.expand(-1, -1, -1, 16, 16)
@@ -152,30 +137,18 @@ class GeRN(torch.jit.ScriptModule):
 
 		# --- Inference/generation
 		u_gop, prior_means, prior_logvs, posterior_means, posterior_logvs = ptcp.checkpoint(self._forward_mc_loop,
-			cat_logit, cnd_repr, qry_repp, qry_v,
+			cnd_repr, qry_repp, qry_v,
 			h_iop, c_iop, o_iop, 
 			h_gop, c_gop, o_gop, u_gop)
 
 		# --- Decoding
 		dec_rgbv = self.dop_rgbv(u_gop)
+		cat_logits = self.aux_class(dec_rgbv, cnd_repr_64)
 		dec_rgbv = dec_rgbv.view(Bc, Tc, -1, 64, 64)
+		cat_logits = cat_logits.view(Bc, Tc, -1)
 
-		return index, dec_rgbv, cat_dist, prior_means, prior_logvs, posterior_means, posterior_logvs
+		return dec_rgbv, cat_logits, prior_means, prior_logvs, posterior_means, posterior_logvs
 
-	def make_target(self, qry_x, qry_m, qry_k, qry_v, label, rsteps=None):
-		Tq = qry_v.size(1)
-		if rsteps is not None:
-			Tq = min(Tq, rsteps + 1)
-			qry_x = qry_x[:, :Tq]
-			qry_m = qry_m[:, :Tq]
-			qry_k = qry_k[:, :Tq]
-			qry_v = qry_v[:, :Tq]
-			
-		label = label.unsqueeze(1).expand(-1, qry_x.size(1))
-		return GernTarget(
-			rgbv=self.pack_time(qry_x)[0],
-			heat=self.pack_time(qry_m)[0],
-			label=self.pack_time(label)[0])
 
 	def predict(self, cnd_x, cnd_m, cnd_k, cnd_v, qry_v, 
 				gamma=.95, 
@@ -258,11 +231,35 @@ class GeRN(torch.jit.ScriptModule):
 			)
 
 
-if __name__ == '__main__':
-	from .data import BallTubeDataLoader
+# if __name__ == '__main__':
+# 	from .data import BallTubeDataLoader
+# 	from torch.nn import functional as F
 
-	loader = BallTubeDataLoader('/home/yen/data/balltube/train', subset_size=1, batch_size=1)
-	net = GeRN()
+# 	loader = BallTubeDataLoader('/home/yen/data/balltube/test', subset_size=8, batch_size=8)
+# 	net = GeRN().cuda()
 
-	for kx, kv, qx, qv, label, qvi in loader:
-		net(kx, kv, qx, qv, label)
+# 	for kx, kv, qx, qv, label in loader:
+# 		print('kx: ', kx.size())
+# 		print('kv: ', kv.size())
+# 		print('qx: ', qx.size())
+# 		print('qv: ', qv.size())
+# 		print('label: ', label.size(), label)
+# 		kx = kx.to('cuda')
+# 		kv = kv.to('cuda')
+# 		qx = qx.to('cuda')
+# 		qv = qv.to('cuda')
+# 		label = label.to('cuda')
+# 		dec_rgbv, cat_logits, prior_means, prior_logvs, posterior_means, posterior_logvs = net(kx, kv, qx, qv)
+# 		print('dec_rgbv: ', dec_rgbv.size())
+# 		print('cat_logits: ', cat_logits.size())
+
+# 		preference = torch.linspace(0, 1, qx.size(1), device='cuda').view(1, -1) + 1e7
+# 		loss = F.l1_loss(dec_rgbv, qx, reduction='none').sum(dim=[2, 3, 4])
+# 		_, min_index = (loss / preference).min(dim=1)
+# 		print('min_loss: ', loss[torch.arange(8), min_index])
+# 		print('min_index: ', min_index)
+
+# 		min_cat_logits = cat_logits[torch.arange(cat_logits.size(0)), min_index, :]
+# 		print('min_cat_logits: ', min_cat_logits.size())
+# 		ce_loss = F.cross_entropy(min_cat_logits, label)
+# 		print('ce_loss: ', ce_loss)

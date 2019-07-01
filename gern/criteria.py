@@ -1,7 +1,8 @@
 from torchvision import models as visionmodels
 from torch.utils import checkpoint as ptcp
-import torch
+import torch, random
 import torch.nn as nn
+from torch.nn import functional as F
 
 class PerceptualLoss(nn.Module):
 	def __init__(self, vgg_layers=[6, 13, 26, 39, 52]):
@@ -63,25 +64,23 @@ class GernCriterion(nn.Module):
 		self.l_kldiv = None
 		self.accuracy = None
 
-	def forward(self, index, qry_x, dec_rgbv, cat_dist, prior_means, prior_logvs, posterior_means, posterior_logvs, weights, label):
-		qry_x = qry_x[torch.arange(len(index)), index]
-		self.l_rgbv, self.l_rgbv_index = (dec_rgbv - qry_x).pow(2).mean(dim=[2, 3, 4]).min(dim=1)
-		self.l_rgbv = self.l_rgbv.mean()
+	def forward(self, label, xtarg, xpred, cat_logits, prior_means, prior_logvs, posterior_means, posterior_logvs, weights, beta=1e7):
+		device = xtarg.device
+		decoder_loss = F.l1_loss(xpred, xtarg, reduction='none').sum(dim=[2, 3, 4])
+		preference = torch.linspace(0, 1, decoder_loss.size(1), device=device) + beta
+		_, min_index = (decoder_loss / preference).min(dim=1)
+		min_decoder_loss = decoder_loss[torch.arange(decoder_loss.size(0)), min_index].mean()
 
-		self.l_classifier = (cat_dist[torch.arange(len(label)), :, label]
-							 .add(1e-5).log().mul(-1)
-							 .mean())
+		min_cat_logits = cat_logits[torch.arange(cat_logits.size(0)), min_index, :]
+		min_cat_loss = F.cross_entropy(min_cat_logits, label)
 
+		self.min_index = min_index
+		self.l_rgbv = min_decoder_loss
+		self.l_classifier = min_cat_loss
 		self.l_kldiv = kl_divergence(prior_means, prior_logvs, posterior_means, posterior_logvs)
-
-		self.accuracy = (cat_dist[torch.arange(len(index)), index]
-						 .max(dim=0)[1]
-						 == label).float().mean() * 100
-		self.accuracy = self.accuracy.item()
+		self.accuracy = ((min_cat_logits.max(dim=1)[1] == label).float().mean() * 100).item()
 
 		return sum(map(lambda l, w: l * w, [self.l_rgbv, self.l_classifier, self.l_kldiv], weights))
 
-
 	def item(self):
-		"""Return a 5-tuple consisting of all criteria except accuracy."""
 		return self.l_rgbv.item(),	self.l_classifier.item(), self.l_kldiv.item()

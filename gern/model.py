@@ -4,6 +4,7 @@ from numpy.random import randint
 from torch.distributions import Normal
 from collections import namedtuple
 from .utils import ConvLSTMCell, LSTMCell, GroupNorm2d, GroupNorm1d, SkipConnect, BilinearInterpolate, count_parameters
+from torch.nn import functional as F
 
 
 def init_parameters(module):
@@ -12,15 +13,27 @@ def init_parameters(module):
 		if module.bias is not None:
 			module.bias.data.fill_(0.)
 
+def l1_regularizer(r=[]):
+	def _l1_regularizer(module):
+		if type(module) in (nn.Linear, nn.Conv2d, nn.ConvTranspose2d):
+			reg = F.l1_loss(module.weight, torch.zeros_like(module.weight))
+			num = module.weight.numel()
+			r.append((reg, num))
+	return _l1_regularizer
+
 
 class RepresentationEncoderPrimitive(nn.Module):
-	def __init__(self, input_channels=3, output_channels=256):
+	"""The `Pool' Representation Network as documented in
+	`Neural scene representation and rendering'."""
+	def __init__(self, input_channels=3, output_channels=256, p=0.2):
 		super(RepresentationEncoderPrimitive, self).__init__()
 		cinp = input_channels
 		cout = output_channels
 		self.output_channels = cout
 		self.features = self.features = nn.ModuleList([
-			# 0 ---
+			# Modifications:
+			# Dropout at bottleneck
+			# LeakyReLU instead of ReLU
 			nn.Sequential(
 				nn.Conv2d(cinp, 256, (2, 2), (2, 2), padding=0), 
 				nn.ReLU(True),
@@ -28,19 +41,21 @@ class RepresentationEncoderPrimitive(nn.Module):
 				SkipConnect(
 					nn.Conv2d(256, 128, (3, 3), (1, 1), padding=1),
 					nn.Conv2d(256, 128, (1, 1), (1, 1), padding=0)), 
-				nn.ReLU(True),
+				nn.LeakyReLU(0.1),
 				GroupNorm2d(128, 32), 
+				nn.Dropout(p=p),
 				nn.Conv2d(128, 256, (2, 2), (2, 2), padding=0),
-				nn.ReLU(True),
+				nn.LeakyReLU(0.1),
 				GroupNorm2d(256, 32)),
 			nn.Sequential(
 				SkipConnect(
 					nn.Conv2d(263, 128, (3, 3), (1, 1), padding=1),
 					nn.Conv2d(263, 128, (1, 1), (1, 1), padding=0)),
-				nn.ReLU(True),
+				nn.LeakyReLU(0.1),
 				GroupNorm2d(128, 32),
+				nn.Dropout(p=p),
 				nn.Conv2d(128, 256, (3, 3), (1, 1), padding=1),
-				nn.ReLU(True),
+				nn.LeakyReLU(0.1),
 				GroupNorm2d(256, 32),
 				nn.Conv2d(256, 256, (1, 1), (1, 1), padding=0),
 				nn.AvgPool2d((16, 16))
@@ -51,34 +66,26 @@ class RepresentationEncoderPrimitive(nn.Module):
 		# print('{}: {:,} trainable parameters.'.format(self.__class__.__name__, count_parameters(self)))
 
 	def forward(self, x, v):
-		xsize = x.size()
-		xdims = len(xsize)
-		if xdims == 5:
-			B, T, C, H, W = xsize
-			x = x.view(B * T, C, H, W)
-			v = v.view(B * T, 7, 1, 1)
-		elif xdims == 6:
-			B, Q, T, C, H, W = xsize
-			x = x.view(B * Q * T, C, H, W)
-			v = (v.unsqueeze(2)
-				  .expand(-1, -1, T, -1, -1, -1)
-				  .contiguous()
-				  .view(B * Q * T, 7, 1, 1))
-			
-		
+		B, T, C, H, W = x.size()
+		x = x.view(B * T, C, H, W)
+		v = v.view(B * T, 7, 1, 1)
+
 		h = self.features[0](x)
 		h = torch.cat([h, v.expand(-1, -1, h.size(2), h.size(3))], dim=1)
 		out = self.features[1](h)
 
-		if xdims == 5:
-			return out.view(B, T, self.output_channels)
-		elif xdims == 6:
-			return out.view(B, Q, T, self.output_channels)
+		return out.view(B, T, self.output_channels)
+
+	def regularizer(self):
+		r = []
+		self.apply(l1_regularizer(r))
+		reg, num = zip(*r)
+		return sum(reg), sum(num)
 
 
 class RepresentationEncoderState(torch.jit.ScriptModule):
 	__constants__ = ['hidden_size']
-	def __init__(self, input_size=256, hidden_size=128, zoneout=0.3):
+	def __init__(self, input_size=256, hidden_size=128, zoneout=0.4):
 		super(RepresentationEncoderState, self).__init__()
 
 		self.input_size = input_size
@@ -128,7 +135,7 @@ class RepresentationEncoderState(torch.jit.ScriptModule):
 
 class RepresentationEncoder(torch.jit.ScriptModule):
 	__constants__ = ['zoneout_prob', 'hidden_size']
-	def __init__(self, primitive_size=256, state_size=128, hidden_size=256, zoneout=0.3):
+	def __init__(self, primitive_size=256, state_size=128, hidden_size=256, zoneout=0.4):
 		super(RepresentationEncoder, self).__init__()
 
 		input_size = primitive_size + state_size
@@ -183,11 +190,11 @@ class GaussianFactor(nn.Module):
 
 		self.layer = nn.Sequential(
 			nn.Conv2d(256, 512, (3, 3), (1, 1), padding=1),
-			nn.ReLU(),
+			nn.LeakyReLU(0.1),
 			SkipConnect(
 				nn.Conv2d(512, 256, (3, 3), (1, 1), padding=1),
 				nn.Conv2d(512, 256, (1, 1), (1, 1), bias=False)),
-			nn.ReLU(),
+			nn.LeakyReLU(0.1),
 			nn.Conv2d(256, 512, (1, 1), (1, 1))  # mean, log-variance
 		)
 		
@@ -246,10 +253,10 @@ class GeneratorDelta(nn.Module):
 
 		self.layers = nn.Sequential(
 			nn.Conv2d(512, 256, (3, 3), (1, 1), padding=1),
-			nn.ReLU(True),
+			nn.LeakyReLU(0.1),
 			GroupNorm2d(256, 8),
 			SkipConnect(nn.Conv2d(256, 256, (3, 3), (1, 1), padding=1)),
-			nn.ReLU(True),
+			nn.LeakyReLU(0.1),
 			GroupNorm2d(256, 8),
 			nn.Conv2d(256, 256, (3, 3), (1, 1), padding=1)
 			)
@@ -261,31 +268,31 @@ class GeneratorDelta(nn.Module):
 		return self.layers(inp)
 
 
-class DecoderRGBVision(nn.Module):
+class DecoderRGBV(nn.Module):
 	def __init__(self):
-		super(DecoderRGBVision, self).__init__()
+		super(DecoderRGBV, self).__init__()
 
 		self.decoder = nn.Sequential(
-			nn.ConvTranspose2d(256, 256, (2, 2), (2, 2), padding=0),
-			nn.ReLU(True),
+			nn.ConvTranspose2d(256, 256, (2, 2), (2, 2), bias=False, padding=0),
+			nn.LeakyReLU(0.1),
 			GroupNorm2d(256, 32),
 			SkipConnect(
-				nn.Conv2d(256, 128, (1, 1), (1, 1), padding=0),
-				nn.Conv2d(256, 128, (3, 3), (1, 1), padding=1)),
-			nn.ReLU(True),
+				nn.Conv2d(256, 128, (1, 1), (1, 1), bias=False, padding=0),
+				nn.Conv2d(256, 128, (3, 3), (1, 1), bias=False, padding=1)),
+			nn.LeakyReLU(0.1),
 			GroupNorm2d(128, 32),
 			SkipConnect(
-				nn.Conv2d(128, 128, (1, 1), (1, 1), padding=0),
-				nn.Conv2d(128, 128, (3, 3), (1, 1), padding=1)),
-			nn.ReLU(True),
+				nn.Conv2d(128, 128, (1, 1), (1, 1), bias=False, padding=0),
+				nn.Conv2d(128, 128, (3, 3), (1, 1), bias=False, padding=1)),
+			nn.LeakyReLU(0.1),
 			GroupNorm2d(128, 32),
-			nn.ConvTranspose2d(128, 64, (2, 2), (2, 2), padding=0),
-			nn.ReLU(True),
+			nn.ConvTranspose2d(128, 64, (2, 2), (2, 2), bias=False, padding=0),
+			nn.LeakyReLU(0.1),
 			GroupNorm2d(64, 32),
 			SkipConnect(
-				nn.Conv2d(64, 16, (1, 1), (1, 1), padding=0),
-				nn.Conv2d(64, 16, (3, 3), (1, 1), padding=1)),
-			nn.ReLU(True),
+				nn.Conv2d(64, 16, (1, 1), (1, 1), bias=False, padding=0),
+				nn.Conv2d(64, 16, (3, 3), (1, 1), bias=True,  padding=1)),
+			nn.LeakyReLU(0.1),
 			nn.Conv2d(16, 3, (3, 3), (1, 1), padding=1)
 			)
 
@@ -294,39 +301,47 @@ class DecoderRGBVision(nn.Module):
 	def forward(self, x):
 		return self.decoder(x)
 
+	def regularizer(self):
+		r = []
+		self.apply(l1_regularizer(r))
+		reg, num = zip(*r)
+		return sum(reg), sum(num)
+
 
 class LatentClassifier(nn.Module):
-	def __init__(self, nclass=13):
+	def __init__(self, nclass=13, p=0.2):
 		super(LatentClassifier, self).__init__()
 
 		self.features = nn.Sequential(
-			nn.Linear(263, 256),
-			nn.ReLU(True),
-			GroupNorm1d(256, 32),
+			nn.Conv2d(259, 128, (4, 4), (4, 4), bias=False, padding=0),
+			nn.LeakyReLU(0.1),
+			GroupNorm2d(128, 32),
 			SkipConnect(
-				nn.Linear(256, 256)),
-			nn.ReLU(True),
-			GroupNorm1d(256, 32),
-			nn.Linear(256, 128),
+				nn.Conv2d(128, 128, (3, 3), (1, 1), bias=False, padding=1)),
+			nn.LeakyReLU(0.1),
+			nn.MaxPool2d((2, 2)),
+			GroupNorm2d(128, 32),
+			nn.Conv2d(128, 256, (4, 4), (4, 4), bias=False, padding=0),
+			nn.LeakyReLU(0.1),
+			GroupNorm2d(256, 32),
 			SkipConnect(
-				nn.Linear(128, 128)),
-			nn.ReLU(True),
-			GroupNorm1d(128, 32),
-			nn.Linear(128, 64),
-			nn.ReLU(True),
-			SkipConnect(
-				nn.Linear(64, 64)),
-			nn.ReLU(True),
-			GroupNorm1d(64, 32),
-			nn.Linear(64, nclass)
+				nn.Conv2d(256, 256, (3, 3), (1, 1), bias=False, padding=1)),
+			nn.LeakyReLU(0.1),
+			GroupNorm2d(256, 32),
+			nn.Conv2d(256, 1024, (2, 2), (2, 2), bias=False, padding=0),
+			nn.LeakyReLU(0.1),
+			GroupNorm2d(1024, 32),
+			nn.Conv2d(1024, nclass, (1, 1), (1, 1))
 			)
 		self.nclass = nclass
 		self.apply(init_parameters)
 
-	def forward(self, x, v):
-		B = x.size(0)
-		Q = v.size(1)
-		x = x.unsqueeze(1).expand(-1, Q, -1)
-		v = v.squeeze(4).squeeze(3)
-		inp = torch.cat([x, v], dim=2).view(B * Q, -1)
-		return self.features(inp).view(B, Q, self.nclass)
+	def forward(self, x, r):
+		inp = torch.cat([x, r], dim=1)
+		return self.features(inp).view(-1, self.nclass)
+
+	def regularizer(self):
+		r = []
+		self.apply(l1_regularizer(r))
+		reg, num = zip(*r)
+		return sum(reg), sum(num)
