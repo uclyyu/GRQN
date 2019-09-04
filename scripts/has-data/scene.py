@@ -54,8 +54,10 @@ class Scene:
                 map_spawn = cv2.imread(map_spawn, cv2.IMREAD_GRAYSCALE)
             elif isinstance(map_spawn, np.ndarray):
                 map_spawn = map_spawn.astype(np.float)
-                map_spawn = (map_spawn - map_spawn.max()) / \
-                    (map_spawn.max() - map_spwan.min())
+                print(map_spawn.min())
+                print(map_spawn.max())
+                map_spawn = (map_spawn - map_spawn.min()) / \
+                    (map_spawn.max() - map_spawn.min()) * value
             else:
                 raise ValueError(
                     "map_spawn should be a string or numpy.ndarray")
@@ -70,7 +72,7 @@ class Scene:
             pos = [px, py, pz]
         else:
             at = np.add(at, [0.1 * random.randn(), 0.1 * random.randn(), 0.])
-            d = at - self.spawnables
+            d = at - spawnables
             d = (d ** 2).sum(axis=1)
             px, py, pz = spawnables[d.argmin()]
             pz = pz if z is None else z

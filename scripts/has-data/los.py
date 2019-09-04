@@ -113,7 +113,7 @@ class LineOfSight:
         index_dest = self.map_index(true_dest[:, :2])
         index_dest = np.reshape(index_dest, [-1, self.z_rays, 2])
 
-        img = np.zeros((self.z_rays,) + self.map_size)
+        img = np.zeros([self.z_rays] + self.map_size)
         for j in range(self.z_rays):
             for pt in index_dest[:, j]:
                 img[j] = cv2.line(img[j], index_orig, tuple(

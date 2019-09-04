@@ -6,9 +6,12 @@ import json
 import argparse
 import multiprocessing as mp
 import pandas as pd
-import los.LineOfSight as LineOfSight
-import scene.Scene as Scene
+import los
+import scene
 import queue
+
+LineOfSight = los.LineOfSight
+Scene = scene.Scene
 
 TAU = 2 * np.pi
 PI_2 = np.pi / 2
@@ -17,23 +20,24 @@ PI = np.pi
 
 def task(basedir, mapsize, nrays, Z, camwh, scene, los):
     ctx_pos = None
-    map_jlos = np.zeros(mapsize)
-    df_ctx = pd.DataFrame(cols=['pos_x', 'pos_y', 'pos_z',
-                                'eul_x', 'eul_y', 'eul_z',
-                                'file_pxl', 'file_dep', 'file_los', 'file_jlos'])
-    df_qry = pd.DataFrame(cols=['pos_x', 'pos_y', 'pos_z',
-                                'eul_x', 'eul_y', 'eul_z',
-                                'file_pxl', 'file_dep', 'file_los'])
+    ctx_jlos = np.zeros(mapsize)
+    df_ctx = pd.DataFrame(columns=['pos_x', 'pos_y', 'pos_z',
+                                   'eul_x', 'eul_y', 'eul_z',
+                                   'file_pxl', 'file_dep', 'file_los', 'file_jlos'])
+    df_qry = pd.DataFrame(columns=['pos_x', 'pos_y', 'pos_z',
+                                   'eul_x', 'eul_y', 'eul_z',
+                                   'file_pxl', 'file_dep', 'file_los'])
     width, height = camwh
 
     for i in range(5):
         #
         # Contextual samples
+        print('ctx')
         ctx_pos = scene.sample_position(ctx_pos, z=Z)
         ctx_orn = scene.sample_orientation()
 
         ctx_los = los.rays2map(ctx_pos, ctx_orn, nrays, scene.client)
-        ctx_jlos = np.logical_or(ctx_jlos, los_map)
+        ctx_jlos = np.logical_or(ctx_jlos, ctx_los)
         _ctx_jlos = los.morphology(ctx_jlos * 1.0)
         _ctx_jlos = cv2.normalize(_ctx_jlos, None, 0, 255, cv2.NORM_MINMAX)
 
@@ -53,8 +57,8 @@ def task(basedir, mapsize, nrays, Z, camwh, scene, los):
         cv2.imwrite(os.path.join(basedir, file_los), ctx_los)
         cv2.imwrite(os.path.join(basedir, file_jlos), _ctx_jlos)
 
-        df_ctx.iloc[i] = [*ctx_pos, *ctx_orn,
-                          file_pxl, file_dep, file_los, file_jlos]
+        df_ctx.loc[i] = [*ctx_pos, *ctx_orn,
+                         file_pxl, file_dep, file_los, file_jlos]
 
         #
         # Query samples
@@ -64,6 +68,7 @@ def task(basedir, mapsize, nrays, Z, camwh, scene, los):
         qry_spawn *= ctx_jlos
         qry_spawn = np.logical_and(scene.map_spawn, qry_spawn)
 
+        print('qry')
         pos = scene.sample_position(at=None, map_spawn=qry_spawn, z=Z)
         orn = scene.sample_orientation()
 
@@ -86,7 +91,7 @@ def task(basedir, mapsize, nrays, Z, camwh, scene, los):
         cv2.imwrite(os.path.join(basedir, file_dep), img_dep)
         cv2.imwrite(os.path.join(basedir, file_los), qry_los)
 
-        df_qry.iloc[i] = [*pos, *orn, file_pxl, file_dep, file_los]
+        df_qry.loc[i] = [*pos, *orn, file_pxl, file_dep, file_los]
 
     df_ctx.to_csv(os.path.join(basedir, 'ctx-data.csv'))
     df_qry.to_csv(os.path.join(basedir, 'qry-data.csv'))
