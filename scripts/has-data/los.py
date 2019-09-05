@@ -28,8 +28,8 @@ class LineOfSight:
                            np.linspace(y_range[1], y_range[0], map_size[1]))
         self.grid = np.stack(grid, axis=2)
         self.param_morphology = {
-            'erode': {'kernel': np.ones((4, 4), dtype=np.int), 'iterations': 2},
-            'dilate': {'kernel': np.ones((4, 4), dtype=np.int), 'iterations': 2},
+            'erode': {'kernel': np.ones((8, 8), dtype=np.int), 'iterations': 1},
+            'dilate': {'kernel': np.ones((8, 8), dtype=np.int), 'iterations': 2},
         }
         self.param_morphology.update(param_morphology)
 

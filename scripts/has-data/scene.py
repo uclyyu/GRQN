@@ -54,8 +54,6 @@ class Scene:
                 map_spawn = cv2.imread(map_spawn, cv2.IMREAD_GRAYSCALE)
             elif isinstance(map_spawn, np.ndarray):
                 map_spawn = map_spawn.astype(np.float)
-                print(map_spawn.min())
-                print(map_spawn.max())
                 map_spawn = (map_spawn - map_spawn.min()) / \
                     (map_spawn.max() - map_spawn.min()) * value
             else:
@@ -94,6 +92,7 @@ class Scene:
 
         _, _, rgb, dep, _ = p.getCameraImage(
             width, height, mat_v, mat_p,
+            renderer=p.ER_BULLET_HARDWARE_OPENGL,  # p.ER_TINY_RENDERER,
             physicsClientId=self.client)
 
         return rgb, dep
