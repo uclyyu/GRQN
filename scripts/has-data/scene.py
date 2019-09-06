@@ -46,6 +46,12 @@ class Scene:
         self.world_spawnables = self.coords_world[np.where(
             self.map_spawn.ravel() == value)]
 
+        self.coords_min = self.coords_world.min(axis=0)
+
+    def normalize_position(self, pos):
+        x, y, z = self.coords_min
+        return np.subtract(pos, [x, y, 0]) + [-3.5, -3.5, 0]
+
     def sample_position(self, at=None, z=None, map_spawn=None, value=255):
         if map_spawn is None:
             spawnables = self.world_spawnables

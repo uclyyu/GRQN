@@ -57,7 +57,7 @@ def task(basedir, mapsize, nrays, Z, camwh, scene, los):
         cv2.imwrite(os.path.join(basedir, file_los), ctx_los)
         cv2.imwrite(os.path.join(basedir, file_jlos), _ctx_jlos)
 
-        df_ctx.loc[i] = [*ctx_pos, *ctx_orn,
+        df_ctx.loc[i] = [*scene.normalize_position(ctx_pos), *ctx_orn,
                          file_pxl, file_dep, file_los, file_jlos]
 
         #
@@ -94,7 +94,8 @@ def task(basedir, mapsize, nrays, Z, camwh, scene, los):
         cv2.imwrite(os.path.join(basedir, file_dep), img_dep)
         cv2.imwrite(os.path.join(basedir, file_los), qry_los)
 
-        df_qry.loc[i] = [*qry_pos, *qry_orn, file_pxl, file_dep, file_los]
+        df_qry.loc[i] = [*scene.normalize_position(qry_pos), *qry_orn,
+                         file_pxl, file_dep, file_los]
 
     df_ctx.to_csv(os.path.join(basedir, 'ctx-data.csv'))
     df_qry.to_csv(os.path.join(basedir, 'qry-data.csv'))
