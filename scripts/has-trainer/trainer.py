@@ -116,7 +116,7 @@ def trainer(args, model, criterion, optimiser, lr_scheduler, writer):
                     wtag('epoch', 'kld_dlos', phase), kld_dlos_epoch, epoch)
 
                 # --- Save origin and decoded images every test epoch
-                if phase == 'train':
+                if phase == 'test':
                     writer.add_image(wtag('epoch', 'dec_jlos'),
                                      dec_jlos[0], epoch)
                     writer.add_image(wtag('epoch', 'dec_dlos'),
