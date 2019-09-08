@@ -59,7 +59,7 @@ def trainer(args, model, criterion, optimiser, lr_scheduler, writer):
             # --- Iterate over the current subset
             with torch.set_grad_enabled(phase == 'train'):
                 for i, (ctx_x, ctx_v, qry_jlos, qry_dlos, qry_v) in enumerate(dataloaders[phase]):
-                    k = 5  # random.randint(1, 6)
+                    k = random.randint(1, 6)
 
                     # --- Model inputs
                     ctx_x = ctx_x[:, :k].to(args.target_device)
