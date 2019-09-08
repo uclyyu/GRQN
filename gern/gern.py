@@ -1,299 +1,186 @@
-import torch, random
+import torch
 import torch.nn as nn
-from numpy.random import randint
-from torch.distributions import Normal
-from torch.utils import checkpoint as ptcp
-from collections import namedtuple
-from .utils import count_parameters
+from .utils import count_parameters, init_parameters
 from .model import *
 
 
 class GeRN(torch.jit.ScriptModule):
-	def __init__(self):
-		super(GeRN, self).__init__()
+    def __init__(self, nr=256, nq=128, nh=128, nv=4):
+        super(GeRN, self).__init__()
+        gain = nn.init.calculate_gain('leaky_relu')
 
-		# --- default sizes/dimensionality
-		Nr = 256  # aggregated representation
-		Nh = 256  # recurrent cell hidden
-		Nv =   7  # query vector
+        # --- default sizes
+        self.size_r = nr
+        self.size_q = nq
+        self.size_h = nh
+        self.size_v = nv
 
-		# --- representaiton operators
-		self.rop_primitive = RepresentationEncoderPrimitive()
-		self.rop_state = RepresentationEncoderState()
-		self.rop_representation = RepresentationEncoder()
-		self.rop_aggregator = RepresentationAggregator()
-		self.rop_rewind = AggregateRewind()
+        # --- representaiton operators
+        self.rop_deprepr = DepRepresentationEncoder()
+        self.rop_losrepr = LosRepresentationEncoder()
 
-		# --- inference operators
-		self.iop_posterior = GaussianFactor()
-		self.iop_state = RecurrentCell(Nr * 2 + Nh, Nh)
+        # --- inference operators
+        self.iop_posterior = GaussianFactor()
+        self.iop_state = RecurrentCell(nr + nq + nh, nh)
 
-		# --- generation operators
-		self.gop_prior = GaussianFactor()
-		self.gop_state = RecurrentCell(Nr + Nh + Nv, Nh)
-		self.gop_delta = GeneratorDelta()
+        # --- generation operators
+        self.gop_prior = GaussianFactor()
+        self.gop_state = RecurrentCell(nr + nh, nh)
+        self.gop_delta = GeneratorDelta()
+        self.conv2d = nn.Sequential(
+            nn.Conv2d(nr + nh + nv, nr + nh, (3, 3), padding=1),
+            nn.LeakyReLU(.01),
+            GroupNorm2d(nr + nh, 8))
+        self.conv2d.apply(partial(init_parameters, gain=gain))
 
-		# --- classifier
-		self.aux_class = AuxiliaryClassifier()
+        # --- decoding operators
+        self.dop_base = Decoder()
 
-		# --- decoding operators
-		self.dop_base = DecoderBase()
-		self.dop_heat = DecoderHeatmap()
-		self.dop_rgbv = DecoderRGBVision()
+        print('{}: {:,} trainable parameters.'.format(
+            self.__class__.__name__, count_parameters(self)))
 
-		print('{}: {:,} trainable parameters.'.format(self.__class__.__name__, count_parameters(self)))
+    @torch.jit.script_method
+    def _forward_mc_loop(self, ndraw, cnd_repr, qry_jrep, qry_drep, qry_v, hi_jlos, ci_jlos, oi_jlos, hi_dlos, ci_dlos, oi_dlos, hg_jlos, cg_jlos, og_jlos, hg_dlos, cg_dlos, og_dlos, ug_jlos, ug_dlos, pr_means_jlos, pr_logvs_jlos, pr_means_dlos, pr_logvs_dlos, po_means_jlos, po_logvs_jlos, po_means_dlos, po_logvs_dlos):
+        # type: (int, Tensor, Tensor, Tensor, Tensor, Tensor, Tensor, Tensor, Tensor, Tensor, Tensor, Tensor, Tensor, Tensor, Tensor, Tensor, Tensor, Tensor, Tensor, List[Tensor], List[Tensor], List[Tensor], List[Tensor], List[Tensor], List[Tensor], List[Tensor], List[Tensor]) -> Tuple[Tensor, Tensor, List[Tensor], List[Tensor], List[Tensor], List[Tensor], List[Tensor], List[Tensor], List[Tensor], List[Tensor],]
 
-	def pack_time(self, x):
-		size = x.size()
-		T = size[1]
-		new_size = torch.Size([-1]) + size[2:]
-		return x.contiguous().view(new_size), T
+        for ast in range(ndraw):
+            _, pr_mean_jlos, pr_logv_jlos = self.gop_prior(hg_jlos)
+            _, pr_mean_dlos, pr_logv_dlos = self.gop_prior(hg_dlos)
 
-	def unpack_time(self, x, t):
-		size = x.size()
-		new_size = torch.Size([-1, t]) + size[1:]
-		return x.contiguous().view(new_size)
+            inp_ij = torch.cat([cnd_repr, qry_jrep, hg_jlos], dim=1)
+            inp_id = torch.cat([cnd_repr, qry_drep, hg_dlos], dim=1)
 
-	@torch.jit.script_method
-	def _forward_mc_loop(self, asteps, rwn_aggr, qry_repp, qry_v, h_iop, c_iop, o_iop, h_gop, c_gop, o_gop, u_gop, prior_means, prior_logvs, posterior_means, posterior_logvs):
-		# type: (int, Tensor, Tensor, Tensor, Tensor, Tensor, Tensor, Tensor, Tensor, Tensor, Tensor, List[Tensor], List[Tensor], List[Tensor], List[Tensor]) -> Tuple[Tensor, List[Tensor], List[Tensor], List[Tensor], List[Tensor]]
+            hi_jlos, ci_jlos, oi_jlos = self.iop_state(
+                inp_ij, hi_jlos, ci_jlos, oi_jlos)
+            hi_dlos, ci_dlos, oi_dlos = self.iop_state(
+                inp_id, hi_dlos, ci_dlos, oi_dlos)
 
-		for ast in range(asteps):
-			prior_z, prior_mean, prior_logv = self.gop_prior(h_gop)
+            po_z_jlos, po_mean_jlos, po_logv_jlos = self.iop_posterior(hi_jlos)
+            po_z_dlos, po_mean_dlos, po_logv_dlos = self.iop_posterior(hi_dlos)
 
-			input_iop = torch.cat([rwn_aggr, qry_repp, h_gop], dim=1)
-			h_iop, c_iop, o_iop = self.iop_state(input_iop, h_iop, c_iop, o_iop)
-			posterior_z, posterior_mean, posterior_logv = self.iop_posterior(h_iop)
+            inp_gj = torch.cat([cnd_repr, po_z_jlos], dim=1)
+            inp_gd = torch.cat([cnd_repr, po_z_dlos, qry_v], dim=1)
+            inp_gd = self.conv2d(inp_gd)
 
-			input_gop = torch.cat([rwn_aggr, posterior_z, qry_v], dim=1)
-			h_gop, c_gop, o_gop = self.gop_state(input_gop, h_gop, c_gop, o_gop)
-			u_gop = u_gop + self.gop_delta(u_gop, h_gop)
+            hg_jlos, cg_jlos, og_jlos = self.gop_state(
+                inp_gj, hg_jlos, cg_jlos, og_jlos)
+            hg_dlos, cg_dlos, og_dlos = self.gop_state(
+                inp_gd, hg_dlos, cg_dlos, og_dlos)
 
-			# collect means and log variances
-			prior_means.append(prior_mean), prior_logvs.append(prior_logv)
-			posterior_means.append(posterior_mean), posterior_logvs.append(posterior_logv)
+            ug_jlos = ug_jlos + self.gop_delta(ug_jlos, hg_jlos)
+            ug_dlos = ug_dlos + self.gop_delta(ug_dlos, hg_dlos)
 
-		return u_gop, prior_means, prior_logvs, posterior_means, posterior_logvs
+            # collect means and log variances
+            pr_means_jlos.append(pr_mean_jlos)
+            pr_logvs_jlos.append(pr_logv_jlos)
+            pr_means_dlos.append(pr_mean_dlos)
+            pr_logvs_dlos.append(pr_logv_dlos)
 
-	@torch.jit.script_method
-	def _predict_mc_loop(self, asteps, rwn_aggr, qry_v, h_gop, c_gop, o_gop, u_gop, prior_means=[], prior_logvs=[]):
-	# type: (int, Tensor, Tensor, Tensor, Tensor, Tensor, Tensor, List[Tensor], List[Tensor]) -> Tuple[Tensor, List[Tensor], List[Tensor]]
-		for ast in range(asteps):
-			prior_z, prior_mean, prior_logv = self.gop_prior(h_gop)
+            po_means_jlos.append(po_mean_jlos)
+            po_logvs_jlos.append(po_logv_jlos)
+            po_means_dlos.append(po_mean_dlos)
+            po_logvs_dlos.append(po_logv_dlos)
 
-			input_gop = torch.cat([rwn_aggr, prior_z, qry_v], dim=1)
-			h_gop, c_gop, o_gop = self.gop_state(input_gop, h_gop, c_gop, o_gop)
-			u_gop = u_gop + self.gop_delta(u_gop, h_gop)
+        return ug_jlos, ug_dlos, pr_means_jlos, pr_logvs_jlos, pr_means_dlos, pr_logvs_dlos, po_means_jlos, po_logvs_jlos, po_means_dlos, po_logvs_dlos
 
-			# collect means and log variances
-			prior_means.append(prior_mean), prior_logvs.append(prior_logv)
+    # @torch.jit.script_method
+    # def _predict_mc_loop(self, asteps, rwn_aggr, qry_v, h_gop, c_gop, o_gop, u_gop, prior_means=[], prior_logvs=[]):
+    #     # type: (int, Tensor, Tensor, Tensor, Tensor, Tensor, Tensor, List[Tensor], List[Tensor]) -> Tuple[Tensor, List[Tensor], List[Tensor]]
+    #     for ast in range(asteps):
+    #         prior_z, prior_mean, prior_logv = self.gop_prior(h_gop)
 
-		return u_gop, prior_means, prior_logvs
+    #         input_gop = torch.cat([rwn_aggr, prior_z, qry_v], dim=1)
+    #         h_gop, c_gop, o_gop = self.gop_state(
+    #             input_gop, h_gop, c_gop, o_gop)
+    #         u_gop = u_gop + self.gop_delta(u_gop, h_gop)
 
-	def forward(self, 
-				cnd_x, cnd_m, cnd_k, cnd_v, 
-				qry_x, qry_m, qry_k, qry_v, 
-				gamma=.95, 
-				asteps=7, rsteps=None):
-		# --- Conditional (cnd_*) and query (qry_*) inputs
-		# cnd/qry_x: RGB image (B, T, 3, 256, 256)
-		# cnd/qry_m: 'Background' heatmap (B, T, 1, 256, 256)
-		# cnd/qry_k: Rendered skeleton (B, T, 3, 256, 256)
-		# cnd/qry_v: Orientation vector (B, T, 7, 1, 1)
-		# * For conditional inputs, time (T) will be reduced, this is not the case
-		#  for query inputs. Different T's are allowed for each input types. 
-		# ---
+    #         # collect means and log variances
+    #         prior_means.append(prior_mean), prior_logvs.append(prior_logv)
 
-		# Containers to hold outputs.
-		prior_means, prior_logvs = [], []
-		posterior_means, posterior_logvs = [], []
-		output_heat = []
-		output_rgb = []
+    #     return u_gop, prior_means, prior_logvs
 
-		# Size information.
-		Bc, Tc, _, Hc, Wc = cnd_x.size()
-		Tq = qry_v.size(1)
-		dev = cnd_x.device
+    def forward(self, cnd_x, cnd_v, qry_jlos, qry_dlos, qry_v, ndraw=7):
+        """Forward method
+        Args:
+            cnd_x (torch.tensor): A 5-way tensor representing contextual sensors (pixels)
+            cnd_v (torch.tenosr): A 5-way tensor representing contextual sensors (viewpoint)
+            qry_x (torch.tenosr): Description
+            qry_v (torch.tenosr): Description
+            ndraw (int, optional): Description
+        Returns:
+            torch.tenosr: Description
+        """
+        # Containers to hold outputs.
+        pr_means_jlos = []
+        pr_logvs_jlos = []
+        pr_means_dlos = []
+        pr_logvs_dlos = []
+        po_means_jlos = []
+        po_logvs_jlos = []
+        po_means_dlos = []
+        po_logvs_dlos = []
 
-		# Number of steps to query backward in time.
-		if rsteps is None:
-			rsteps = Tq - 1
-		else:
-			rsteps = min(Tq - 1, rsteps)
-			Tq = rsteps + 1
+        # Size information.
+        kB, kN, kC, kH, kW = cnd_x.size()
+        dev = cnd_x.device
 
-			qry_x = qry_x[:, :Tq]
-			qry_m = qry_m[:, :Tq]
-			qry_k = qry_k[:, :Tq]
-			qry_v = qry_v[:, :Tq]
+        # --- Conditional filtered and aggregated representations
+        cnd_x = cnd_x.view(kB * kN, kC, kH, kW)
+        cnd_v = cnd_v.view(kB * kN, -1, 1, 1)
+        cnd_repr = self.rop_deprepr(cnd_x, cnd_v)
+        cnd_repr = cnd_repr.view(kB, kN, -1, 1, 1).sum(dim=1)
+        cnd_repr = cnd_repr.expand(-1, -1, 16, 16)
 
-		# --- Conditional filtered and aggregated representations
-		prim = self.rop_primitive(cnd_x, cnd_m, cnd_k, cnd_v).squeeze(4).squeeze(3)
-		prim_packed, cnd_t = self.pack_time(prim)
-		state, c_rop, o_rop = self.rop_state(prim)
-		state_padded = nn.functional.pad(state, (0, 0, 1, 0), value=0)
-		state = self.pack_time(state)[0]
-		state_padded = self.pack_time(state_padded)[0]
+        # --- Query representation
+        qry_jrep = self.rop_losrepr(qry_jlos, index=2)
+        qry_drep = self.rop_losrepr(qry_dlos, qry_v, index=1)
+        qry_jrep = qry_jrep.expand(-1, -1, 16, 16)
+        qry_drep = qry_drep.expand(-1, -1, 16, 16)
+        qry_v = qry_v.expand(-1, -1, 16, 16)
 
-		cnd_repf = self.unpack_time(self.rop_representation(prim_packed, state), cnd_t)
-		cnd_aggr = self.unpack_time(self.rop_aggregator(state_padded), cnd_t + 1)
-		end_aggr = gamma * cnd_aggr[:, -2] + cnd_repf[:, -1]
+        # --- LSTM hidden/cell/prior output gate for inference/generator operators
+        hi_jlos = torch.zeros(1, device=dev).expand(kB, self.size_h, 16, 16)
+        ci_jlos = torch.zeros(1, device=dev).expand(kB, self.size_h, 16, 16)
+        oi_jlos = torch.zeros(1, device=dev).expand(kB, self.size_h, 16, 16)
+        hg_jlos = torch.zeros(1, device=dev).expand(kB, self.size_h, 16, 16)
+        cg_jlos = torch.zeros(1, device=dev).expand(kB, self.size_h, 16, 16)
+        og_jlos = torch.zeros(1, device=dev).expand(kB, self.size_h, 16, 16)
 
-		# --- Query representation primitives
-		# 									-> (B, Tq, 256, 1, 1)
-		qry_repp = self.rop_primitive(qry_x, qry_m, qry_k, qry_v)
+        hi_dlos = torch.zeros(1, device=dev).expand(kB, self.size_h, 16, 16)
+        ci_dlos = torch.zeros(1, device=dev).expand(kB, self.size_h, 16, 16)
+        oi_dlos = torch.zeros(1, device=dev).expand(kB, self.size_h, 16, 16)
+        hg_dlos = torch.zeros(1, device=dev).expand(kB, self.size_h, 16, 16)
+        cg_dlos = torch.zeros(1, device=dev).expand(kB, self.size_h, 16, 16)
+        og_dlos = torch.zeros(1, device=dev).expand(kB, self.size_h, 16, 16)
 
-		# --- LSTM hidden/cell/prior output gate for inference/generator operators
-		h_iop = torch.zeros(1, device=dev).expand(Bc * Tq, 256, 16, 16)
-		c_iop = torch.zeros(1, device=dev).expand(Bc * Tq, 256, 16, 16)
-		o_iop = torch.zeros(1, device=dev).expand(Bc * Tq, 256, 16, 16)
-		h_gop = torch.zeros(1, device=dev).expand(Bc * Tq, 256, 16, 16)
-		c_gop = torch.zeros(1, device=dev).expand(Bc * Tq, 256, 16, 16)
-		o_gop = torch.zeros(1, device=dev).expand(Bc * Tq, 256, 16, 16)
-		u_gop = torch.zeros(1, device=dev).expand(Bc * Tq, 256, 16, 16)
+        ug_jlos = torch.zeros(1, device=dev).expand(kB, self.size_h, 16, 16)
+        ug_dlos = torch.zeros(1, device=dev).expand(kB, self.size_h, 16, 16)
 
-		# --- Rewind 
-		# 								-> (B, Tq, 256), (B, 256)
-		rwn_aggr, _ = self.rop_rewind(end_aggr, steps=rsteps)
-		
-		# tweaking dimensionality
-		rwn_aggr = self.pack_time(rwn_aggr)[0].unsqueeze(2).unsqueeze(2).expand(-1, -1, 16, 16)
-		qry_repp = self.pack_time(qry_repp)[0].expand(-1, -1, 16, 16)
-		qry_v = self.pack_time(qry_v)[0].expand(-1, -1, 16, 16)
+        # --- Inference/generation
+        (ug_jlos, ug_dlos,
+         pr_means_jlos, pr_logvs_jlos, pr_means_dlos, pr_logvs_dlos,
+         po_means_jlos, po_logvs_jlos, po_means_dlos, po_logvs_dlos) = self._forward_mc_loop(
+            ndraw,
+            cnd_repr, qry_jrep, qry_drep, qry_v,
+            hi_jlos, ci_jlos, oi_jlos,
+            hi_dlos, ci_dlos, oi_dlos,
+            hg_jlos, cg_jlos, og_jlos,
+            hg_dlos, cg_dlos, og_dlos,
+            ug_jlos, ug_dlos,
+            pr_means_jlos, pr_logvs_jlos, pr_means_dlos, pr_logvs_dlos,
+            po_means_jlos, po_logvs_jlos, po_means_dlos, po_logvs_dlos)
 
-		# --- Inference/generation
-		u_gop, prior_means, prior_logvs, posterior_means, posterior_logvs = self._forward_mc_loop(
-			asteps, rwn_aggr, qry_repp, qry_v,
-			h_iop, c_iop, o_iop, 
-			h_gop, c_gop, o_gop, u_gop,
-			prior_means, prior_logvs, posterior_means, posterior_logvs)
+        # --- Decoding
+        dec_jlos = self.dop_base(ug_jlos)
+        dec_dlos = self.dop_base(ug_dlos)
 
-		# --- Auxiliary classification task
-		cat_dist = self.aux_class(u_gop)
+        return (dec_jlos, dec_dlos,
+                pr_means_jlos, pr_logvs_jlos, pr_means_dlos, pr_logvs_dlos,
+                po_means_jlos, po_logvs_jlos, po_means_dlos, po_logvs_dlos)
 
-		# --- Decoding
-		dec_base = self.dop_base(u_gop)
-		dec_heat = self.dop_heat(dec_base)
-		dec_rgbv = self.dop_rgbv(dec_base, dec_heat)
-
-		return GernOutput(
-			rgbv=dec_rgbv,
-			heat=dec_heat,
-			label=cat_dist,
-			gamma=gamma,
-			cnd_repr=cnd_repf,
-			cnd_aggr=cnd_aggr,
-			prior_mean=prior_means,
-			prior_logv=prior_logvs,
-			posterior_mean=posterior_means,
-			posterior_logv=posterior_logvs,
-			)
-
-	def make_target(self, qry_x, qry_m, qry_k, qry_v, label, rsteps=None):
-		Tq = qry_v.size(1)
-		if rsteps is not None:
-			Tq = min(Tq, rsteps + 1)
-			qry_x = qry_x[:, :Tq]
-			qry_m = qry_m[:, :Tq]
-			qry_k = qry_k[:, :Tq]
-			qry_v = qry_v[:, :Tq]
-			
-		label = label.unsqueeze(1).expand(-1, qry_x.size(1))
-		return GernTarget(
-			rgbv=self.pack_time(qry_x)[0],
-			heat=self.pack_time(qry_m)[0],
-			label=self.pack_time(label)[0])
-
-	def predict(self, cnd_x, cnd_m, cnd_k, cnd_v, qry_v, 
-				gamma=.95, 
-				asteps=7, rsteps=None):
-		# --- Conditional (cnd_*) and query (qry_*) inputs
-		# cnd_x    : RGB image (B, T, 3, 256, 256)
-		# cnd_m    : 'Background' heatmap (B, T, 1, 256, 256)
-		# cnd_k    : Rendered skeleton (B, T, 3, 256, 256)
-		# cnd/qry_v: Orientation vector (B, T, 7, 1, 1)
-		# * For conditional inputs, time (T) will be reduced, this is not the case
-		#  for query inputs. Different T's are allowed for each input types. 
-		# ---
-
-		# Containers to hold outputs.
-		prior_means, prior_logvs = [], []
-		posterior_means, posterior_logvs = [], []
-		output_heat = []
-		output_rgb = []
-
-		# Size information.
-		Bc, Tc, _, Hc, Wc = cnd_x.size()
-		Tq = qry_v.size(1)
-		dev = cnd_x.device
-
-		# Number of steps to query backward in time.
-		if rsteps is None:
-			rsteps = Tq - 1
-		else:
-			rsteps = min(Tq - 1, rsteps)
-			Tq = rsteps + 1
-			qry_v = qry_v[:, :Tq]
-
-		# --- Conditional filtered and aggregated representations
-		prim = self.rop_primitive(cnd_x, cnd_m, cnd_k, cnd_v).squeeze(4).squeeze(3)
-		prim_packed, cnd_t = self.pack_time(prim)
-		state, c_rop, o_rop = self.rop_state(prim)
-		state_padded = nn.functional.pad(state, (0, 0, 1, 0), value=0)
-		state = self.pack_time(state)[0]
-		state_padded = self.pack_time(state_padded)[0]
-
-		cnd_repf = self.unpack_time(self.rop_representation(prim_packed, state), cnd_t)
-		cnd_aggr = self.unpack_time(self.rop_aggregator(state_padded), cnd_t + 1)
-		end_aggr = gamma * cnd_aggr[:, -2] + cnd_repf[:, -1]
-
-		# --- Query representation primitives
-		# 									-> (B, Tq, 256, 1, 1)
-
-		# --- LSTM hidden/cell/prior output gate for inference/generator operators
-		h_iop = torch.zeros(1, device=dev).expand(Bc * Tq, 256, 16, 16)
-		c_iop = torch.zeros(1, device=dev).expand(Bc * Tq, 256, 16, 16)
-		o_iop = torch.zeros(1, device=dev).expand(Bc * Tq, 256, 16, 16)
-		h_gop = torch.zeros(1, device=dev).expand(Bc * Tq, 256, 16, 16)
-		c_gop = torch.zeros(1, device=dev).expand(Bc * Tq, 256, 16, 16)
-		o_gop = torch.zeros(1, device=dev).expand(Bc * Tq, 256, 16, 16)
-		u_gop = torch.zeros(1, device=dev).expand(Bc * Tq, 256, 16, 16)
-
-		# --- Rewind 
-		# 								-> (B, Tq, 256), (B, 256)
-		rwn_aggr, _ = self.rop_rewind(end_aggr, steps=rsteps)
-		
-		# tweaking dimensionality
-		rwn_aggr = self.pack_time(rwn_aggr)[0].unsqueeze(2).unsqueeze(2).expand(-1, -1, 16, 16)
-		qry_v = self.pack_time(qry_v)[0].expand(-1, -1, 16, 16)
-
-		# --- Inference/generation
-		u_gop, prior_means, prior_logvs = self._predict_mc_loop(
-			asteps, rwn_aggr, qry_v,
-			h_gop, c_gop, o_gop, u_gop,
-			prior_means, prior_logvs)
-
-		# --- Auxiliary classification task
-		cat_dist = self.aux_class(u_gop)
-
-		# --- Decoding
-		dec_base = self.dop_base(u_gop)
-		dec_heat = self.dop_heat(dec_base)
-		dec_rgbv = self.dop_rgbv(dec_base, dec_heat)
-
-		return GernOutput(
-			rgbv=dec_rgbv,
-			heat=dec_heat,
-			label=cat_dist,
-			gamma=gamma,
-			cnd_repr=cnd_repf,
-			cnd_aggr=cnd_aggr,
-			prior_mean=prior_means,
-			prior_logv=prior_logvs,
-			posterior_mean=posterior_means,
-			posterior_logv=posterior_logvs,
-			)
+    def predict(self, cnd_x, cnd_v, qry_v, ndraw=7):
+        pass
 
 
 if __name__ == '__main__':
-	pass
+    pass

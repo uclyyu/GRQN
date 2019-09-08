@@ -1,143 +1,87 @@
-import torch, torchvision, os, json, cv2
+import torch
+import torchvision
+import os
+import json
+import cv2
 import numpy as np
-from PIL import Image
-from collections import namedtuple
+import pandas as pd
 from functools import reduce
 
 
-def _default_transforms_(obj):
-	# transform rgb images
-	itransform = torchvision.transforms.Compose([
-		torchvision.transforms.ToTensor(),
-		torchvision.transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
-		])
-	# transform monochromatic images
-	mtransform = torchvision.transforms.Compose([
-		torchvision.transforms.ToTensor(),
-		])
-	# transform orientation vector
-	vtransform = torchvision.transforms.Compose([
-		torchvision.transforms.Lambda(lambda x: torch.tensor(x, dtype=torch.float32)),
-		torchvision.transforms.Lambda(lambda x: x.unsqueeze(2).unsqueeze(3))
-		])
-	# transform target label
-	ltransform = torchvision.transforms.Compose([
-		torchvision.transforms.Lambda(lambda x: torch.tensor(x, dtype=torch.long)),
-		torchvision.transforms.Lambda(lambda x: x.view(-1))
-		])
-	
-	setattr(obj, 'itransform', itransform)
-	setattr(obj, 'mtransform', mtransform)
-	setattr(obj, 'vtransform', vtransform)
-	setattr(obj, 'ltransform', ltransform)
-
-def _rebase_(root, serial, filename):
-	name = filename.split(os.path.sep)[-1]
-	return os.path.join(root, serial, name)
-
-def _collate_(samples):
-	# samples: [(C, Q, L), (C, Q, L), ...]
-	C, Q, L = zip(*samples)
-	# C: [(Xc, Mc, Kc, Vc), (Xc, Mc, Kc, Vc), ...]
-	Xc, Mc, Kc, Vc = zip(*C)
-	Xq, Mq, Kq, Vq = zip(*Q)
-
-	# Determine shorted time steps.
-	tc = reduce(lambda x, y: min(x, y), [x.size(0) for x in Xc])
-	tq = reduce(lambda x, y: min(x, y), [x.size(0) for x in Xq])
-
-	# Crop time series
-	Xc = torch.stack([x[-tc:] for x in Xc], dim=0)
-	Mc = torch.stack([m[-tc:] for m in Mc], dim=0)
-	Kc = torch.stack([k[-tc:] for k in Kc], dim=0)
-	Vc = torch.stack([v[-tc:] for v in Vc], dim=0)
-
-	Xq = torch.stack([x[:tq] for x in Xq], dim=0)
-	Mq = torch.stack([m[:tq] for m in Mq], dim=0)
-	Kq = torch.stack([k[:tq] for k in Kq], dim=0)
-	Vq = torch.stack([v[:tq] for v in Vq], dim=0)	
-
-	L = torch.cat(L, dim=0)
-
-	return (Xc, Mc, Kc, Vc), (Xq, Mq, Kq, Vq), L
-
-def _load_images(manifest, root, serial, transform):
-	stack = []
-	for file in manifest:
-		with Image.open(_rebase_(root, serial, file)) as img:
-			stack.append(transform(img))
-
-	return torch.stack(stack, dim=0)
-
-
 class GernDataset(torch.utils.data.Dataset):
-	def __init__(self, rootdir, manifest='manifest.json'):
-		self.rootdir = os.path.abspath(rootdir)
-		self.manifest = manifest
-		self.data = sorted(os.listdir(self.rootdir))
-		_default_transforms_(self)
+    def __init__(self, rootdir):
+        self.rootdir = os.path.abspath(rootdir)
+        assert os.path.exists(self.rootdir)
+        self.data = os.listdir(self.rootdir)
+        assert len(self.data) > 0
 
-		assert os.path.exists(self.rootdir)
-		assert len(self.data) > 0
+    def __len__(self):
+        return len(self.data)
 
-	def __len__(self):
-		return len(self.data)
+    def __getitem__(self, index):
+        serial = self.data[index]  # 8-digit folder name
 
-	def __getitem__(self, index):
-		serial = self.data[index]  # 8-digit folder name
-		manifest_name = os.path.join(self.rootdir, serial, self.manifest)
+        ctx_vector = pd.read_csv(os.path.join(
+            self.rootdir, serial, 'ctx-data.csv'))
+        qry_vector = pd.read_csv(os.path.join(
+            self.rootdir, serial, 'qry-data.csv'))
 
-		with open(manifest_name, 'r') as jr:
-			manifest = json.load(jr)
+        N = len(ctx_vector)
 
-		# --- conditionals
-		tXc = _load_images(manifest['visuals.condition'], self.rootdir, serial, self.itransform)
-		tMc = _load_images(manifest['heatmaps.condition'], self.rootdir, serial, self.mtransform)
-		tKc = _load_images(manifest['skeletons.condition'], self.rootdir, serial, self.itransform)
-		tVc = self.vtransform(manifest['pov.readings.condition'])
+        ctx_x = []
+        ctx_v = []
+        qry_jlos = []
+        for pos_x, pos_y, eul_z, file_dep, file_los in ctx_vector[['pos_x', 'pos_y', 'eul_z', 'file_dep', 'file_jlos']].values:
+            ctx_v.append(torch.tensor([pos_x, pos_y, np.cos(
+                eul_z), np.sin(eul_z)], dtype=torch.float32))
 
-		Nc = manifest['num.pre'] + manifest['num.post']
-		assert tXc.size(0) == Nc 
-		assert tMc.size(0) == Nc
-		assert tKc.size(0) == Nc
-		assert tVc.size(0) == Nc
+            file_dep = os.path.join(self.rootdir, serial, file_dep)
+            dep = cv2.imread(file_dep, cv2.IMREAD_GRAYSCALE)[None] / 255.
+            ctx_x.append(torch.tensor(dep, dtype=torch.float32))
 
-		# --- queries
-		tXq = _load_images(manifest['visuals.rewind'], self.rootdir, serial, self.itransform)
-		tMq = _load_images(manifest['heatmaps.rewind'], self.rootdir, serial, self.mtransform)
-		tKq = _load_images(manifest['skeletons.rewind'], self.rootdir, serial, self.itransform)
-		tVq = self.vtransform(manifest['pov.readings.rewind'])
+            file_los = os.path.join(self.rootdir, serial, file_los)
+            los = cv2.imread(file_los, cv2.IMREAD_GRAYSCALE)[None] / 255.
+            qry_jlos.append(torch.tensor(los, dtype=torch.float32))
 
-		Nq = manifest['num.rewind']
-		assert tXq.size(0) == Nq 
-		assert tMq.size(0) == Nq
-		assert tKq.size(0) == Nq
-		assert tVq.size(0) == Nq
+        qry_v = []
+        qry_dlos = []
+        for pos_x, pos_y, eul_z, file_los in qry_vector[['pos_x', 'pos_y', 'eul_z', 'file_los']].values:
+            qry_v.append(torch.tensor([pos_x, pos_y, np.cos(
+                eul_z), np.sin(eul_z)], dtype=torch.float32))
 
-		# --- activity label
-		Lq = self.ltransform(manifest['label'])
+            file_los = os.path.join(self.rootdir, serial, file_los)
+            los = cv2.imread(file_los, cv2.IMREAD_GRAYSCALE)[None] / 255.
+            qry_dlos.append(torch.tensor(los, dtype=torch.float32))
 
-		return (tXc, tMc, tKc, tVc), (tXq, tMq, tKq, tVq), Lq
+        ctx_x = torch.stack(ctx_x, dim=0)
+        ctx_v = torch.stack(ctx_v, dim=0).view(N, 4, 1, 1)
+        qry_jlos = torch.stack(qry_jlos, dim=0)
+        qry_dlos = torch.stack(qry_dlos, dim=0)
+        qry_v = torch.stack(qry_v, dim=0).view(N, 4, 1, 1)
+
+        return ctx_x, ctx_v, qry_jlos, qry_dlos, qry_v
 
 
 class GernSampler(torch.utils.data.Sampler):
-	def __init__(self, data_source, num_samples):
-		self.max_n = len(data_source)
-		self.n_samples = num_samples
+    def __init__(self, data_source, num_samples):
+        self.max_n = len(data_source)
+        self.n_samples = num_samples
 
-		assert self.n_samples <= self.max_n
+        assert self.n_samples <= self.max_n
 
-	def __iter__(self):
-		yield from np.random.randint(0, self.max_n, self.n_samples)
+    def __iter__(self):
+        yield from np.random.randint(0, self.max_n, self.n_samples)
 
-	def __len__(self):
-		return self.n_samples
+    def __len__(self):
+        return self.n_samples
 
 
 class GernDataLoader(torch.utils.data.DataLoader):
-	def __init__(self, rootdir, subset_size=64, batch_size=8, drop_last=True, **kwargs):
-		dataset = GernDataset(rootdir)
-		sampler = GernSampler(dataset, subset_size)
-		batch_sampler = torch.utils.data.BatchSampler(sampler, batch_size, drop_last=drop_last)
+    def __init__(self, rootdir, subset_size=64, batch_size=8, drop_last=True, **kwargs):
+        dataset = GernDataset(rootdir)
+        sampler = GernSampler(dataset, subset_size)
+        batch_sampler = torch.utils.data.BatchSampler(
+            sampler, batch_size, drop_last=drop_last)
 
-		super(GernDataLoader, self).__init__(dataset, batch_sampler=batch_sampler, collate_fn=_collate_, **kwargs)
+        super(GernDataLoader, self).__init__(
+            dataset, batch_sampler=batch_sampler, **kwargs)

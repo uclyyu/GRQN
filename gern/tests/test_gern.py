@@ -1,41 +1,47 @@
 from .. import gern
-import unittest, torch
-import torch.nn as nn
+import unittest
+import torch
 
 
 class TestGern(unittest.TestCase):
-	def setUp(self):
-		self.net = gern.GeRN()
+    def setUp(self):
+        self.nr = 256
+        self.nq = 128
+        self.nh = 128
+        self.nv = 4
+        self.net = gern.GeRN(self.nr, self.nq, self.nh, self.nv)
 
-	def test_forward(self):
-		cnd_x = torch.randn(2, 5, 3, 256, 256)
-		cnd_m = torch.randn(2, 5, 1, 256, 256)
-		cnd_k = torch.randn(2, 5, 3, 256, 256)
-		cnd_v = torch.randn(2, 5, 7,   1,   1)
-		qry_x = torch.randn(2, 3, 3, 256, 256)
-		qry_m = torch.randn(2, 3, 1, 256, 256)
-		qry_k = torch.randn(2, 3, 3, 256, 256)
-		qry_v = torch.randn(2, 3, 7,   1,   1) 
+    def test_forward(self):
+        cnd_x = torch.randn(1, 3, 1, 320, 240)
+        cnd_v = torch.randn(1, 3, 4, 1, 1)
+        qry_x = torch.randn(1, 1, 256, 256)
+        qry_v = torch.randn(1, 4, 1, 1)
 
-		out = self.net(
-			cnd_x, cnd_m, cnd_k, cnd_v, 
-			qry_x, qry_m, qry_k, qry_v,
-			gamma=.99, asteps=32, rsteps=4)
+        (dec_jlos, dec_dlos,
+         pr_means_jlos, pr_logvs_jlos, pr_means_dlos, pr_logvs_dlos,
+         po_means_jlos, po_logvs_jlos, po_means_dlos, po_logvs_dlos) = self.net(
+            cnd_x, cnd_v,
+            qry_x, qry_v, ndraw=1)
 
-	def test_predict(self):
-		cnd_x = torch.randn(2, 5, 3, 256, 256)
-		cnd_m = torch.randn(2, 5, 1, 256, 256)
-		cnd_k = torch.randn(2, 5, 3, 256, 256)
-		cnd_v = torch.randn(2, 5, 7,   1,   1)
-		qry_v = torch.randn(2, 3, 7,   1,   1) 
-
-		out = self.net.predict(
-			cnd_x, cnd_m, cnd_k, cnd_v, qry_v,
-			gamma=.99, asteps=32, rsteps=4)
-
-	def test_optimiser(self):
-		optimiser = torch.optim.Adam(self.net.parameters(), 1e-4)
+        self.assertEqual(dec_jlos.size(), torch.Size([1, 1, 320, 240]))
+        self.assertEqual(dec_dlos.size(), torch.Size([1, 1, 320, 240]))
+        self.assertEqual(pr_means_jlos[-1].size(),
+                         torch.Size([1, self.nh, 16, 16]))
+        self.assertEqual(pr_logvs_jlos[-1].size(),
+                         torch.Size([1, self.nh, 16, 16]))
+        self.assertEqual(pr_means_dlos[-1].size(),
+                         torch.Size([1, self.nh, 16, 16]))
+        self.assertEqual(pr_logvs_dlos[-1].size(),
+                         torch.Size([1, self.nh, 16, 16]))
+        self.assertEqual(po_means_jlos[-1].size(),
+                         torch.Size([1, self.nh, 16, 16]))
+        self.assertEqual(po_logvs_jlos[-1].size(),
+                         torch.Size([1, self.nh, 16, 16]))
+        self.assertEqual(po_means_dlos[-1].size(),
+                         torch.Size([1, self.nh, 16, 16]))
+        self.assertEqual(po_logvs_dlos[-1].size(),
+                         torch.Size([1, self.nh, 16, 16]))
 
 
 if __name__ == '__main__':
-	unittest.main()
+    unittest.main()
