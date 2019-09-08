@@ -28,8 +28,8 @@ class GernCriterion(object):
                  pr_means_jlos, pr_logvs_jlos, pr_means_dlos, pr_logvs_dlos,
                  po_means_jlos, po_logvs_jlos, po_means_dlos, po_logvs_dlos):
 
-        bce_jlos = F.binary_cross_entroy(dec_jlos, trg_jlos, reduction='mean')
-        bce_dlos = F.binary_cross_entroy(dec_dlos, trg_dlos, reduction='mean')
+        bce_jlos = F.binary_cross_entropy(dec_jlos, trg_jlos, reduction='mean')
+        bce_dlos = F.binary_cross_entropy(dec_dlos, trg_dlos, reduction='mean')
         kld_jlos = kl_divergence(
             po_means_jlos, po_logvs_jlos, pr_means_jlos, pr_logvs_jlos)
         kld_dlos = kl_divergence(

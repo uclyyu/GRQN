@@ -9,6 +9,7 @@ import os
 import json
 import sys
 import time
+from numpy import random
 
 
 def wtag(*strings):
@@ -25,9 +26,9 @@ def trainer(args, model, criterion, optimiser, lr_scheduler, writer):
 
     # --- Build data loader
     dataloaders = {'train': GernDataLoader(args.rootdir_train, subset_size=args.train_subset_size,
-                                           batch_size=args.train_batch_size, num_workers=args.data_worker),
+                                           batch_size=args.batch_size, num_workers=args.data_worker),
                    'test': GernDataLoader(args.rootdir_test, subset_size=args.test_subset_size,
-                                          batch_size=args.test_batch_size, num_workers=args.data_worker)}
+                                          batch_size=args.batch_size, num_workers=args.data_worker)}
 
     since = time.time()
     for epoch in range(args.from_epoch, args.total_epochs):
@@ -35,15 +36,17 @@ def trainer(args, model, criterion, optimiser, lr_scheduler, writer):
         # --- Information
         elapsed = time.time() - since
         since = time.time()
-        epoch_string = '\n\n[{}]--- Epoch {:5d} (+{:.0f}s) {}'.format(
-            args.local_rank, epoch, elapsed, '-' * 50)
+        epoch_string = '\n\n--- Epoch {:5d} (+{:.0f}s) {}'.format(
+            epoch, elapsed, '-' * 50)
         print(epoch_string)
 
         # --- Alternating between training and testing phases
         for phase in ['train', 'test']:
             if phase == 'train':
-                lr_scheduler.step(epoch)
+                lr = lr_scheduler.step(epoch)
+                writer.add_scalar(wtag('epoch', 'lr'), lr, epoch)
                 model.train()
+
             else:
                 model.eval()
 
@@ -56,13 +59,14 @@ def trainer(args, model, criterion, optimiser, lr_scheduler, writer):
             # --- Iterate over the current subset
             with torch.set_grad_enabled(phase == 'train'):
                 for i, (ctx_x, ctx_v, qry_jlos, qry_dlos, qry_v) in enumerate(dataloaders[phase]):
+                    k = 5  # random.randint(1, 6)
 
                     # --- Model inputs
-                    ctx_x = ctx_x.to(args.target_device)
-                    ctx_v = ctx_v.to(args.target_device)
-                    qry_jlos = qry_jlos.to(args.target_device)
-                    qry_dlos = qry_dlos.to(args.target_device)
-                    qry_v = qry_v.to(args.target_device)
+                    ctx_x = ctx_x[:, :k].to(args.target_device)
+                    ctx_v = ctx_v[:, :k].to(args.target_device)
+                    qry_jlos = qry_jlos[:, k - 1].to(args.target_device)
+                    qry_dlos = qry_dlos[:, k - 1].to(args.target_device)
+                    qry_v = qry_v[:, k - 1].to(args.target_device)
 
                     # --- Forward pass
                     (dec_jlos, dec_dlos,
@@ -132,8 +136,8 @@ def main(args):
     lr_scheduler = LearningRateScheduler(
         optimiser, args.lr_min, args.lr_max, args.lr_saturate_epoch)
 
-    if args.target_device == 'cuda':
-        model = torch.nn.DataParallel(model)
+    # if args.target_device == 'cuda':
+    #     model = torch.nn.DataParallel(model)
 
     # --- Tensorboard writer
     writer = SummaryWriter(
@@ -146,8 +150,8 @@ def main(args):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     # Command line argument management
-    parser.add_argument('--use-json', type=str)
-    parser.add_argument('--generate-default-json', type=str)
+    parser.add_argument('--use-json', type=str, default='')
+    parser.add_argument('--generate-default-json', type=str, default='')
     # Main training arguments
     parser.add_argument('--run', type=int, default=0)
     parser.add_argument('--target-device', type=str,
@@ -158,6 +162,7 @@ if __name__ == '__main__':
     parser.add_argument('--lr-min', type=float, default=5e-5)
     parser.add_argument('--lr-max', type=float, default=5e-4)
     parser.add_argument('--lr-saturate-epoch', type=int, default=1600000)
+    parser.add_argument('--enable-amsgrad', type=bool, default=False)
     # Dataset settings
     parser.add_argument('--rootdir-train', type=str)
     parser.add_argument('--rootdir-test', type=str)
@@ -166,7 +171,7 @@ if __name__ == '__main__':
     parser.add_argument('--batch-size', type=int, default=8)
     parser.add_argument('--data-worker', type=int, default=4)
     # Trained model and checkpoint output
-    parser.add_argument('--savedir', type=str)
+    parser.add_argument('--savedir', type=str, default='')
     parser.add_argument('--checkpoint-interval', type=int, default=2000)
 
     args = parser.parse_args()
@@ -192,7 +197,7 @@ if __name__ == '__main__':
     # Assert savedir
     assert os.path.isdir(args.savedir), 'Not a valid pathname.'
 
-    chkptdir = os.join(args.savedir, 'checkpoints')
+    chkptdir = os.path.join(args.savedir, 'checkpoints')
     if not os.path.isdir(chkptdir):
         os.makedirs(chkptdir)
     setattr(args, 'chkptdir', chkptdir)

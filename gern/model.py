@@ -245,9 +245,9 @@ class Decoder(nn.Module):
     def __init__(self):
         super(Decoder, self).__init__()
         self.decoder_base = nn.Sequential(
-            nn.ConvTranspose2d(128, 128, (7, 3), (2, 2), padding=(0, 1)),
+            nn.ConvTranspose2d(128, 128, (3, 3), (2, 2), padding=(0, 0)),
             nn.LeakyReLU(.01),
-            nn.ConvTranspose2d(128, 128, (7, 3), (2, 2), padding=(0, 1)),
+            nn.ConvTranspose2d(128, 128, (3, 3), (2, 2), padding=(1, 1)),
             nn.LeakyReLU(.01),
             GroupNorm2d(128, 8),
             SkipConnect(
@@ -255,7 +255,7 @@ class Decoder(nn.Module):
                 nn.Conv2d(128, 256, (1, 1), (1, 1), bias=False)),
             nn.LeakyReLU(.01),
             GroupNorm2d(256, 8),
-            nn.ConvTranspose2d(256, 128, (5, 3), (2, 2), padding=(0, 1)),
+            nn.ConvTranspose2d(256, 128, (3, 3), (2, 2), padding=(1, 1)),
             nn.LeakyReLU(.01),
             GroupNorm2d(128, 8),
             SkipConnect(
