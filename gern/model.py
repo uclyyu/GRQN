@@ -42,9 +42,29 @@ class LosRepresentationEncoder(nn.Module):
                 GroupNorm2d(64, 8),
                 nn.MaxPool2d((2, 2), stride=(2, 2))
             ),
-            nn.Conv2d(68, 128, (3, 3), (2, 2), padding=1),
-            nn.Conv2d(64, 128, (3, 3), (2, 2), padding=1),
             nn.Sequential(
+                nn.Conv2d(68, 128, (3, 3), (2, 2), padding=1),
+                nn.LeakyReLU(.01),
+                GroupNorm2d(128, 8),
+                nn.MaxPool2d((2, 2), stride=(2, 2)),
+                nn.Conv2d(128, 128, (3, 3), (1, 1), padding=1),
+                nn.LeakyReLU(.01),
+                GroupNorm2d(128, 8),
+                SkipConnect(
+                    nn.Conv2d(128, 128, (1, 1), (1, 1), bias=False),
+                    nn.Sequential(
+                        nn.Conv2d(128, 128, (3, 3), (1, 1), padding=1),
+                        nn.LeakyReLU(.01),
+                        GroupNorm2d(128, 8),
+                        nn.Conv2d(128, 128, (3, 3), (1, 1), padding=1))
+                ),
+                nn.LeakyReLU(.01),
+                GroupNorm2d(128, 8),
+                nn.MaxPool2d((2, 2), stride=(2, 2)),
+                nn.Conv2d(128, 128, (3, 3), (2, 2), padding=1)
+            ),
+            nn.Sequential(
+                nn.Conv2d(64, 128, (3, 3), (2, 2), padding=1),
                 nn.LeakyReLU(.01),
                 GroupNorm2d(128, 8),
                 nn.MaxPool2d((2, 2), stride=(2, 2)),
@@ -78,7 +98,6 @@ class LosRepresentationEncoder(nn.Module):
             v = v.expand(-1, -1, h.size(2), h.size(3))
             h = torch.cat([h, v], dim=1)
         h = self.features[index](h)
-        h = self.features[3](h)
         return h
 
 
@@ -241,9 +260,9 @@ class GeneratorDelta(nn.Module):
         return self.layers(inp)
 
 
-class Decoder(nn.Module):
+class DecoderBase(nn.Module):
     def __init__(self):
-        super(Decoder, self).__init__()
+        super(DecoderBase, self).__init__()
         self.decoder_base = nn.Sequential(
             nn.ConvTranspose2d(128, 128, (3, 3), (2, 2), padding=(0, 0)),
             nn.LeakyReLU(.01),
@@ -258,6 +277,22 @@ class Decoder(nn.Module):
             nn.ConvTranspose2d(256, 128, (3, 3), (2, 2), padding=(1, 1)),
             nn.LeakyReLU(.01),
             GroupNorm2d(128, 8),
+        )
+        gain = nn.init.calculate_gain('leaky_relu')
+        self.apply(partial(init_parameters, gain=gain))
+
+        print('{}: {:,} trainable parameters.'.format(
+            self.__class__.__name__, count_parameters(self)))
+
+    def forward(self, x):
+        y = self.decoder_base(x)
+        return y
+
+
+class DecoderTop(nn.Module):
+    def __init__(self):
+        super(DecoderTop, self).__init__()
+        self.decoder_top = nn.Sequential(
             SkipConnect(
                 nn.Conv2d(128, 64, (3, 3), (1, 1), padding=1),
                 nn.Conv2d(128, 64, (1, 1), (1, 1), bias=False)),
@@ -281,5 +316,5 @@ class Decoder(nn.Module):
             self.__class__.__name__, count_parameters(self)))
 
     def forward(self, x):
-        y = self.decoder_base(x)
+        y = self.decoder_top(x)
         return y[:, :, 1:, 1:]

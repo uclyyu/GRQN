@@ -24,15 +24,27 @@ def kl_divergence(po_means, po_logvs, pr_means, pr_logvs):
 
 class GernCriterion(object):
 
+    def call_for_dlos(self, trg_dlos, dec_dlos, pr_means_dlos, pr_logvs_dlos, po_means_dlos, po_logvs_dlos):
+        bce_dlos = F.binary_cross_entropy(dec_dlos, trg_dlos, reduction='mean')
+        kld_dlos = kl_divergence(
+            po_means_dlos, po_logvs_dlos, pr_means_dlos, pr_logvs_dlos)
+
+        return bce_dlos, kld_dlos
+
+    def call_for_jlos(self, trg_jlos, dec_jlos, pr_means_jlos, pr_logvs_jlos, po_means_jlos, po_logvs_jlos):
+        bce_jlos = F.binary_cross_entropy(dec_jlos, trg_jlos, reduction='mean')
+        kld_jlos = kl_divergence(
+            po_means_jlos, po_logvs_jlos, pr_means_jlos, pr_logvs_jlos)
+
+        return bce_jlos, kld_jlos
+
     def __call__(self, trg_jlos, trg_dlos, dec_jlos, dec_dlos,
                  pr_means_jlos, pr_logvs_jlos, pr_means_dlos, pr_logvs_dlos,
                  po_means_jlos, po_logvs_jlos, po_means_dlos, po_logvs_dlos):
 
-        bce_jlos = F.binary_cross_entropy(dec_jlos, trg_jlos, reduction='mean')
-        bce_dlos = F.binary_cross_entropy(dec_dlos, trg_dlos, reduction='mean')
-        kld_jlos = kl_divergence(
-            po_means_jlos, po_logvs_jlos, pr_means_jlos, pr_logvs_jlos)
-        kld_dlos = kl_divergence(
-            po_means_dlos, po_logvs_dlos, pr_means_dlos, pr_logvs_dlos)
+        bce_dlos, kld_dlos = self.call_for_dlos(
+            trg_dlos, dec_dlos, pr_means_dlos, pr_logvs_dlos, po_means_dlos, po_logvs_dlos)
+        bce_jlos, kld_jlos = self.call_for_jlos(
+            trg_jlos, dec_jlos, pr_means_jlos, pr_logvs_jlos, po_means_jlos, po_logvs_jlos)
 
         return bce_jlos, bce_dlos, kld_jlos, kld_dlos

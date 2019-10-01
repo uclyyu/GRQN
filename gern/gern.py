@@ -34,7 +34,9 @@ class GeRN(torch.jit.ScriptModule):
         self.conv2d.apply(partial(init_parameters, gain=gain))
 
         # --- decoding operators
-        self.dop_base = Decoder()
+        self.dop_jlos = DecoderBase()
+        self.dop_dlos = DecoderBase()
+        self.dop_top = DecoderTop()
 
         print('{}: {:,} trainable parameters.'.format(
             self.__class__.__name__, count_parameters(self)))
@@ -83,33 +85,7 @@ class GeRN(torch.jit.ScriptModule):
 
         return ug_jlos, ug_dlos, pr_means_jlos, pr_logvs_jlos, pr_means_dlos, pr_logvs_dlos, po_means_jlos, po_logvs_jlos, po_means_dlos, po_logvs_dlos
 
-    # @torch.jit.script_method
-    # def _predict_mc_loop(self, asteps, rwn_aggr, qry_v, h_gop, c_gop, o_gop, u_gop, prior_means=[], prior_logvs=[]):
-    #     # type: (int, Tensor, Tensor, Tensor, Tensor, Tensor, Tensor, List[Tensor], List[Tensor]) -> Tuple[Tensor, List[Tensor], List[Tensor]]
-    #     for ast in range(asteps):
-    #         prior_z, prior_mean, prior_logv = self.gop_prior(h_gop)
-
-    #         input_gop = torch.cat([rwn_aggr, prior_z, qry_v], dim=1)
-    #         h_gop, c_gop, o_gop = self.gop_state(
-    #             input_gop, h_gop, c_gop, o_gop)
-    #         u_gop = u_gop + self.gop_delta(u_gop, h_gop)
-
-    #         # collect means and log variances
-    #         prior_means.append(prior_mean), prior_logvs.append(prior_logv)
-
-    #     return u_gop, prior_means, prior_logvs
-
     def forward(self, cnd_x, cnd_v, qry_jlos, qry_dlos, qry_v, ndraw=7):
-        """Forward method
-        Args:
-            cnd_x (torch.tensor): A 5-way tensor representing contextual sensors (pixels)
-            cnd_v (torch.tenosr): A 5-way tensor representing contextual sensors (viewpoint)
-            qry_x (torch.tenosr): Description
-            qry_v (torch.tenosr): Description
-            ndraw (int, optional): Description
-        Returns:
-            torch.tenosr: Description
-        """
         # Containers to hold outputs.
         pr_means_jlos = []
         pr_logvs_jlos = []
@@ -171,8 +147,10 @@ class GeRN(torch.jit.ScriptModule):
             po_means_jlos, po_logvs_jlos, po_means_dlos, po_logvs_dlos)
 
         # --- Decoding
-        dec_jlos = self.dop_base(ug_jlos)
-        dec_dlos = self.dop_base(ug_dlos)
+        dec_jlos = self.dop_jlos(ug_jlos)
+        dec_dlos = self.dop_dlos(ug_dlos)
+        dec_jlos = self.dop_top(dec_jlos)
+        dec_dlos = self.dop_top(dec_dlos)
 
         return (dec_jlos, dec_dlos,
                 pr_means_jlos, pr_logvs_jlos, pr_means_dlos, pr_logvs_dlos,

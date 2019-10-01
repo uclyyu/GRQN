@@ -79,7 +79,8 @@ def trainer(args, model, criterion, optimiser, lr_scheduler, writer):
                         pr_means_jlos, pr_logvs_jlos, pr_means_dlos, pr_logvs_dlos,
                         po_means_jlos, po_logvs_jlos, po_means_dlos, po_logvs_dlos)
 
-                    total_loss = bce_jlos + bce_dlos + kld_jlos + kld_dlos
+                    total_loss = bce_jlos + \
+                        bce_dlos + .01 * (kld_jlos + kld_dlos)
                     bce_jlos_epoch += bce_jlos.item()
                     bce_dlos_epoch += bce_dlos.item()
                     kld_jlos_epoch += kld_jlos.item()
