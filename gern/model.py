@@ -148,7 +148,8 @@ class RepresentationD(nn.Module):
                 SkipConnect(
                     nn.Conv2d(256, 256, (1, 1), (1, 1), bias=False),
                     nn.Sequential(
-                        nn.Conv2d(256, 256, (3, 3), (1, 1), padding=1, groups=256),
+                        nn.Conv2d(256, 256, (3, 3), (1, 1),
+                                  padding=1, groups=256),
                         nn.Conv2d(256, 256, (1, 1), (1, 1)),
                         # nn.Conv2d(256, 256, (3, 3), (1, 1), padding=1),
                         nn.LeakyReLU(.01),
@@ -275,7 +276,7 @@ class Decoder(nn.Module):
                 nn.Conv2d(128, 128, (3, 3), (1, 1), padding=1),
                 DummyModule()),
             nn.LeakyReLU(.01),
-            GroupNorm2d(256, 8),
+            GroupNorm2d(128, 8),
             nn.ConvTranspose2d(128, 64, (3, 3), (2, 2), padding=(1, 1)),
             nn.LeakyReLU(.01),
             GroupNorm2d(64, 8),
@@ -291,7 +292,7 @@ class Decoder(nn.Module):
                 nn.Conv2d(32, 32, (3, 3), (1, 1), padding=1),
                 DummyModule()),
             nn.LeakyReLU(.01),
-            GroupNorm2d(64, 8),
+            GroupNorm2d(32, 4),
             nn.Conv2d(32, 1, (3, 3), (1, 1), padding=(1, 1)),
             nn.Sigmoid()
         )
