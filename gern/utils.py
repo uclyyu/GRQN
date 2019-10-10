@@ -25,6 +25,24 @@ def count_parameters(cls, trainable_only=True):
     return count
 
 
+def get_params_l2(model):
+    l2 = nn.MSELoss(reduction='sum')
+    regulariser = 0
+    for m in model.modules():
+        if isinstance(m, (nn.Linear, nn.Conv2d)):
+            regulariser += l2(m.weight, torch.zeros_like(m.weight))
+    return regulariser
+
+
+def get_params_l1(model):
+    l1 = nn.L1Loss(reduction='sum')
+    regulariser = 0
+    for m in model.modules():
+        if isinstance(m, (nn.Linear, nn.Conv2d)):
+            regulariser += l1(m.weight, torch.zeros_like(m.weight))
+    return regulariser
+
+
 class DummyModule(nn.Module):
     # Accommodating torch.jit
     def __init__(self):
