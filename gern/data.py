@@ -1,11 +1,8 @@
 import torch
-import torchvision
 import os
-import json
 import cv2
 import numpy as np
 import pandas as pd
-from functools import reduce
 
 
 class GernDataset(torch.utils.data.Dataset):
@@ -31,7 +28,8 @@ class GernDataset(torch.utils.data.Dataset):
         ctx_x = []
         ctx_v = []
         qry_jlos = []
-        for pos_x, pos_y, eul_z, file_dep, file_los in ctx_vector[['pos_x', 'pos_y', 'eul_z', 'file_dep', 'file_jlos']].values:
+        weight_jlos = []
+        for pos_x, pos_y, eul_z, file_dep, file_los, file_wlos in ctx_vector[['pos_x', 'pos_y', 'eul_z', 'file_dep', 'file_jlos', 'file_weight_jlos']].values:
             ctx_v.append(torch.tensor([pos_x, pos_y, np.cos(
                 eul_z), np.sin(eul_z)], dtype=torch.float32))
 
@@ -43,9 +41,14 @@ class GernDataset(torch.utils.data.Dataset):
             los = cv2.imread(file_los, cv2.IMREAD_GRAYSCALE)[None] / 255.
             qry_jlos.append(torch.tensor(los, dtype=torch.float32))
 
+            file_weight_los = os.path.join(self.rootdir, serial, file_wlos)
+            w_los = np.load(file_weight_los)
+            weight_jlos.append(torch.tensor(w_los, dtype=torch.float32))
+
         qry_v = []
         qry_dlos = []
-        for pos_x, pos_y, eul_z, file_los in qry_vector[['pos_x', 'pos_y', 'eul_z', 'file_los']].values:
+        weight_dlos = []
+        for pos_x, pos_y, eul_z, file_los, file_wlos in qry_vector[['pos_x', 'pos_y', 'eul_z', 'file_los', 'file_weight_los']].values:
             qry_v.append(torch.tensor([pos_x, pos_y, np.cos(
                 eul_z), np.sin(eul_z)], dtype=torch.float32))
 
@@ -53,13 +56,19 @@ class GernDataset(torch.utils.data.Dataset):
             los = cv2.imread(file_los, cv2.IMREAD_GRAYSCALE)[None] / 255.
             qry_dlos.append(torch.tensor(los, dtype=torch.float32))
 
+            file_weight_los = os.path.join(self.rootdir, serial, file_wlos)
+            w_los = np.load(file_weight_los)
+            weight_dlos.append(torch.tensor(w_los, dtype=torch.float32))
+
         ctx_x = torch.stack(ctx_x, dim=0)
         ctx_v = torch.stack(ctx_v, dim=0).view(N, 4, 1, 1)
         qry_jlos = torch.stack(qry_jlos, dim=0)
         qry_dlos = torch.stack(qry_dlos, dim=0)
+        wgt_jlos = torch.stack(weight_jlos, dim=0)
+        wgt_dlos = torch.stack(weight_dlos, dim=0)
         qry_v = torch.stack(qry_v, dim=0).view(N, 4, 1, 1)
 
-        return ctx_x, ctx_v, qry_jlos, qry_dlos, qry_v
+        return ctx_x, ctx_v, qry_jlos, qry_dlos, qry_v, wgt_jlos, wgt_dlos
 
 
 class GernSampler(torch.utils.data.Sampler):
