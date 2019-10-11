@@ -2,6 +2,7 @@ from gern.gern import GeRN
 from gern.data import GernDataLoader
 from gern.criteria import GernCriterion
 from gern.scheduler import LearningRateScheduler
+from gern.utils import get_params_l2, get_params_l1
 from torch.utils.tensorboard import SummaryWriter
 import torch
 import argparse
@@ -54,11 +55,12 @@ def trainer(args, model, criterion, optimiser, lr_scheduler, writer):
             bce_dlos_epoch = 0.
             kld_jlos_epoch = 0.
             kld_dlos_epoch = 0.
+            regulariser_epoch = 0.
 
             optimiser.zero_grad()
             # --- Iterate over the current subset
             with torch.set_grad_enabled(phase == 'train'):
-                for i, (ctx_x, ctx_v, qry_jlos, qry_dlos, qry_v) in enumerate(dataloaders[phase]):
+                for i, (ctx_x, ctx_v, qry_jlos, qry_dlos, qry_v, wgt_jlos, wgt_dlos) in enumerate(dataloaders[phase]):
                     k = random.randint(1, 6)
 
                     # --- Model inputs
@@ -76,11 +78,12 @@ def trainer(args, model, criterion, optimiser, lr_scheduler, writer):
 
                     bce_jlos, bce_dlos, kld_jlos, kld_dlos = criterion(
                         qry_jlos, qry_dlos, dec_jlos, dec_dlos,
+                        wgt_jlos, wgt_dlos,
                         pr_means_jlos, pr_logvs_jlos, pr_means_dlos, pr_logvs_dlos,
                         po_means_jlos, po_logvs_jlos, po_means_dlos, po_logvs_dlos)
 
                     total_loss = bce_jlos + \
-                        bce_dlos + .01 * (kld_jlos + kld_dlos)
+                        bce_dlos + args.kl_weight * (kld_jlos + kld_dlos)
                     bce_jlos_epoch += bce_jlos.item()
                     bce_dlos_epoch += bce_dlos.item()
                     kld_jlos_epoch += kld_jlos.item()
@@ -88,8 +91,11 @@ def trainer(args, model, criterion, optimiser, lr_scheduler, writer):
 
                     # --- Gradient step
                     if phase == 'train':
-                        total_loss.backward()
+                        l2 = get_params_l2(model)
+                        (total_loss + args.l2_weight * l2).backward()
                         optimiser.step()
+
+                        regulariser_epoch += l2.item()
 
                     # --- Reset
                     optimiser.zero_grad()
@@ -98,6 +104,7 @@ def trainer(args, model, criterion, optimiser, lr_scheduler, writer):
                 bce_dlos_epoch /= (i + 1)
                 kld_jlos_epoch /= (i + 1)
                 kld_dlos_epoch /= (i + 1)
+                regulariser_epoch /= (i + 1)
 
                 # --- Make training checkpoint
                 if phase == 'train':
@@ -115,17 +122,19 @@ def trainer(args, model, criterion, optimiser, lr_scheduler, writer):
                     wtag('epoch', 'kld_jlos', phase), kld_jlos_epoch, epoch)
                 writer.add_scalar(
                     wtag('epoch', 'kld_dlos', phase), kld_dlos_epoch, epoch)
+                if phase == 'train':
+                    writer.add_scalar(
+                        wtag('epoch', 'weight_l2', phase), regulariser_epoch, epoch)
 
-                # --- Save origin and decoded images every test epoch
-                if phase == 'test':
-                    writer.add_image(wtag('epoch', 'dec_jlos'),
-                                     dec_jlos[0], epoch)
-                    writer.add_image(wtag('epoch', 'dec_dlos'),
-                                     dec_dlos[0], epoch)
-                    writer.add_image(wtag('epoch', 'qry_jlos'),
-                                     qry_jlos[0], epoch)
-                    writer.add_image(wtag('epoch', 'qry_dlos'),
-                                     qry_dlos[0], epoch)
+                # --- Save origin and decoded images epoch
+                writer.add_image(wtag('epoch', 'dec_jlos', phase),
+                                 dec_jlos[0], epoch)
+                writer.add_image(wtag('epoch', 'dec_dlos', phase),
+                                 dec_dlos[0], epoch)
+                writer.add_image(wtag('epoch', 'qry_jlos', phase),
+                                 qry_jlos[0], epoch)
+                writer.add_image(wtag('epoch', 'qry_dlos', phase),
+                                 qry_dlos[0], epoch)
 
 
 def main(args):
@@ -164,6 +173,8 @@ if __name__ == '__main__':
     parser.add_argument('--lr-max', type=float, default=5e-4)
     parser.add_argument('--lr-saturate-epoch', type=int, default=1600000)
     parser.add_argument('--enable-amsgrad', type=bool, default=False)
+    parser.add_argument('--kl-weight', type=float, default=0.001)
+    parser.add_argument('--l2-weight', type=float, default=0.001)
     # Dataset settings
     parser.add_argument('--rootdir-train', type=str)
     parser.add_argument('--rootdir-test', type=str)
