@@ -26,7 +26,8 @@ class GernCriterion(object):
 
     def call_for_dlos(self, trg_dlos, dec_dlos, wgt_dlos, pr_means_dlos, pr_logvs_dlos, po_means_dlos, po_logvs_dlos):
         bce_dlos = F.binary_cross_entropy(dec_dlos, trg_dlos, reduction='none')
-        bce_dlos = (bce_dlos * wgt_dlos).mean()
+        bce_dlos = (bce_dlos * wgt_dlos).mean() * \
+            trg_dlos.size(0) / self.batch_size
         kld_dlos = kl_divergence(
             po_means_dlos, po_logvs_dlos, pr_means_dlos, pr_logvs_dlos)
 
@@ -34,7 +35,8 @@ class GernCriterion(object):
 
     def call_for_jlos(self, trg_jlos, wgt_jlos, dec_jlos, pr_means_jlos, pr_logvs_jlos, po_means_jlos, po_logvs_jlos):
         bce_jlos = F.binary_cross_entropy(dec_jlos, trg_jlos, reduction='none')
-        bce_jlos = (bce_jlos * wgt_jlos).mean()
+        bce_jlos = (bce_jlos * wgt_jlos).mean() * \
+            trg_jlos.size(0) / self.batch_size
         kld_jlos = kl_divergence(
             po_means_jlos, po_logvs_jlos, pr_means_jlos, pr_logvs_jlos)
 
@@ -42,7 +44,10 @@ class GernCriterion(object):
 
     def __call__(self, trg_jlos, trg_dlos, dec_jlos, dec_dlos, wgt_jlos, wgt_dlos,
                  pr_means_jlos, pr_logvs_jlos, pr_means_dlos, pr_logvs_dlos,
-                 po_means_jlos, po_logvs_jlos, po_means_dlos, po_logvs_dlos):
+                 po_means_jlos, po_logvs_jlos, po_means_dlos, po_logvs_dlos,
+                 batch_size):
+
+        self.batch_size = batch_size
 
         bce_dlos, kld_dlos = self.call_for_dlos(
             trg_dlos, dec_dlos, pr_means_dlos, pr_logvs_dlos, po_means_dlos, po_logvs_dlos)
