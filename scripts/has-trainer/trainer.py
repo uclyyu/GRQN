@@ -4,6 +4,7 @@ from gern.criteria import GernCriterion
 from gern.scheduler import LearningRateScheduler
 from gern.utils import get_params_l2, get_params_l1
 from torch.utils.tensorboard import SummaryWriter
+from datetime import datetime
 import torch
 import argparse
 import os
@@ -32,13 +33,14 @@ def trainer(args, model, criterion, optimiser, lr_scheduler, writer):
                                           batch_size=args.batch_size, num_workers=args.data_worker)}
 
     since = time.time()
+    today = datetime.today()
     for epoch in range(args.from_epoch, args.total_epochs):
 
         # --- Information
         elapsed = time.time() - since
         since = time.time()
-        epoch_string = '\n\n--- Epoch {:5d} (+{:.0f}s) {}'.format(
-            epoch, elapsed, '-' * 50)
+        epoch_string = '\n\n--- Epoch {:5d} (+{:.0f}s) {} {}'.format(
+            epoch, elapsed, '-' * 25, today)
         print(epoch_string)
 
         # --- Alternating between training and testing phases
@@ -69,36 +71,43 @@ def trainer(args, model, criterion, optimiser, lr_scheduler, writer):
                     qry_jlos = qry_jlos[:, k - 1].to(args.target_device)
                     qry_dlos = qry_dlos[:, k - 1].to(args.target_device)
                     qry_v = qry_v[:, k - 1].to(args.target_device)
+                    wgt_jlos = wgt_jlos[:, k - 1].to(args.target_device)
+                    wgt_dlos = wgt_dlos[:, k - 1].to(args.target_device)
 
-                    # --- Forward pass
-                    (dec_jlos, dec_dlos,
-                     pr_means_jlos, pr_logvs_jlos, pr_means_dlos, pr_logvs_dlos,
-                     po_means_jlos, po_logvs_jlos, po_means_dlos, po_logvs_dlos) = model(
-                        ctx_x, ctx_v, qry_jlos, qry_dlos, qry_v)
+                    # --- Forward pass (with split)
+                    zip_split = zip(map(
+                        lambda tsr: torch.split(tsr, args.batch_split, dim=0),
+                        [ctx_x, ctx_v, qry_jlos, qry_dlos, qry_v, wgt_jlos, wgt_dlos]))
 
-                    bce_jlos, bce_dlos, kld_jlos, kld_dlos = criterion(
-                        qry_jlos, qry_dlos, dec_jlos, dec_dlos,
-                        wgt_jlos, wgt_dlos,
-                        pr_means_jlos, pr_logvs_jlos, pr_means_dlos, pr_logvs_dlos,
-                        po_means_jlos, po_logvs_jlos, po_means_dlos, po_logvs_dlos)
+                    for cx, cv, qj, qd, qv, wj, wd in zip_split:
+                        (dec_jlos, dec_dlos,
+                         pr_means_jlos, pr_logvs_jlos, pr_means_dlos, pr_logvs_dlos,
+                         po_means_jlos, po_logvs_jlos, po_means_dlos, po_logvs_dlos) = model(
+                            cx, cv, qj, qd, qv)
 
-                    total_loss = bce_jlos + \
-                        bce_dlos + args.kl_weight * (kld_jlos + kld_dlos)
-                    bce_jlos_epoch += bce_jlos.item()
-                    bce_dlos_epoch += bce_dlos.item()
-                    kld_jlos_epoch += kld_jlos.item()
-                    kld_dlos_epoch += kld_dlos.item()
+                        bce_jlos, bce_dlos, kld_jlos, kld_dlos = criterion(
+                            qj, qd, dec_jlos, dec_dlos, wj, wd,
+                            pr_means_jlos, pr_logvs_jlos, pr_means_dlos, pr_logvs_dlos,
+                            po_means_jlos, po_logvs_jlos, po_means_dlos, po_logvs_dlos,
+                            args.batch_size)
 
-                    # --- Gradient step
+                        total_loss = bce_jlos + \
+                            bce_dlos + args.kl_weight * (kld_jlos + kld_dlos)
+                        bce_jlos_epoch += bce_jlos.item()
+                        bce_dlos_epoch += bce_dlos.item()
+                        kld_jlos_epoch += kld_jlos.item()
+                        kld_dlos_epoch += kld_dlos.item()
+
+                        # --- Gradient accumulation
+                        if phase == 'train':
+                            l2 = get_params_l2(model)
+                            (total_loss + args.l2_weight * l2).backward()
+                            regulariser_epoch += l2.item()
+
+                    # --- Gradient step & reset
                     if phase == 'train':
-                        l2 = get_params_l2(model)
-                        (total_loss + args.l2_weight * l2).backward()
                         optimiser.step()
-
-                        regulariser_epoch += l2.item()
-
-                    # --- Reset
-                    optimiser.zero_grad()
+                        optimiser.zero_grad()
 
                 bce_jlos_epoch /= (i + 1)
                 bce_dlos_epoch /= (i + 1)
@@ -181,6 +190,7 @@ if __name__ == '__main__':
     parser.add_argument('--train-subset-size', type=int, default=64)
     parser.add_argument('--test-subset-size', type=int, default=64)
     parser.add_argument('--batch-size', type=int, default=8)
+    parser.add_argument('--batch-split', type=int, default=1)
     parser.add_argument('--data-worker', type=int, default=4)
     # Trained model and checkpoint output
     parser.add_argument('--savedir', type=str, default='')
