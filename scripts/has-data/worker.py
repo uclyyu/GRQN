@@ -182,7 +182,7 @@ if __name__ == '__main__':
     scene.random.seed(args.seed)
 
     iter_start = args.from_sample
-    iter_end = args.until_sample - args.from_sample
+    iter_end = args.until_sample
     iter_step = args.chunk_size if args.chunk_size > 0 else iter_end
     for chunk_start in range(iter_start, iter_end, iter_step):
 
