@@ -31,7 +31,8 @@ def trainer(args, model, criterion, optimiser, lr_scheduler, writer):
                                            batch_size=args.train_batch_size, num_workers=args.data_worker),
                    'test': GernDataLoader(args.rootdir_test, subset_size=args.test_subset_size,
                                           batch_size=args.test_batch_size, num_workers=args.data_worker)}
-   batch_sizes = {'train': args.train_batch_size, 'test': args.test_batch_size}
+    batch_sizes = {'train': args.train_batch_size,
+                   'test': args.test_batch_size}
 
     since = time.time()
     today = datetime.today()
@@ -145,6 +146,8 @@ def trainer(args, model, criterion, optimiser, lr_scheduler, writer):
                                  qry_jlos[0], epoch)
                 writer.add_image(wtag('epoch', 'qry_dlos', phase),
                                  qry_dlos[0], epoch)
+
+                writer.flush()
 
 
 def main(args):
