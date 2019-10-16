@@ -28,9 +28,10 @@ def trainer(args, model, criterion, optimiser, lr_scheduler, writer):
 
     # --- Build data loader
     dataloaders = {'train': GernDataLoader(args.rootdir_train, subset_size=args.train_subset_size,
-                                           batch_size=args.batch_size, num_workers=args.data_worker),
+                                           batch_size=args.train_batch_size, num_workers=args.data_worker),
                    'test': GernDataLoader(args.rootdir_test, subset_size=args.test_subset_size,
-                                          batch_size=args.batch_size, num_workers=args.data_worker)}
+                                          batch_size=args.test_batch_size, num_workers=args.data_worker)}
+   batch_sizes = {'train': args.train_batch_size, 'test': args.test_batch_size}
 
     since = time.time()
     today = datetime.today()
@@ -75,7 +76,7 @@ def trainer(args, model, criterion, optimiser, lr_scheduler, writer):
                     wgt_dlos = wgt_dlos[:, k - 1].to(args.target_device)
 
                     # --- Forward pass (with split)
-                    zip_split = zip(map(
+                    zip_split = zip(*map(
                         lambda tsr: torch.split(tsr, args.batch_split, dim=0),
                         [ctx_x, ctx_v, qry_jlos, qry_dlos, qry_v, wgt_jlos, wgt_dlos]))
 
@@ -89,7 +90,7 @@ def trainer(args, model, criterion, optimiser, lr_scheduler, writer):
                             qj, qd, dec_jlos, dec_dlos, wj, wd,
                             pr_means_jlos, pr_logvs_jlos, pr_means_dlos, pr_logvs_dlos,
                             po_means_jlos, po_logvs_jlos, po_means_dlos, po_logvs_dlos,
-                            args.batch_size)
+                            batch_sizes[phase])
 
                         total_loss = bce_jlos + \
                             bce_dlos + args.kl_weight * (kld_jlos + kld_dlos)
@@ -189,7 +190,8 @@ if __name__ == '__main__':
     parser.add_argument('--rootdir-test', type=str)
     parser.add_argument('--train-subset-size', type=int, default=64)
     parser.add_argument('--test-subset-size', type=int, default=64)
-    parser.add_argument('--batch-size', type=int, default=8)
+    parser.add_argument('--train-batch-size', type=int, default=8)
+    parser.add_argument('--test-batch-size', type=int, default=8)
     parser.add_argument('--batch-split', type=int, default=1)
     parser.add_argument('--data-worker', type=int, default=4)
     # Trained model and checkpoint output
