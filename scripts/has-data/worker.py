@@ -64,7 +64,7 @@ def task(basedir, mapsize, nrays, Z, camwh, scene, los):
 
         img = _ctx_jlos / 255
         u, v = get_binary_weight(img)
-        weight = np.where(img == 1, a, b)
+        weight = np.where(img == 1, u, v)
 
         file_pxl = 'ctx-pxl-{:02d}.png'.format(i)
         file_dep = 'ctx-dep-{:02d}.png'.format(i)
@@ -109,7 +109,7 @@ def task(basedir, mapsize, nrays, Z, camwh, scene, los):
 
         img = qry_los / 255
         u, v = get_binary_weight(img)
-        weight = np.where(img == 1, a, b)
+        weight = np.where(img == 1, u, v)
 
         file_pxl = 'qry-pxl-{:02d}.png'.format(i)
         file_dep = 'qry-dep-{:02d}.png'.format(i)
