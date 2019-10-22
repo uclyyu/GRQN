@@ -17,17 +17,20 @@ class LearningRateScheduler(object):
 
 
 class PixelStdDevScheduler(object):
-    def __init__(self, weights, index, sdmin, sdmax, end_epoch):
+    def __init__(self, sdmin, sdmax, end_epoch):
         assert sdmin < sdmax
-        assert index < len(weights)
-        self.weights = weights
-        self.index = index
         self.sdmin = sdmin
         self.sdmax = sdmax
         self.end_epoch = end_epoch
+        self._weight = 1. / self.sdmax
+
+    @property
+    def weight(self):
+        return self._weight
 
     def step(self, epoch):
         sd = self.sdmin + (self.sdmax - self.sdmin) * \
             (1 - epoch / self.end_epoch)
         sd = max(sd, self.sdmin)
-        self.weights[self.index] = 1. / sd
+
+        self._weight = 1. / sd
