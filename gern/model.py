@@ -10,34 +10,34 @@ class EncoderJ(nn.Module):
 
         self.features = nn.Sequential(
             nn.Conv2d(1, 32, (3, 3), (2, 2), padding=1),
-            nn.LeakyReLU(.01),
+            nn.ReLU(True),
             GroupNorm2d(32, 4),
             SkipConnect(
                 nn.Conv2d(32, 32, (3, 3), (1, 1), padding=1),
                 DummyModule()),
-            nn.LeakyReLU(.01),
+            nn.ReLU(True),
             nn.MaxPool2d((2, 2), stride=(2, 2)),
             nn.Conv2d(32, 64, (3, 3), (2, 2), padding=1),
-            nn.LeakyReLU(.01),
+            nn.ReLU(True),
             GroupNorm2d(64, 8),
             SkipConnect(
                 nn.Conv2d(64, 64, (3, 3), (1, 1), padding=1),
                 DummyModule()),
-            nn.LeakyReLU(.01),
+            nn.ReLU(True),
             nn.MaxPool2d((2, 2), stride=(2, 2)),
             nn.Conv2d(64, 128, (3, 3), (2, 2), padding=1),
-            nn.LeakyReLU(.01),
+            nn.ReLU(True),
             GroupNorm2d(128, 8),
             SkipConnect(
                 nn.Conv2d(128, 128, (3, 3), (1, 1), padding=1),
                 DummyModule()),
-            nn.LeakyReLU(.01),
+            nn.ReLU(True),
             nn.MaxPool2d((2, 2), stride=(2, 2)),
             nn.Conv2d(128, 64, (3, 3), (2, 2), padding=1),
             nn.MaxPool2d((2, 2), stride=(1, 1))
         )
 
-        gain = nn.init.calculate_gain('leaky_relu')
+        gain = nn.init.calculate_gain('relu')
         self.features.apply(partial(init_parameters, gain=gain))
 
         print('{}: {:,} trainable parameters.'.format(
@@ -54,37 +54,37 @@ class EncoderD(nn.Module):
         self.features = nn.ModuleList([
             nn.Sequential(
                 nn.Conv2d(1, 32, (3, 3), (2, 2), padding=1),
-                nn.LeakyReLU(.01),
+                nn.ReLU(True),
                 GroupNorm2d(32, 4),
                 SkipConnect(
                     nn.Conv2d(32, 32, (3, 3), (1, 1), padding=1),
                     DummyModule()),
-                nn.LeakyReLU(.01),
+                nn.ReLU(True),
                 nn.MaxPool2d((2, 2), stride=(2, 2)),
                 nn.Conv2d(32, 64, (3, 3), (2, 2), padding=1),
-                nn.LeakyReLU(.01),
+                nn.ReLU(True),
                 GroupNorm2d(64, 8),
                 SkipConnect(
                     nn.Conv2d(64, 64, (3, 3), (1, 1), padding=1),
                     DummyModule()),
-                nn.LeakyReLU(.01),
+                nn.ReLU(True),
                 nn.MaxPool2d((2, 2), stride=(2, 2)),
             ),
             nn.Sequential(
                 nn.Conv2d(68, 128, (3, 3), (2, 2), padding=1),
-                nn.LeakyReLU(.01),
+                nn.ReLU(True),
                 GroupNorm2d(128, 8),
                 SkipConnect(
                     nn.Conv2d(128, 128, (3, 3), (1, 1), padding=1),
                     DummyModule()),
-                nn.LeakyReLU(.01),
+                nn.ReLU(True),
                 nn.MaxPool2d((2, 2), stride=(2, 2)),
                 nn.Conv2d(128, 64, (3, 3), (2, 2), padding=1),
                 nn.MaxPool2d((2, 2), stride=(1, 1))
             )
         ])
 
-        gain = nn.init.calculate_gain('leaky_relu')
+        gain = nn.init.calculate_gain('relu')
         self.features.apply(partial(init_parameters, gain=gain))
 
         print('{}: {:,} trainable parameters.'.format(
@@ -101,26 +101,26 @@ class EncoderD(nn.Module):
 class RepresentationD(nn.Module):
     def __init__(self):
         super(RepresentationD, self).__init__()
-        gain = nn.init.calculate_gain('leaky_relu')
+        gain = nn.init.calculate_gain('relu')
 
         self.features = nn.ModuleList([
             nn.Sequential(
                 nn.Conv2d(1, 32, (3, 3), (2, 2), padding=1),
-                nn.LeakyReLU(.01),
+                nn.ReLU(True),
                 GroupNorm2d(32, 8),
                 SkipConnect(
                     nn.Conv2d(32, 32, (3, 3), (1, 1), padding=1),
                     DummyModule()),
-                nn.LeakyReLU(.01),
+                nn.ReLU(True),
                 GroupNorm2d(32, 8),
                 nn.MaxPool2d((2, 2), stride=(2, 2)),
                 nn.Conv2d(32, 64, (3, 3), (1, 1), padding=1),
-                nn.LeakyReLU(.01),
+                nn.ReLU(True),
                 GroupNorm2d(64, 8),
                 SkipConnect(
                     nn.Conv2d(64, 64, (3, 3), (1, 1), padding=1),
                     DummyModule()),
-                nn.LeakyReLU(.01),
+                nn.ReLU(True),
                 GroupNorm2d(64, 8),
                 nn.MaxPool2d((2, 2), stride=(2, 2)),
                 nn.Conv2d(64, 128, (3, 3), (1, 1), padding=1),
@@ -129,34 +129,34 @@ class RepresentationD(nn.Module):
                 SkipConnect(
                     nn.Sequential(
                         nn.Conv2d(128, 128, (3, 3), (1, 1), padding=1),
-                        nn.LeakyReLU(.01),
+                        nn.ReLU(True),
                         GroupNorm2d(128, 8),
                         nn.Conv2d(128, 128, (3, 3), (1, 1), padding=1),
                     ), DummyModule()),
-                nn.LeakyReLU(.01),
+                nn.ReLU(True),
                 GroupNorm2d(128, 8),
                 nn.MaxPool2d((2, 2), stride=(2, 2))
             ),
             nn.Sequential(
                 nn.Conv2d(132, 128, (3, 3), (2, 2), padding=1),
-                nn.LeakyReLU(.01),
+                nn.ReLU(True),
                 GroupNorm2d(128, 8),
                 nn.MaxPool2d((2, 2), stride=(2, 2)),
                 nn.Conv2d(128, 256, (3, 3), (1, 1), padding=1),
-                nn.LeakyReLU(.01),
+                nn.ReLU(True),
                 GroupNorm2d(256, 8),
                 SkipConnect(
                     nn.Conv2d(256, 256, (1, 1), (1, 1), bias=False),
                     nn.Sequential(
-                        nn.Conv2d(256, 256, (3, 3), (1, 1),
-                                  padding=1, groups=256),
-                        nn.Conv2d(256, 256, (1, 1), (1, 1)),
-                        # nn.Conv2d(256, 256, (3, 3), (1, 1), padding=1),
-                        nn.LeakyReLU(.01),
+                        # nn.Conv2d(256, 256, (3, 3), (1, 1),
+                        #           padding=1, groups=256),
+                        # nn.Conv2d(256, 256, (1, 1), (1, 1)),
+                        nn.Conv2d(256, 256, (3, 3), (1, 1), padding=1),
+                        nn.ReLU(True),
                         GroupNorm2d(256, 8),
                         nn.Conv2d(256, 256, (3, 3), (1, 1), padding=1))
                 ),
-                nn.LeakyReLU(.01),
+                nn.ReLU(True),
                 GroupNorm2d(256, 8),
                 nn.MaxPool2d((2, 2), stride=(2, 2)),
                 nn.Conv2d(256, 256, (3, 3), (2, 2), padding=1)
@@ -179,16 +179,16 @@ class RepresentationD(nn.Module):
 class GaussianFactor(nn.Module):
     def __init__(self):
         super(GaussianFactor, self).__init__()
-        gain = nn.init.calculate_gain('leaky_relu')
+        gain = nn.init.calculate_gain('relu')
 
         self.layer = nn.Sequential(
             nn.Conv2d(64, 64, (3, 3), (1, 1), padding=1),
-            nn.LeakyReLU(.01),
+            nn.ReLU(True),
             GroupNorm2d(64, 8),
             SkipConnect(
                 nn.Conv2d(64, 64, (3, 3), (1, 1), padding=1),
                 DummyModule()),
-            nn.LeakyReLU(.01),
+            nn.ReLU(True),
             GroupNorm2d(64, 8),
             nn.Conv2d(64, 128, (1, 1), (1, 1))  # mean, log-variance
         )
@@ -242,16 +242,16 @@ class GeneratorDelta(nn.Module):
 
         self.layers = nn.Sequential(
             nn.Conv2d(128, 128, (3, 3), (1, 1), padding=1),
-            nn.LeakyReLU(.01),
+            nn.ReLU(True),
             GroupNorm2d(128, 8),
             SkipConnect(nn.Conv2d(128, 128, (3, 3), (1, 1), padding=1),
                         DummyModule()),
-            nn.LeakyReLU(.01),
+            nn.ReLU(True),
             GroupNorm2d(128, 8),
             nn.Conv2d(128, 64, (3, 3), (1, 1), padding=1)
         )
 
-        gain = nn.init.calculate_gain('leaky_relu')
+        gain = nn.init.calculate_gain('relu')
         self.apply(partial(init_parameters, gain=gain))
 
         print('{}: {:,} trainable parameters.'.format(
@@ -268,36 +268,36 @@ class Decoder(nn.Module):
 
         self.decoder = nn.Sequential(
             nn.ConvTranspose2d(64, 128, (3, 3), (2, 2), padding=(0, 0)),
-            nn.LeakyReLU(.01),
+            nn.ReLU(True),
             nn.ConvTranspose2d(128, 128, (3, 3), (2, 2), padding=(1, 1)),
-            nn.LeakyReLU(.01),
+            nn.ReLU(True),
             GroupNorm2d(128, 8),
             SkipConnect(
                 nn.Conv2d(128, 128, (3, 3), (1, 1), padding=1),
                 DummyModule()),
-            nn.LeakyReLU(.01),
+            nn.ReLU(True),
             GroupNorm2d(128, 8),
             nn.ConvTranspose2d(128, 64, (3, 3), (2, 2), padding=(1, 1)),
-            nn.LeakyReLU(.01),
+            nn.ReLU(True),
             GroupNorm2d(64, 8),
             SkipConnect(
                 nn.Conv2d(64, 64, (3, 3), (1, 1), padding=1),
                 DummyModule()),
-            nn.LeakyReLU(.01),
+            nn.ReLU(True),
             GroupNorm2d(64, 8),
             nn.ConvTranspose2d(64, 32, (3, 3), (2, 2), padding=(1, 1)),
-            nn.LeakyReLU(.01),
+            nn.ReLU(True),
             GroupNorm2d(32, 4),
             SkipConnect(
                 nn.Conv2d(32, 32, (3, 3), (1, 1), padding=1),
                 DummyModule()),
-            nn.LeakyReLU(.01),
+            nn.ReLU(True),
             GroupNorm2d(32, 4),
             nn.Conv2d(32, 1, (3, 3), (1, 1), padding=(1, 1)),
             nn.Sigmoid()
         )
 
-        gain = nn.init.calculate_gain('leaky_relu')
+        gain = nn.init.calculate_gain('relu')
         self.apply(partial(init_parameters, gain=gain))
 
         print('{}: {:,} trainable parameters.'.format(
@@ -312,20 +312,20 @@ class DecoderBase(nn.Module):
         super(DecoderBase, self).__init__()
         self.decoder_base = nn.Sequential(
             nn.ConvTranspose2d(128, 128, (3, 3), (2, 2), padding=(0, 0)),
-            nn.LeakyReLU(.01),
+            nn.ReLU(True),
             nn.ConvTranspose2d(128, 128, (3, 3), (2, 2), padding=(1, 1)),
-            nn.LeakyReLU(.01),
+            nn.ReLU(True),
             GroupNorm2d(128, 8),
             SkipConnect(
                 nn.Conv2d(128, 256, (3, 3), (1, 1), padding=1),
                 nn.Conv2d(128, 256, (1, 1), (1, 1), bias=False)),
-            nn.LeakyReLU(.01),
+            nn.ReLU(True),
             GroupNorm2d(256, 8),
             nn.ConvTranspose2d(256, 128, (3, 3), (2, 2), padding=(1, 1)),
-            nn.LeakyReLU(.01),
+            nn.ReLU(True),
             GroupNorm2d(128, 8),
         )
-        gain = nn.init.calculate_gain('leaky_relu')
+        gain = nn.init.calculate_gain('relu')
         self.apply(partial(init_parameters, gain=gain))
 
         print('{}: {:,} trainable parameters.'.format(
@@ -343,20 +343,20 @@ class DecoderTop(nn.Module):
             SkipConnect(
                 nn.Conv2d(128, 64, (3, 3), (1, 1), padding=1),
                 nn.Conv2d(128, 64, (1, 1), (1, 1), bias=False)),
-            nn.LeakyReLU(.01),
+            nn.ReLU(True),
             GroupNorm2d(64, 8),
             nn.ConvTranspose2d(64, 64, (3, 3), (2, 2), padding=(1, 1)),
-            nn.LeakyReLU(.01),
+            nn.ReLU(True),
             GroupNorm2d(64, 8),
             SkipConnect(
                 nn.Conv2d(64, 64, (3, 3), (1, 1), padding=1),
                 nn.Conv2d(64, 64, (1, 1), (1, 1), bias=False)),
-            nn.LeakyReLU(.01),
+            nn.ReLU(True),
             GroupNorm2d(64, 8),
             nn.Conv2d(64, 1, (3, 3), (1, 1), padding=(1, 1)),
             nn.Sigmoid()
         )
-        gain = nn.init.calculate_gain('leaky_relu')
+        gain = nn.init.calculate_gain('relu')
         self.apply(partial(init_parameters, gain=gain))
 
         print('{}: {:,} trainable parameters.'.format(
