@@ -1,7 +1,7 @@
 from gern.gern import GeRN
 from gern.data import GernDataLoader
 from gern.criteria import GernCriterion
-from gern.scheduler import LearningRateScheduler
+from gern.scheduler import LearningRateScheduler, PixelStdDevScheduler
 from gern.utils import get_params_l2, get_params_l1
 from torch.utils.tensorboard import SummaryWriter
 from datetime import datetime
@@ -18,7 +18,7 @@ def wtag(*strings):
     return '/'.join(strings)
 
 
-def trainer(args, model, criterion, optimiser, lr_scheduler, writer):
+def trainer(args, model, criterion, optimiser, lr_scheduler, sd_scheduler, writer):
     # --- Load checkpoint if from_epoch > 0
     if args.from_epoch > 0:
         load_name = os.path.join(
@@ -49,9 +49,9 @@ def trainer(args, model, criterion, optimiser, lr_scheduler, writer):
         for phase in ['train', 'test']:
             if phase == 'train':
                 lr = lr_scheduler.step(epoch)
+                sd_scheduler.step(epoch)
                 writer.add_scalar(wtag('epoch', 'lr'), lr, epoch)
                 model.train()
-
             else:
                 model.eval()
 
@@ -93,8 +93,9 @@ def trainer(args, model, criterion, optimiser, lr_scheduler, writer):
                             po_means_jlos, po_logvs_jlos, po_means_dlos, po_logvs_dlos,
                             batch_sizes[phase])
 
-                        total_loss = bce_jlos + \
-                            bce_dlos + args.kl_weight * (kld_jlos + kld_dlos)
+                        total_loss = sd_scheduler.weight * \
+                            (bce_jlos + bce_dlos) + \
+                            args.kl_weight * (kld_jlos + kld_dlos)
                         bce_jlos_epoch += bce_jlos.item()
                         bce_dlos_epoch += bce_dlos.item()
                         kld_jlos_epoch += kld_jlos.item()
@@ -158,6 +159,8 @@ def main(args):
         args.lr_min, amsgrad=args.enable_amsgrad)
     lr_scheduler = LearningRateScheduler(
         optimiser, args.lr_min, args.lr_max, args.lr_saturate_epoch)
+    sd_scheduler = PixelStdDevScheduler(
+        args.sd_min, args.sd_max, args.sd_saturate_epoch)
 
     # if args.target_device == 'cuda':
     #     model = torch.nn.DataParallel(model)
@@ -167,7 +170,7 @@ def main(args):
         log_dir=args.writerdir, filename_suffix='.r{:03d}'.format(args.run))
 
     trainer(args, model, criterion, optimiser,
-            lr_scheduler, writer)
+            lr_scheduler, sd_scheduler, writer)
 
 
 if __name__ == '__main__':
@@ -185,6 +188,9 @@ if __name__ == '__main__':
     parser.add_argument('--lr-min', type=float, default=5e-5)
     parser.add_argument('--lr-max', type=float, default=5e-4)
     parser.add_argument('--lr-saturate-epoch', type=int, default=1600000)
+    parser.add_argument('--sd-min', type=float, default=0.7)
+    parser.add_argument('--sd-max', type=float, default=2.0)
+    parser.add_argument('--sd-saturate-epoch', type=int, default=1600000)
     parser.add_argument('--enable-amsgrad', type=bool, default=False)
     parser.add_argument('--kl-weight', type=float, default=0.001)
     parser.add_argument('--l2-weight', type=float, default=0.001)
