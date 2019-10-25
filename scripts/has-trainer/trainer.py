@@ -4,6 +4,7 @@ from gern.criteria import GernCriterion
 from gern.scheduler import LearningRateScheduler, PixelStdDevScheduler
 from gern.utils import get_params_l2, get_params_l1
 from torch.utils.tensorboard import SummaryWriter
+from torch.utils.data import DataLoader
 from datetime import datetime
 import torch
 import argparse
@@ -27,8 +28,8 @@ def trainer(args, model, criterion, optimiser, lr_scheduler, sd_scheduler, write
         print('Loaded checkpoint: {}'.format(load_name))
 
     # --- Build data loader
-    dataloaders = {'train': GernDataLoader(args.rootdir_train, subset_size=args.train_subset_size,
-                                           batch_size=args.train_batch_size, num_workers=args.data_worker),
+    dataloaders = {'train': DataLoader(args.rootdir_train, shuffle=True, drop_last=True,
+                                       batch_size=args.train_batch_size, num_workers=args.data_worker),
                    'test': GernDataLoader(args.rootdir_test, subset_size=args.test_subset_size,
                                           batch_size=args.test_batch_size, num_workers=args.data_worker)}
     batch_sizes = {'train': args.train_batch_size,
@@ -36,35 +37,29 @@ def trainer(args, model, criterion, optimiser, lr_scheduler, sd_scheduler, write
 
     since = time.time()
     today = datetime.today()
-    for epoch in range(args.from_epoch, args.total_epochs):
-
-        # --- Information
-        elapsed = time.time() - since
-        since = time.time()
-        epoch_string = '\n\n--- Epoch {:5d} (+{:.0f}s) {} {}'.format(
-            epoch, elapsed, '-' * 25, today)
-        print(epoch_string)
-
-        # --- Alternating between training and testing phases
+    epoch = args.from_epoch
+    while epoch < args.total_epochs:
         for phase in ['train', 'test']:
             if phase == 'train':
-                lr = lr_scheduler.step(epoch)
-                sd_scheduler.step(epoch)
-                writer.add_scalar(wtag('epoch', 'lr'), lr, epoch)
                 model.train()
             else:
                 model.eval()
 
-            bce_jlos_epoch = 0.
-            bce_dlos_epoch = 0.
-            kld_jlos_epoch = 0.
-            kld_dlos_epoch = 0.
-            regulariser_epoch = 0.
-
-            optimiser.zero_grad()
-            # --- Iterate over the current subset
             with torch.set_grad_enabled(phase == 'train'):
-                for i, (ctx_x, ctx_v, qry_jlos, qry_dlos, qry_v, wgt_jlos, wgt_dlos) in enumerate(dataloaders[phase]):
+                bce_jlos_total = 0.
+                bce_dlos_total = 0.
+                kld_jlos_total = 0.
+                kld_dlos_total = 0.
+                regulariser_total = 0.
+                for N, (ctx_x, ctx_v, qry_jlos, qry_dlos, qry_v, wgt_jlos, wgt_dlos) in enumerate(dataloaders[phase]):
+                    # --- Time information
+                    elapsed = time.time() - since
+                    since = time.time()
+                    epoch_string = '\n--- [{}] Epoch {:5d} (+{:.0f}s) {} {}'.format(
+                        phase, epoch, elapsed, '-' * 25, today)
+                    print(epoch_string)
+
+                    # --- Context size
                     k = random.randint(1, 6)
 
                     # --- Model inputs
@@ -93,62 +88,65 @@ def trainer(args, model, criterion, optimiser, lr_scheduler, sd_scheduler, write
                             po_means_jlos, po_logvs_jlos, po_means_dlos, po_logvs_dlos,
                             batch_sizes[phase])
 
-                        total_loss = sd_scheduler.weight * \
+                        split_loss = sd_scheduler.weight * \
                             (bce_jlos + bce_dlos) + \
                             args.kl_weight * (kld_jlos + kld_dlos)
-                        bce_jlos_epoch += bce_jlos.item()
-                        bce_dlos_epoch += bce_dlos.item()
-                        kld_jlos_epoch += kld_jlos.item()
-                        kld_dlos_epoch += kld_dlos.item()
 
                         # --- Gradient accumulation
+                        bce_jlos_total += bce_jlos.item()
+                        bce_dlos_total += bce_dlos.item()
+                        kld_jlos_total += kld_jlos.item()
+                        kld_dlos_total += kld_dlos.item()
                         if phase == 'train':
                             l2 = get_params_l2(model)
-                            (total_loss + args.l2_weight * l2).backward()
-                            regulariser_epoch += l2.item()
+                            (split_loss + args.l2_weight * l2).backward()
+                            regulariser_total += l2.item()
 
                     # --- Gradient step & reset
                     if phase == 'train':
                         optimiser.step()
                         optimiser.zero_grad()
+                        epoch += 1
 
-                bce_jlos_epoch /= (i + 1)
-                bce_dlos_epoch /= (i + 1)
-                kld_jlos_epoch /= (i + 1)
-                kld_dlos_epoch /= (i + 1)
-                regulariser_epoch /= (i + 1)
+                        lr = lr_scheduler.step(epoch)
+                        sd_scheduler.step(epoch)
+                        writer.add_scalar(wtag('epoch', 'lr'), lr, epoch)
+
+                # --- Log progress (total)
+                bce_jlos_total /= (N + 1)
+                bce_dlos_total /= (N + 1)
+                kld_jlos_total /= (N + 1)
+                kld_dlos_total /= (N + 1)
+                regulariser_total /= (N + 1)
+
+                writer.add_scalar(
+                    wtag('total', 'bce_jlos', phase), bce_jlos_total, epoch)
+                writer.add_scalar(
+                    wtag('total', 'bce_dlos', phase), bce_dlos_total, epoch)
+                writer.add_scalar(
+                    wtag('total', 'kld_jlos', phase), kld_jlos_total, epoch)
+                writer.add_scalar(
+                    wtag('total', 'kld_dlos', phase), kld_dlos_total, epoch)
+                if phase == 'train':
+                    writer.add_scalar(
+                        wtag('total', 'weight_l2', phase), regulariser_total, epoch)
+
+                # --- Save origin and decoded images epoch
+                writer.add_image(wtag('total', 'dec_jlos', phase),
+                                 dec_jlos[0], epoch)
+                writer.add_image(wtag('total', 'dec_dlos', phase),
+                                 dec_dlos[0], epoch)
+                writer.add_image(wtag('total', 'qry_jlos', phase),
+                                 qry_jlos[0], epoch)
+                writer.add_image(wtag('total', 'qry_dlos', phase),
+                                 qry_dlos[0], epoch)
+                writer.flush()
 
                 # --- Make training checkpoint
                 if phase == 'train':
-                    if epoch == 0 or ((epoch + 1) % args.checkpoint_interval) == 0:
-                        save_name = os.path.join(
-                            args.chkptdir, 'chkpt_{:08d}.pth'.format(epoch))
-                        torch.save(model.state_dict(), save_name)
-
-                # --- Log epoch progress
-                writer.add_scalar(
-                    wtag('epoch', 'bce_jlos', phase), bce_jlos_epoch, epoch)
-                writer.add_scalar(
-                    wtag('epoch', 'bce_dlos', phase), bce_dlos_epoch, epoch)
-                writer.add_scalar(
-                    wtag('epoch', 'kld_jlos', phase), kld_jlos_epoch, epoch)
-                writer.add_scalar(
-                    wtag('epoch', 'kld_dlos', phase), kld_dlos_epoch, epoch)
-                if phase == 'train':
-                    writer.add_scalar(
-                        wtag('epoch', 'weight_l2', phase), regulariser_epoch, epoch)
-
-                # --- Save origin and decoded images epoch
-                writer.add_image(wtag('epoch', 'dec_jlos', phase),
-                                 dec_jlos[0], epoch)
-                writer.add_image(wtag('epoch', 'dec_dlos', phase),
-                                 dec_dlos[0], epoch)
-                writer.add_image(wtag('epoch', 'qry_jlos', phase),
-                                 qry_jlos[0], epoch)
-                writer.add_image(wtag('epoch', 'qry_dlos', phase),
-                                 qry_dlos[0], epoch)
-
-                writer.flush()
+                    save_name = os.path.join(
+                        args.chkptdir, 'chkpt_{:08d}.pth'.format(epoch))
+                    torch.save(model.state_dict(), save_name)
 
 
 def main(args):
