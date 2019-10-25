@@ -1,5 +1,5 @@
 from gern.gern import GeRN
-from gern.data import GernDataLoader
+from gern.data import GernDataLoader, GernDataset
 from gern.criteria import GernCriterion
 from gern.scheduler import LearningRateScheduler, PixelStdDevScheduler
 from gern.utils import get_params_l2, get_params_l1
@@ -28,7 +28,7 @@ def trainer(args, model, criterion, optimiser, lr_scheduler, sd_scheduler, write
         print('Loaded checkpoint: {}'.format(load_name))
 
     # --- Build data loader
-    dataloaders = {'train': DataLoader(args.rootdir_train, shuffle=True, drop_last=True,
+    dataloaders = {'train': DataLoader(GernDataset(args.rootdir_train), shuffle=True, drop_last=True,
                                        batch_size=args.train_batch_size, num_workers=args.data_worker),
                    'test': GernDataLoader(args.rootdir_test, subset_size=args.test_subset_size,
                                           batch_size=args.test_batch_size, num_workers=args.data_worker)}
