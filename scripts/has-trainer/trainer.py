@@ -150,7 +150,7 @@ def trainer(args, model, criterion, optimiser, lr_scheduler, sd_scheduler, write
 
 
 def main(args):
-    model = GeRN().to(args.target_device)
+    model = torch.nn.DataParallel(GeRN().to(args.target_device))
     criterion = GernCriterion()
     optimiser = torch.optim.AdamW(
         filter(lambda p: p.requires_grad, model.parameters()),
