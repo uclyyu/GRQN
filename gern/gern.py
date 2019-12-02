@@ -20,27 +20,27 @@ class GeRN(nn.Module):
         self.rop_encoder = RepresentationD()
 
         # --- inference operators
-        self.iop_jencoder = EncoderJ(p=.1)
-        self.iop_jposterior = GaussianFactor(p=.1)
-        self.iop_jstate = RecurrentCell(nr + nq + nh, nh, zoneout=0.2)
+        self.iop_jencoder = EncoderJ(p=.0)
+        self.iop_jposterior = GaussianFactor(p=.0)
+        self.iop_jstate = RecurrentCell(nr + nq + nh, nh, zoneout=0.0)
 
-        self.iop_dencoder = EncoderD(p=.1)
-        self.iop_dposterior = GaussianFactor(p=.1)
-        self.iop_dstate = RecurrentCell(nr + nq + nh + nv, nh, zoneout=0.2)
+        self.iop_dencoder = EncoderD(p=.5)
+        self.iop_dposterior = GaussianFactor(p=.0)
+        self.iop_dstate = RecurrentCell(nr + nq + nh + nv, nh, zoneout=0.0)
 
         # --- generation operators
-        self.gop_jprior = GaussianFactor(p=.1)
-        self.gop_jstate = RecurrentCell(nr + nh, nh, zoneout=0.2)
+        self.gop_jprior = GaussianFactor(p=.0)
+        self.gop_jstate = RecurrentCell(nr + nh, nh, zoneout=0.0)
 
-        self.gop_dprior = GaussianFactor(p=.1)
-        self.gop_dstate = RecurrentCell(nr + nh + nv, nh, zoneout=0.2)
+        self.gop_dprior = GaussianFactor(p=.0)
+        self.gop_dstate = RecurrentCell(nr + nh + nv, nh, zoneout=0.0)
 
-        self.gop_jdelta = GeneratorDelta(p=.1)
-        self.gop_ddelta = GeneratorDelta(p=.1)
+        self.gop_jdelta = GeneratorDelta(p=.0)
+        self.gop_ddelta = GeneratorDelta(p=.0)
 
         # --- decoding operators
-        self.dop_jdecoder = Decoder(p=.1)
-        self.dop_ddecoder = Decoder(p=.1)
+        self.dop_jdecoder = Decoder(p=.0)
+        self.dop_ddecoder = Decoder(p=.0)
 
         print('{}: {:,} trainable parameters.'.format(
             self.__class__.__name__, count_parameters(self)))
