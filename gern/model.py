@@ -1,39 +1,39 @@
 import torch
 import torch.nn as nn
 from functools import partial
-from .utils import DummyModule, ConvLSTMCell, LSTMCell, GroupNorm2d, GroupNorm1d, SkipConnect, count_parameters, init_parameters
+from .utils import DummyModule, ConvLSTMCell, LSTMCell, SkipConnect, count_parameters, init_parameters
 
 
 class EncoderJ(nn.Module):
-    def __init__(self):
+    def __init__(self, p=.1):
         super(EncoderJ, self).__init__()
 
         self.features = nn.Sequential(
-            nn.Conv2d(1, 32, (3, 3), (2, 2), padding=1),
+            nn.Conv2d(1, 8, (3, 3), (2, 2), padding=1),
             nn.ReLU(True),
-            GroupNorm2d(32, 4),
+            nn.Dropout(p),
+            SkipConnect(
+                nn.Conv2d(8, 8, (3, 3), (1, 1), padding=1),
+                DummyModule()),
+            nn.ReLU(True),
+            nn.MaxPool2d((2, 2), stride=(2, 2)),
+            nn.Conv2d(8, 16, (3, 3), (2, 2), padding=1),
+            nn.ReLU(True),
+            nn.Dropout(p),
+            SkipConnect(
+                nn.Conv2d(16, 16, (3, 3), (1, 1), padding=1),
+                DummyModule()),
+            nn.ReLU(True),
+            nn.MaxPool2d((2, 2), stride=(2, 2)),
+            nn.Conv2d(16, 32, (3, 3), (2, 2), padding=1),
+            nn.ReLU(True),
+            nn.Dropout(p),
             SkipConnect(
                 nn.Conv2d(32, 32, (3, 3), (1, 1), padding=1),
                 DummyModule()),
             nn.ReLU(True),
             nn.MaxPool2d((2, 2), stride=(2, 2)),
-            nn.Conv2d(32, 64, (3, 3), (2, 2), padding=1),
-            nn.ReLU(True),
-            GroupNorm2d(64, 8),
-            SkipConnect(
-                nn.Conv2d(64, 64, (3, 3), (1, 1), padding=1),
-                DummyModule()),
-            nn.ReLU(True),
-            nn.MaxPool2d((2, 2), stride=(2, 2)),
-            nn.Conv2d(64, 128, (3, 3), (2, 2), padding=1),
-            nn.ReLU(True),
-            GroupNorm2d(128, 8),
-            SkipConnect(
-                nn.Conv2d(128, 128, (3, 3), (1, 1), padding=1),
-                DummyModule()),
-            nn.ReLU(True),
-            nn.MaxPool2d((2, 2), stride=(2, 2)),
-            nn.Conv2d(128, 64, (3, 3), (2, 2), padding=1),
+            nn.Conv2d(32, 32, (3, 3), (2, 2), padding=1),
             nn.MaxPool2d((2, 2), stride=(1, 1))
         )
 
@@ -48,38 +48,38 @@ class EncoderJ(nn.Module):
 
 
 class EncoderD(nn.Module):
-    def __init__(self):
+    def __init__(self, p=.1):
         super(EncoderD, self).__init__()
 
         self.features = nn.ModuleList([
             nn.Sequential(
-                nn.Conv2d(1, 32, (3, 3), (2, 2), padding=1),
+                nn.Conv2d(1, 8, (3, 3), (2, 2), padding=1),
                 nn.ReLU(True),
-                GroupNorm2d(32, 4),
+                nn.Dropout(p),
                 SkipConnect(
-                    nn.Conv2d(32, 32, (3, 3), (1, 1), padding=1),
+                    nn.Conv2d(8, 8, (3, 3), (1, 1), padding=1),
                     DummyModule()),
                 nn.ReLU(True),
                 nn.MaxPool2d((2, 2), stride=(2, 2)),
-                nn.Conv2d(32, 64, (3, 3), (2, 2), padding=1),
+                nn.Conv2d(8, 16, (3, 3), (2, 2), padding=1),
                 nn.ReLU(True),
-                GroupNorm2d(64, 8),
+                nn.Dropout(p),
                 SkipConnect(
-                    nn.Conv2d(64, 64, (3, 3), (1, 1), padding=1),
+                    nn.Conv2d(16, 16, (3, 3), (1, 1), padding=1),
                     DummyModule()),
                 nn.ReLU(True),
                 nn.MaxPool2d((2, 2), stride=(2, 2)),
             ),
             nn.Sequential(
-                nn.Conv2d(68, 128, (3, 3), (2, 2), padding=1),
+                nn.Conv2d(20, 32, (3, 3), (2, 2), padding=1),
                 nn.ReLU(True),
-                GroupNorm2d(128, 8),
+                nn.Dropout(p),
                 SkipConnect(
-                    nn.Conv2d(128, 128, (3, 3), (1, 1), padding=1),
+                    nn.Conv2d(32, 32, (3, 3), (1, 1), padding=1),
                     DummyModule()),
                 nn.ReLU(True),
                 nn.MaxPool2d((2, 2), stride=(2, 2)),
-                nn.Conv2d(128, 64, (3, 3), (2, 2), padding=1),
+                nn.Conv2d(32, 32, (3, 3), (2, 2), padding=1),
                 nn.MaxPool2d((2, 2), stride=(1, 1))
             )
         ])
@@ -105,61 +105,47 @@ class RepresentationD(nn.Module):
 
         self.features = nn.ModuleList([
             nn.Sequential(
-                nn.Conv2d(1, 32, (3, 3), (2, 2), padding=1),
+                nn.Conv2d(1, 8, (3, 3), (2, 2), padding=1),
                 nn.ReLU(True),
-                GroupNorm2d(32, 8),
                 SkipConnect(
-                    nn.Conv2d(32, 32, (3, 3), (1, 1), padding=1),
+                    nn.Conv2d(8, 8, (3, 3), (1, 1), padding=1),
                     DummyModule()),
                 nn.ReLU(True),
-                GroupNorm2d(32, 8),
                 nn.MaxPool2d((2, 2), stride=(2, 2)),
-                nn.Conv2d(32, 64, (3, 3), (1, 1), padding=1),
+                nn.Conv2d(8, 16, (3, 3), (1, 1), padding=1),
                 nn.ReLU(True),
-                GroupNorm2d(64, 8),
                 SkipConnect(
-                    nn.Conv2d(64, 64, (3, 3), (1, 1), padding=1),
+                    nn.Conv2d(16, 16, (3, 3), (1, 1), padding=1),
                     DummyModule()),
                 nn.ReLU(True),
-                GroupNorm2d(64, 8),
                 nn.MaxPool2d((2, 2), stride=(2, 2)),
-                nn.Conv2d(64, 128, (3, 3), (1, 1), padding=1),
+                nn.Conv2d(16, 32, (3, 3), (1, 1), padding=1),
                 nn.ReLU(.01),
-                GroupNorm2d(128, 8),
                 SkipConnect(
                     nn.Sequential(
-                        nn.Conv2d(128, 128, (3, 3), (1, 1), padding=1),
+                        nn.Conv2d(32, 32, (3, 3), (1, 1), padding=1),
                         nn.ReLU(True),
-                        GroupNorm2d(128, 8),
-                        nn.Conv2d(128, 128, (3, 3), (1, 1), padding=1),
+                        nn.Conv2d(32, 32, (3, 3), (1, 1), padding=1),
                     ), DummyModule()),
                 nn.ReLU(True),
-                GroupNorm2d(128, 8),
                 nn.MaxPool2d((2, 2), stride=(2, 2))
             ),
             nn.Sequential(
-                nn.Conv2d(132, 128, (3, 3), (2, 2), padding=1),
+                nn.Conv2d(36, 32, (3, 3), (2, 2), padding=1),
                 nn.ReLU(True),
-                GroupNorm2d(128, 8),
                 nn.MaxPool2d((2, 2), stride=(2, 2)),
-                nn.Conv2d(128, 256, (3, 3), (1, 1), padding=1),
+                nn.Conv2d(32, 64, (3, 3), (1, 1), padding=1),
                 nn.ReLU(True),
-                GroupNorm2d(256, 8),
                 SkipConnect(
-                    nn.Conv2d(256, 256, (1, 1), (1, 1), bias=False),
+                    nn.Conv2d(64, 64, (1, 1), (1, 1), bias=False),
                     nn.Sequential(
-                        # nn.Conv2d(256, 256, (3, 3), (1, 1),
-                        #           padding=1, groups=256),
-                        # nn.Conv2d(256, 256, (1, 1), (1, 1)),
-                        nn.Conv2d(256, 256, (3, 3), (1, 1), padding=1),
+                        nn.Conv2d(64, 64, (3, 3), (1, 1), padding=1),
                         nn.ReLU(True),
-                        GroupNorm2d(256, 8),
-                        nn.Conv2d(256, 256, (3, 3), (1, 1), padding=1))
+                        nn.Conv2d(64, 64, (3, 3), (1, 1), padding=1))
                 ),
                 nn.ReLU(True),
-                GroupNorm2d(256, 8),
                 nn.MaxPool2d((2, 2), stride=(2, 2)),
-                nn.Conv2d(256, 256, (3, 3), (2, 2), padding=1)
+                nn.Conv2d(64, 128, (3, 3), (2, 2), padding=1)
             )
         ])
 
@@ -177,20 +163,20 @@ class RepresentationD(nn.Module):
 
 
 class GaussianFactor(nn.Module):
-    def __init__(self):
+    def __init__(self, p=.1):
         super(GaussianFactor, self).__init__()
         gain = nn.init.calculate_gain('relu')
 
         self.layer = nn.Sequential(
-            nn.Conv2d(64, 64, (3, 3), (1, 1), padding=1),
+            nn.Conv2d(32, 32, (3, 3), (1, 1), padding=1),
             nn.ReLU(True),
-            GroupNorm2d(64, 8),
+            nn.Dropout(p),
             SkipConnect(
-                nn.Conv2d(64, 64, (3, 3), (1, 1), padding=1),
+                nn.Conv2d(32, 32, (3, 3), (1, 1), padding=1),
                 DummyModule()),
             nn.ReLU(True),
-            GroupNorm2d(64, 8),
-            nn.Conv2d(64, 128, (1, 1), (1, 1))  # mean, log-variance
+            nn.Dropout(p),
+            nn.Conv2d(32, 64, (1, 1), (1, 1))  # mean, log-variance
         )
 
         self.apply(partial(init_parameters, gain=gain))
@@ -237,18 +223,18 @@ class RecurrentCell(nn.Module):
 
 
 class GeneratorDelta(nn.Module):
-    def __init__(self):
+    def __init__(self, p=.1):
         super(GeneratorDelta, self).__init__()
 
         self.layers = nn.Sequential(
-            nn.Conv2d(128, 128, (3, 3), (1, 1), padding=1),
+            nn.Conv2d(64, 64, (3, 3), (1, 1), padding=1),
             nn.ReLU(True),
-            GroupNorm2d(128, 8),
-            SkipConnect(nn.Conv2d(128, 128, (3, 3), (1, 1), padding=1),
+            nn.Dropout(p),
+            SkipConnect(nn.Conv2d(64, 64, (3, 3), (1, 1), padding=1),
                         DummyModule()),
             nn.ReLU(True),
-            GroupNorm2d(128, 8),
-            nn.Conv2d(128, 64, (3, 3), (1, 1), padding=1)
+            nn.Dropout(p),
+            nn.Conv2d(64, 32, (3, 3), (1, 1), padding=1)
         )
 
         gain = nn.init.calculate_gain('relu')
@@ -263,37 +249,37 @@ class GeneratorDelta(nn.Module):
 
 
 class Decoder(nn.Module):
-    def __init__(self):
+    def __init__(self, p=.1):
         super(Decoder, self).__init__()
 
         self.decoder = nn.Sequential(
-            nn.ConvTranspose2d(64, 128, (3, 3), (2, 2), padding=(0, 0)),
+            nn.ConvTranspose2d(32, 32, (3, 3), (2, 2), padding=(0, 0)),
             nn.ReLU(True),
-            nn.ConvTranspose2d(128, 128, (3, 3), (2, 2), padding=(1, 1)),
+            nn.ConvTranspose2d(32, 32, (3, 3), (2, 2), padding=(1, 1)),
             nn.ReLU(True),
-            GroupNorm2d(128, 8),
-            SkipConnect(
-                nn.Conv2d(128, 128, (3, 3), (1, 1), padding=1),
-                DummyModule()),
-            nn.ReLU(True),
-            GroupNorm2d(128, 8),
-            nn.ConvTranspose2d(128, 64, (3, 3), (2, 2), padding=(1, 1)),
-            nn.ReLU(True),
-            GroupNorm2d(64, 8),
-            SkipConnect(
-                nn.Conv2d(64, 64, (3, 3), (1, 1), padding=1),
-                DummyModule()),
-            nn.ReLU(True),
-            GroupNorm2d(64, 8),
-            nn.ConvTranspose2d(64, 32, (3, 3), (2, 2), padding=(1, 1)),
-            nn.ReLU(True),
-            GroupNorm2d(32, 4),
+            nn.Dropout(p),
             SkipConnect(
                 nn.Conv2d(32, 32, (3, 3), (1, 1), padding=1),
                 DummyModule()),
             nn.ReLU(True),
-            GroupNorm2d(32, 4),
-            nn.Conv2d(32, 1, (3, 3), (1, 1), padding=(1, 1)),
+            nn.Dropout(p),
+            nn.ConvTranspose2d(32, 16, (3, 3), (2, 2), padding=(1, 1)),
+            nn.ReLU(True),
+            nn.Dropout(p),
+            SkipConnect(
+                nn.Conv2d(16, 16, (3, 3), (1, 1), padding=1),
+                DummyModule()),
+            nn.ReLU(True),
+            nn.Dropout(p),
+            nn.ConvTranspose2d(16, 8, (3, 3), (2, 2), padding=(1, 1)),
+            nn.ReLU(True),
+            nn.Dropout(p),
+            SkipConnect(
+                nn.Conv2d(8, 8, (3, 3), (1, 1), padding=1),
+                DummyModule()),
+            nn.ReLU(True),
+            nn.Dropout(p),
+            nn.Conv2d(8, 1, (3, 3), (1, 1), padding=(1, 1)),
             nn.Sigmoid()
         )
 
@@ -307,80 +293,21 @@ class Decoder(nn.Module):
         return self.decoder(x)[:, :, 1:, 1:]
 
 
-class DecoderBase(nn.Module):
-    def __init__(self):
-        super(DecoderBase, self).__init__()
-        self.decoder_base = nn.Sequential(
-            nn.ConvTranspose2d(128, 128, (3, 3), (2, 2), padding=(0, 0)),
-            nn.ReLU(True),
-            nn.ConvTranspose2d(128, 128, (3, 3), (2, 2), padding=(1, 1)),
-            nn.ReLU(True),
-            GroupNorm2d(128, 8),
-            SkipConnect(
-                nn.Conv2d(128, 256, (3, 3), (1, 1), padding=1),
-                nn.Conv2d(128, 256, (1, 1), (1, 1), bias=False)),
-            nn.ReLU(True),
-            GroupNorm2d(256, 8),
-            nn.ConvTranspose2d(256, 128, (3, 3), (2, 2), padding=(1, 1)),
-            nn.ReLU(True),
-            GroupNorm2d(128, 8),
-        )
-        gain = nn.init.calculate_gain('relu')
-        self.apply(partial(init_parameters, gain=gain))
-
-        print('{}: {:,} trainable parameters.'.format(
-            self.__class__.__name__, count_parameters(self)))
-
-    def forward(self, x):
-        y = self.decoder_base(x)
-        return y
-
-
-class DecoderTop(nn.Module):
-    def __init__(self):
-        super(DecoderTop, self).__init__()
-        self.decoder_top = nn.Sequential(
-            SkipConnect(
-                nn.Conv2d(128, 64, (3, 3), (1, 1), padding=1),
-                nn.Conv2d(128, 64, (1, 1), (1, 1), bias=False)),
-            nn.ReLU(True),
-            GroupNorm2d(64, 8),
-            nn.ConvTranspose2d(64, 64, (3, 3), (2, 2), padding=(1, 1)),
-            nn.ReLU(True),
-            GroupNorm2d(64, 8),
-            SkipConnect(
-                nn.Conv2d(64, 64, (3, 3), (1, 1), padding=1),
-                nn.Conv2d(64, 64, (1, 1), (1, 1), bias=False)),
-            nn.ReLU(True),
-            GroupNorm2d(64, 8),
-            nn.Conv2d(64, 1, (3, 3), (1, 1), padding=(1, 1)),
-            nn.Sigmoid()
-        )
-        gain = nn.init.calculate_gain('relu')
-        self.apply(partial(init_parameters, gain=gain))
-
-        print('{}: {:,} trainable parameters.'.format(
-            self.__class__.__name__, count_parameters(self)))
-
-    def forward(self, x):
-        y = self.decoder_top(x)
-        return y[:, :, 1:, 1:]
-
-
 if __name__ == '__main__':
-    k = torch.randn(1, 1, 240, 320)
-    x = torch.randn(1, 1, 256, 256)
-    v = torch.randn(1, 4, 1, 1)
-    u = torch.randn(1, 64, 16, 16)
+    # k = torch.randn(1, 1, 240, 320)
+    # x = torch.randn(1, 1, 256, 256)
+    # v = torch.randn(1, 4, 1, 1)
+    # u = torch.randn(1, 64, 16, 16)
 
-    net = RepresentationD()
-    print(net(k, v).size())
+    # net = RepresentationD()
+    # print(net(k, v).size())
 
-    net = EncoderJ()
-    print(net(x).size())
+    # net = EncoderJ()
+    # print(net(x).size())
 
-    net = EncoderD()
-    print(net(x, v).size())
+    # net = EncoderD()
+    # print(net(x, v).size())
 
-    net = Decoder()
-    print(net(u).size())
+    # net = Decoder()
+    # print(net(u).size())
+    pass
