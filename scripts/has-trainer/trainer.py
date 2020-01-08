@@ -80,10 +80,10 @@ def trainer(args, model, criterion, optimiser, lr_scheduler, sd_scheduler, write
                     qry_jlos = qry_jlos[:, k - 1].to(args.target_device)
                     qry_dlos = qry_dlos[:, k - 1].to(args.target_device)
                     qry_v = qry_v[:, k - 1].to(args.target_device)
-                    wgt_jlos = None  # wgt_jlos[:, slice(
-                        # k - 1, k)].to(args.target_device)
-                    wgt_dlos = None  # wgt_dlos[:, slice(
-                        # k - 1, k)].to(args.target_device)
+                    wgt_jlos = wgt_jlos[:, slice(
+                        k - 1, k)].to(args.target_device)
+                    wgt_dlos = wgt_dlos[:, slice(
+                        k - 1, k)].to(args.target_device)
 
                     (dec_jlos, dec_dlos,
                      pr_means_jlos, pr_logvs_jlos, pr_means_dlos, pr_logvs_dlos,

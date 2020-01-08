@@ -11,7 +11,7 @@ class EncoderJ(nn.Module):
         self.features = nn.Sequential(
             nn.Conv2d(1, 8, (3, 3), (2, 2), padding=1),
             nn.ReLU(True),
-            nn.Dropout(p),
+            nn.Dropout2d(p),
             SkipConnect(
                 nn.Conv2d(8, 8, (3, 3), (1, 1), padding=1),
                 DummyModule()),
@@ -19,7 +19,7 @@ class EncoderJ(nn.Module):
             nn.MaxPool2d((2, 2), stride=(2, 2)),
             nn.Conv2d(8, 16, (3, 3), (2, 2), padding=1),
             nn.ReLU(True),
-            nn.Dropout(p),
+            nn.Dropout2d(p),
             SkipConnect(
                 nn.Conv2d(16, 16, (3, 3), (1, 1), padding=1),
                 DummyModule()),
@@ -27,7 +27,7 @@ class EncoderJ(nn.Module):
             nn.MaxPool2d((2, 2), stride=(2, 2)),
             nn.Conv2d(16, 32, (3, 3), (2, 2), padding=1),
             nn.ReLU(True),
-            nn.Dropout(p),
+            nn.Dropout2d(p),
             SkipConnect(
                 nn.Conv2d(32, 32, (3, 3), (1, 1), padding=1),
                 DummyModule()),
@@ -55,7 +55,7 @@ class EncoderD(nn.Module):
             nn.Sequential(
                 nn.Conv2d(1, 8, (3, 3), (2, 2), padding=1),
                 nn.ReLU(True),
-                nn.Dropout(p),
+                nn.Dropout2d(p),
                 SkipConnect(
                     nn.Conv2d(8, 8, (3, 3), (1, 1), padding=1),
                     DummyModule()),
@@ -63,7 +63,7 @@ class EncoderD(nn.Module):
                 nn.MaxPool2d((2, 2), stride=(2, 2)),
                 nn.Conv2d(8, 16, (3, 3), (2, 2), padding=1),
                 nn.ReLU(True),
-                nn.Dropout(p),
+                nn.Dropout2d(p),
                 SkipConnect(
                     nn.Conv2d(16, 16, (3, 3), (1, 1), padding=1),
                     DummyModule()),
@@ -73,7 +73,7 @@ class EncoderD(nn.Module):
             nn.Sequential(
                 nn.Conv2d(20, 32, (3, 3), (2, 2), padding=1),
                 nn.ReLU(True),
-                nn.Dropout(p),
+                nn.Dropout2d(p),
                 SkipConnect(
                     nn.Conv2d(32, 32, (3, 3), (1, 1), padding=1),
                     DummyModule()),
@@ -170,12 +170,12 @@ class GaussianFactor(nn.Module):
         self.layer = nn.Sequential(
             nn.Conv2d(32, 32, (3, 3), (1, 1), padding=1),
             nn.ReLU(True),
-            nn.Dropout(p),
+            nn.Dropout2d(p),
             SkipConnect(
                 nn.Conv2d(32, 32, (3, 3), (1, 1), padding=1),
                 DummyModule()),
             nn.ReLU(True),
-            nn.Dropout(p),
+            nn.Dropout2d(p),
             nn.Conv2d(32, 64, (1, 1), (1, 1))  # mean, log-variance
         )
 
@@ -229,11 +229,11 @@ class GeneratorDelta(nn.Module):
         self.layers = nn.Sequential(
             nn.Conv2d(64, 64, (3, 3), (1, 1), padding=1),
             nn.ReLU(True),
-            nn.Dropout(p),
+            nn.Dropout2d(p),
             SkipConnect(nn.Conv2d(64, 64, (3, 3), (1, 1), padding=1),
                         DummyModule()),
             nn.ReLU(True),
-            nn.Dropout(p),
+            nn.Dropout2d(p),
             nn.Conv2d(64, 32, (3, 3), (1, 1), padding=1)
         )
 
@@ -257,28 +257,28 @@ class Decoder(nn.Module):
             nn.ReLU(True),
             nn.ConvTranspose2d(32, 32, (3, 3), (2, 2), padding=(1, 1)),
             nn.ReLU(True),
-            nn.Dropout(p),
+            nn.Dropout2d(p),
             SkipConnect(
                 nn.Conv2d(32, 32, (3, 3), (1, 1), padding=1),
                 DummyModule()),
             nn.ReLU(True),
-            nn.Dropout(p),
+            nn.Dropout2d(p),
             nn.ConvTranspose2d(32, 16, (3, 3), (2, 2), padding=(1, 1)),
             nn.ReLU(True),
-            nn.Dropout(p),
+            nn.Dropout2d(p),
             SkipConnect(
                 nn.Conv2d(16, 16, (3, 3), (1, 1), padding=1),
                 DummyModule()),
             nn.ReLU(True),
-            nn.Dropout(p),
+            nn.Dropout2d(p),
             nn.ConvTranspose2d(16, 8, (3, 3), (2, 2), padding=(1, 1)),
             nn.ReLU(True),
-            nn.Dropout(p),
+            nn.Dropout2d(p),
             SkipConnect(
                 nn.Conv2d(8, 8, (3, 3), (1, 1), padding=1),
                 DummyModule()),
             nn.ReLU(True),
-            nn.Dropout(p),
+            nn.Dropout2d(p),
             nn.Conv2d(8, 1, (3, 3), (1, 1), padding=(1, 1)),
             nn.Sigmoid()
         )

@@ -24,7 +24,7 @@ class GeRN(nn.Module):
         self.iop_jposterior = GaussianFactor(p=.0)
         self.iop_jstate = RecurrentCell(nr + nq + nh, nh, zoneout=0.0)
 
-        self.iop_dencoder = EncoderD(p=.5)
+        self.iop_dencoder = EncoderD(p=.3)
         self.iop_dposterior = GaussianFactor(p=.0)
         self.iop_dstate = RecurrentCell(nr + nq + nh + nv, nh, zoneout=0.0)
 
